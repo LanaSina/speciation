@@ -21,4 +21,11 @@ public interface Individual extends GraphicalComponent {
 	public String stringDesc();
 	public void setID(int globalID);
 	public double getLuminosity();
+	public int[] getProperties();
+	public void setPosition(double[] position2);
+
+	public double getWarm() ;
+	public double getLoud();
+	public double getSmelly();
+	public double getElectric();
 }

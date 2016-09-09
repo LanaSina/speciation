@@ -146,9 +146,11 @@ public class Display extends JFrame {
 	        super.paintComponent(g);
 	        init(g);
 	        
-	        for(int i=0;i<components.size();i++){
-	        	//if(!components.get(i).onTop)
-	        		components.get(i).draw(g,step);
+	        if(Constants.draw){
+		        for(int i=0;i<components.size();i++){
+		        	//if(!components.get(i).onTop)
+		        		components.get(i).draw(g,step);
+		        }
 	        }
 	        
 //	        for(int i=0;i<components.size();i++){

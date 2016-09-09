@@ -3,12 +3,11 @@
  */
 package startup;
 
-import visualization.Display;
-import animals.IndividualV1;
-
+import animals.EmbodiedIndividual;
+import animals.Individual;
 import communication.Map;
 import communication.MyLog;
-import communication.NicheMap;
+import visualization.Display;
 
 /**
  * @author lana
@@ -26,7 +25,7 @@ public class Starter {
 		
 		String dname = "sensor cost high";
 		Display d = new Display(dname);
-		int lightLimit = 30;//35
+		int lightLimit = 30;//30
 		int of = 10;
 		//worldmap		
 		Map map = new Map(Constants.GridMax,d);
@@ -36,7 +35,7 @@ public class Starter {
 			for(int j=0; j<lightLimit; j++){
 				int id = map.incrementGlobalID();
 				//mlog.say("id "+id);
-				IndividualV1 l = new IndividualV1(i+of,j+of,id,0,0, -1);
+				Individual l = new EmbodiedIndividual(i+of,j+of,id,0,0, -1);//IndividualV1(i+of,j+of,id,0,0, -1);// EmbodiedIndividual(i+of,j+of,id,0,0, -1);
 				//mlog.say("id "+l.getID());
 				map.addIndividual(i+of, j+of, l);
 				d.addComponent(l);		

@@ -10,6 +10,10 @@ import java.util.Random;
  * Class containing all the constants variable and generic functions.
  */
 public class Constants {
+	/** update graphics */
+	//TODO make a better UI!
+	public static boolean draw = true;
+
 	
 	/** grid limits*/
 	public static final int GridMax =50;// 10+40+10;//20+20+10+(security)10 
@@ -23,21 +27,23 @@ public class Constants {
 	/** speed*/
 	public static final double SpeedFactor = 0.2;//
 	/** absolute max value*/
-	public static final int SpeedMax= 10;
+	public static final int speedMax= 10;
 	/** absolute max value*/
 	public static final int energyMax = 1000;
-	
+	/** coarse graining of property values*/
+	public static final int propGrain = 10;
+
 	public static final double SpeedCost= 0.2;
 	/** cost of being alive */
 	public static final double StepCost = 0.15;//0.15;//0.3
 	/** niche motion */
 	public static final double NicheSpeed = 2.0;
 	/** cost of having sensors*/
-	public static final double SensorCost = 0.5;
+	public static final double SensorCost = 0.1;//0.5;
 	/**cost of making sensory errors, ratio of prey energy*/
 	public static final double ErrorCost = 0.2;
 	/** energy iput into system */
-	public static final double FreeEnergy = 5;//7
+	public static final double FreeEnergy = 5;//5
 	
 	/** how far the kids are from the parents*/
 	public static final double BirthDistance = 1.7;

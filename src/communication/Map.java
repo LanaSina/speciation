@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import animals.EmbodiedIndividual;
 import animals.Individual;
 import animals.Node;
 import animals.Tree;
@@ -15,7 +16,7 @@ import startup.Constants;
 import visualization.Display;
 
 public class Map {
-	MyLog mlog = new MyLog("map",true);
+	MyLog mlog = new MyLog("map", true);
 	/**graphic panel*/
 	Display d;
 	/** 2D map is made of cells, in each cell there are creatures;*/
@@ -112,6 +113,7 @@ public class Map {
 	public void updateCell(int x, int y, boolean hasLight){
 		
 		Cell c = map[x][y];
+		c.calculateValues();
 		int size = c.creatures.size();
 
 		if(size==0){
@@ -162,11 +164,13 @@ public class Map {
                 Node s = sensors.root;
                 //iterate on properties
                 ArrayList<Node> sChildren = s.getChildren();
+                //mlog.say("c " + sChildren.size());
                 for(int k=0; k<sChildren.size();k++){
                 	//this is the property
                 	Node prop = sChildren.get(k);
                 	//these are the value-action pairs
                 	ArrayList<Node> pChildren = prop.getChildren();
+                	//mlog.say("c " + pChildren.size());
                 	
                 	for(int l=0; l<pChildren.size();l++){
                 		int value = pChildren.get(l).data;
@@ -182,8 +186,11 @@ public class Map {
                 			}
                 			
                 			//based on direct perception of other creatures properties
-                			/*if(value==cr2.properties[k]){
-                				mlog.say("eat; property " + prop.data + " value "+value);
+                			/*int[] properties = cr2.getProperties();
+                			if(value == properties[k]){
+                				if(Constants.uniformDouble()>0.6){
+                					mlog.say("eat; property " + prop.data + " value "+value);
+                				}
                 				//record interaction
                 				interacting.add(i);
                 				interactedOn.add(m);
@@ -192,14 +199,16 @@ public class Map {
     							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
     							int a = actions.get(ia).data;
                 				interaction.add(a);
-                			}*/
+                			}//*/
                 			
                 			//based on perception of cell properties
                 			//TODO later will be based on properties gradient, when one individual can affect several cells
                 			
-                			//value is int between 0:100
-                			if( (value == (int) (100*c.getLuminosity())) ){
-                				mlog.say("eat; lum value "+value);
+                			//value is integer between 0:10
+                			double ind_prop = c.getProp(k);
+                			
+                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
+                				mlog.say("eat; pro " + k + " value "+value );
                 				//record interaction
                 				interacting.add(i);
                 				interactedOn.add(m);
@@ -208,7 +217,7 @@ public class Map {
     							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
     							int a = actions.get(ia).data;
                 				interaction.add(a);
-                			}
+                			}//*/
 
                 		}
                 	}
@@ -286,13 +295,13 @@ public class Map {
 			}
 		}
 		
-//		if(!hadLight & hasLight){
-//			mlog.say("======= not called ?");
-//			globalID++;
-//			Individual l = new Individual(x,y,globalID,globalID,time, -1);
-//			addIndividual(x, y, l);
-//			d.addComponent(l);		
-//		}
+		/*if(!hadLight & hasLight){
+			mlog.say("======= not called ?");
+			globalID++;
+			Individual l = new EmbodiedIndividual(x,y,globalID,globalID,time, -1);
+			addIndividual(x, y, l);
+			d.addComponent(l);		
+		}*/
 		
 
 	}
@@ -308,6 +317,7 @@ public class Map {
 				//write down info
 				// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
 				String str = creature.stringDesc();
+				//mlog.say(str);
 				//mlog.say("parent "+creature.getParentID()+" self "+creature.getID());
 				try {
 					summaryWriter.append(str);
@@ -327,22 +337,26 @@ public class Map {
 		//update moved
 		for (int i = 0; i < moving.size(); i++) {
 			Individual creature = moving.get(i);
+			double[] position = creature.getPosition();
 			//new x,y	
 			int nx = (int) (newPositions.get(i*2)+0.5);
 			int ny = (int) (newPositions.get(i*2+1)+0.5);
 			updatePosition(nx,ny,creature);
-			creature.position[0] = newPositions.get(i*2);
-			creature.position[1] = newPositions.get(i*2+1);  			
+			position[0] = newPositions.get(i*2);
+			position[1] = newPositions.get(i*2+1);  	
+			creature.setPosition(position);
         }
 		
 		//add new babies
 		for (int i = 0; i < babies.size(); i++) {
 			Individual baby = babies.get(i);
+			double[] position = baby.getPosition();
+			
 			globalID++;
 			baby.setID(globalID);
 			//mlog.say("added to map");
-			int nx = (int) (baby.position[0]+0.5);
-			int ny = (int) (baby.position[1]+0.5);
+			int nx = (int) (position[0]+0.5);
+			int ny = (int) (position[1]+0.5);
 			addIndividual(nx, ny, baby);
 			d.addComponent(baby);
         }		
@@ -373,10 +387,14 @@ public class Map {
 		/** how easy light goes through it (0=does not get out)*/
 		double transparency = 1;
 		/** how easy it is to move through (1=cannot move) */
-		double density = 0;
+		double density = 0;//TODO use. may also change how sound etc travels.
 		
 		/** determined by animals and transparency on this cell*/
 		double luminosity;
+		double sound;
+		double smell;
+		double temperature;
+		double electric;
 		
 		/** all creatures on this cell*/
 		LinkedList<Individual> creatures;
@@ -385,6 +403,35 @@ public class Map {
 			creatures = new LinkedList<Individual>();	
 		}
 		
+		/** return a property of the cell*/
+		public double getProp(int k) {
+			double r = 0;
+			//todo put all in an array
+			switch (k) {
+			case 0:
+				r = luminosity;
+				break;
+			case 2:
+				r = sound;
+				break;
+			case 3:
+				r = smell;
+				break;
+			case 4:
+				r = temperature;
+				break;
+			case 5:
+				r = electric;
+				break;
+			default:
+				r = 0;
+				break;
+			}
+			//mlog.say("r "+r);
+			
+			return r;
+		}
+
 		/**
 		 * 
 		 * @param t transparency
@@ -412,14 +459,28 @@ public class Map {
 		 * and recalculate them
 		 */
 		public void calculateValues(){
+			//smell and temp could last longer in time
 			luminosity = 0;
+			sound = 0;
+			smell = 0;
+			temperature = 0;
+			electric = 0;
 			
+			//make modular function for this
 			for (Iterator<Individual> iterator = creatures.iterator(); iterator.hasNext();) {
 				Individual ind = iterator.next();
 				luminosity+=ind.getLuminosity();
+				sound += ind.getLoud();
+				smell += ind.getSmelly();
+				temperature += ind.getWarm();
+				electric += ind.getElectric();
 			}
 			
 			luminosity = luminosity/creatures.size();
+			sound = sound/creatures.size();
+			smell = smell/creatures.size();
+			temperature = temperature/creatures.size();
+			electric = electric/creatures.size();;
 		}
 		
 		public double getLuminosity(){

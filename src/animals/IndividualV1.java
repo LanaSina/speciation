@@ -162,7 +162,7 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 				if(generateBool(bias)){
 					speed += plus;//speed + plus*0.7;
 					if(speed<0) speed = 0;
-					if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
+					if(speed>Constants.speedMax) speed = Constants.speedMax;
 					//break;
 				}
 				//case 1:{
@@ -485,4 +485,32 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 		return 0;
 	}
 
+	public int[] getProperties() {
+		return properties;
+	}
+	
+	public void setPosition(double[] position2) {
+		position[0] = position2[0];
+		position[1] = position2[1];
+	}
+
+	public double getWarm() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public double getLoud() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public double getSmelly() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public double getElectric() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

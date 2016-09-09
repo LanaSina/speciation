@@ -6,15 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 
-import javax.swing.text.Position;
-
-import startup.Constants;
-import visualization.Display;
 import animals.Individual;
+import animals.IndividualV1;
 import animals.Node;
 import animals.Tree;
+import startup.Constants;
+import visualization.Display;
 
 /**
  * a map with moving "light"
@@ -331,7 +329,7 @@ public class NicheMap {
 				if(nx<0) nx =0; if(nx>=Constants.GridMax-1) nx=Constants.GridMax-2;
 				if(ny<0) ny =0; if(ny>=Constants.GridMax-1) ny=Constants.GridMax-2;
 				
-				Individual l = new Individual(nx,ny,globalID,globalID,time, -1);
+				Individual l = new IndividualV1(nx,ny,globalID,globalID,time, -1);// Individual(nx,ny,globalID,globalID,time, -1);
 				addIndividual((int)(nx+0.5), (int)(ny+0.5), l);
 				d.addComponent(l);		
 				

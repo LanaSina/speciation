@@ -29,42 +29,20 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public int death =  (int)(Constants.uniformDouble(0,4)-2+0.5)+20;//50
 	
 	
-	//detectable properties
+	//detectable properties (0..1)
+	/** how visible*/
 	double luminosity;
+	double warm;
+	double loud;
+	double smelly;
+	double electric;
 	
 	//will be replaced by cell properties sensors
 	/** a tree with properties->pair(value,action)*/
 	public Tree sensors;
-	
-	public int getDeath() {
-		return death;
-	}
 
-	public void setDeath(int death) {
-		this.death = death;
-	}
-
-	public Tree getSensors() {
-		return sensors;
-	}
-
-	public void setSensors(Tree sensors) {
-		this.sensors = sensors;
-	}
-
-	public double getEnergy() {
-		return energy;
-	}
-
-	public void setEnergy(double energy) {
-		this.energy = energy;
-	}
-
-	public void setSpeed(int speed) {
-		this.speed = speed;
-	}
-
-	int nProperties = 6; //sum of above
+	int nProperties = 6;//sum of above
+	int nPhysicalProperties = 5;
 	public int[] properties = new int[nProperties-1];
 	//energy lost per tour
 	//double stepCost = 0.3;
@@ -110,7 +88,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		//lifespan = 1;
 		maxEnergy = 2;// (int)(Constants.uniformDouble(0,4)-2+0.5)+2;
 		energy = 3;//+(int)(Constants.uniformDouble(0,2)+0.5);//(unbiasing)//maxEnergy;
-		isLight = true; mlog.say("--------------- IS LIGHT");
+		isLight = true;
+		//mlog.say("--------------- IS LIGHT");
 		
 		properties[0] = speed;
 		properties[1] = maxEnergy;
@@ -119,7 +98,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[4] =  death;
 		
 		sensors = new Tree(0);//root is not important
-		for(int i=0; i<(nProperties-1);i++){
+		for(int i=0; i<(nPhysicalProperties);i++){
 			Node prop = new Node();
 			prop.data = i;
 			sensors.root.addChild(prop);
@@ -179,7 +158,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			int mut = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);
 			int plus = 1;
 			if(generateBool()){
 				plus = -1;
@@ -197,7 +175,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(generateBool(bias)){
 				speed += plus;//speed + plus*0.7;
 				if(speed<0) speed = 0;
-				if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
+				if(speed>Constants.speedMax) speed = Constants.speedMax;
 				//break;
 			}
 			if(generateBool(bias)){
@@ -215,12 +193,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(generateBool(bias)){
 				//create or modify sensor
 				if(plus>0){
-					//property (-1 = size; -2 = size - sensormap)
-					int prop = (int) (Constants.uniformDouble(0, nProperties-2)+0.5);
+					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);
+					//mlog.say("****  prop " + prop);
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> senses = props.get(prop).getChildren();
-					//mlog.say("**** create or modify ");
+					//mlog.say(" senses "+ senses.size());
 					//modify
 					if(generateBool()){
 						//mlog.say("**** modify ");
@@ -229,36 +207,47 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 						//          0          id              value            id
 						boolean hasSensors = !senses.isEmpty();
 						if(hasSensors){
-							
 							//get random sensor
 							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
 							Node sensor = senses.get(s);	
-							sensor.data = sensor.data + (int)(Constants.uniformDouble(0, 1)+0.5)-1;
-							mlog.say("---- sensor " + prop + " data "+ sensor.data);
+							int value = (int) (sensor.data + Constants.uniformDouble(-2, 2));
+							if(value<0){
+								value = 0;
+							}else if (value>Constants.propGrain) {
+								value = Constants.propGrain;
+							}
+							sensor.data = value;
+							//mlog.say("---- sensor " + prop + " data "+ sensor.data);
 						}
 					} else {
 						//create sensor. 
+						//mlog.say("**** create ");
 						Node value = new Node();
 						//bias it to be like self
-						int selfValue = properties[prop];
+						/*int selfValue = properties[prop];
 						if(generateBool()){//cannibal
 							value.data = selfValue; //(int) (selfValue + Constants.uniformDouble(0, 4)+0.5)-2;		
 						} else {//0 to 4
 							value.data = (int) (Constants.uniformDouble(0, 4)+0.5);		
-						}
-						mlog.say("*** sensor " + prop + " data "+ value.data);
+						}*/
+						
+						value.data = (int) Constants.uniformDouble(0, 10);
+						
+						//mlog.say("*** sensor " + prop + " data "+ value.data);
 						Node action = new Node();
 						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 						value.addChild(action);
 						
-						//props.get(prop).addChilde(value, value.getChildCount());
 						sensors.root.getChildren().get(prop).addChild(value);
+						//mlog.say("c " + sensors.root.getChildren().get(prop).getChildren().size());
+
 					}							
 				}else{
+					//mlog.say("**** delete ");
 					//or delete sensor
 					//tree nodes: root-> 3properties -> detectionValue -> action
 					//property (-1 = size; -2 = size - sensormap)
-					int prop = (int) (Constants.uniformDouble(0, nProperties-2)+0.5);
+					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> sensors = props.get(prop).getChildren();
@@ -286,16 +275,25 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[3] = getNKids();
 		properties[4] =  death;
 		
-		//now calculate luminosity with a random formula TODO mix up several things in different proportions in 
-		//each property
-		luminosity = (maxEnergy)/(Constants.energyMax);
+		//now calculate luminosity etc with a random formula
+		double midSpeed = Math.abs(speed-(Constants.speedMax/2));
+		luminosity = (maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
+		warm = (speed+energy)/(Constants.speedMax+maxEnergy);
+		if(maxEnergy>=haveKids && maxEnergy>0){
+			loud = haveKids/maxEnergy;
+		}else{
+			loud = 1;
+		}
+		smelly = haveKids/death;
+		electric = warm*smelly;
+		//mlog.say("physProp lum "+ luminosity + " warm "+ warm+ " loud "+ loud + " smelly "+ smelly + " electric " + electric);
 
 		
 		makeColor();
 	}
 	
 	private void makeColor() {
-		int red = (hasSensors()-(nProperties-1))*256/(2*10);
+		int red = (hasSensors()-(nPhysicalProperties-1))*256/(2*10);
 		if(red>255) red = 255; if(red<0) red =0;
 		//red = 255-red;
 		int green = maxEnergy*255/70;//20
@@ -323,10 +321,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		//if(color == Color.black) mlog.say("energy before "+energy);
 		
 		//remove energy due to sensors
-		double se = sensors.root.getChildCount() - (nProperties-1);
+		double se = sensors.root.getChildCount() - (nPhysicalProperties-1);
 		//mlog.say("se "+se);
 		if(!isLight){
 			energy = energy - se*Constants.SensorCost - Constants.StepCost;	//6*0.2//3*10
+			//mlog.say("energy "+energy);
 			if(life == death){
 				energy = -1;
 			}
@@ -504,5 +503,60 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				+ death + "\n";
 		return description;
 	}
+	
+	public int[] getProperties() {
+		return properties;
+	}
+
+	public void setPosition(double[] position2) {
+		position[0] = position2[0];
+		position[1] = position2[1];
+	}
+
+	public double getWarm() {
+		return warm;
+	}
+
+	public double getLoud() {
+		return loud;
+	}
+
+	public double getSmelly() {
+		return smelly;
+	}
+
+	public double getElectric() {
+		return electric;
+	}
+	
+	
+	public int getDeath() {
+		return death;
+	}
+
+	public void setDeath(int death) {
+		this.death = death;
+	}
+
+	public Tree getSensors() {
+		return sensors;
+	}
+
+	public void setSensors(Tree sensors) {
+		this.sensors = sensors;
+	}
+
+	public double getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(double energy) {
+		this.energy = energy;
+	}
+
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+
 
 }
