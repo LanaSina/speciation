@@ -84,9 +84,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		//mlog.say("id " + ID);
 		birthDate = date;
 		
-		speed = 1; //(int)(Constants.uniformDouble(0,1)+0.5)+1;
+		speed = 0; //1
 		//lifespan = 1;
-		maxEnergy = 2;// (int)(Constants.uniformDouble(0,4)-2+0.5)+2;
+		maxEnergy = 4;
 		energy = 3;//+(int)(Constants.uniformDouble(0,2)+0.5);//(unbiasing)//maxEnergy;
 		isLight = true;
 		//mlog.say("--------------- IS LIGHT");
@@ -317,25 +317,25 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public boolean update(LinkedList<Individual> babies, int date){
 		life= life+1;
 		
-//if(color == Color.black) mlog.say("energy before "+energy);
-		//if(color == Color.black) mlog.say("energy before "+energy);
-		
 		//remove energy due to sensors
 		double se = sensors.root.getChildCount() - (nPhysicalProperties-1);
 		//mlog.say("se "+se);
 		if(!isLight){
-			energy = energy - se*Constants.SensorCost - Constants.StepCost;	//6*0.2//3*10
+			energy = energy - se*Constants.SensorCost - Constants.StepCost*maxEnergy;	//6*0.2//3*10
 			//mlog.say("energy "+energy);
 			if(life == death){
 				energy = -1;
 			}
+			if(energy>maxEnergy){
+				energy=maxEnergy;
+			}
 		//energy = energy ;	
 		} else {
 			//free energy into light
-			energy = energy + Constants.FreeEnergy;//0.4
+			energy = energy + Constants.FreeEnergy;
 		}
-	
-		if((energy>=maxEnergy) & (energy>=haveKids)){
+		
+		if(energy>=haveKids){//(energy>=maxEnergy) & 
 			//add children to the map		
 			int n = 0;
 			if(isLight){
@@ -350,7 +350,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
 					energy = energy-haveKids;
-					
 					n++;
 				}
 			}
@@ -369,7 +368,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.color = in.color;
 		this.position = in.position.clone();
 		this.maxEnergy = in.maxEnergy;
-		this.energy = maxEnergy; //TODO change
+		this.energy = haveKids; //TODO change
 		//this.lifespan = in.lifespan;
 		this.haveKids = in.haveKids;
 		this.speed = in.speed;
@@ -380,21 +379,23 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 	
 	public void draw(Graphics g, int gridStep) {
+		if(!parentIsLight){
 		
-		//draw a yellow square .
-		Graphics2D g2d = (Graphics2D) g;
-        g2d.setColor(color);
-        
-        int x = (int) (position[0]*gridStep +0.5);
-        int y = (int) (position[1]*gridStep +0.5);
-        int size = 8;
-        if(isLight){
-        	g2d.drawRect(x, y, size,size);
-        }else{
-        	g2d.fillRect(x, y, size,size);
-        }      
-        g2d.setColor(borderColor);
-        g2d.drawRect(x, y, size,size);
+			//draw a yellow square .
+			Graphics2D g2d = (Graphics2D) g;
+	        g2d.setColor(color);
+	        
+	        int x = (int) (position[0]*gridStep +0.5);
+	        int y = (int) (position[1]*gridStep +0.5);
+	        int size = 8;
+	        if(isLight){
+	        	g2d.drawRect(x, y, size,size);
+	        }else{
+	        	g2d.fillRect(x, y, size,size);
+	        }      
+	        g2d.setColor(borderColor);
+	        g2d.drawRect(x, y, size,size);
+		}
 	}
 	
 	/**
@@ -551,6 +552,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 
 	public void setEnergy(double energy) {
+		if(energy>maxEnergy){
+			energy = maxEnergy;
+		}
 		this.energy = energy;
 	}
 

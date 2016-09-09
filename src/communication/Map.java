@@ -108,9 +108,8 @@ public class Map {
 	 * 
 	 * @param x coordinate
 	 * @param y coordinate
-	 * @param hasLight is there eternal light on this cell or not?
 	 */
-	public void updateCell(int x, int y, boolean hasLight){
+	public void updateCell(int x, int y){
 		
 		Cell c = map[x][y];
 		c.calculateValues();
@@ -208,7 +207,9 @@ public class Map {
                 			double ind_prop = c.getProp(k);
                 			
                 			if( (value == (int) (Constants.propGrain*ind_prop)) ){
-                				mlog.say("eat; pro " + k + " value "+value );
+                				/*if(Constants.uniformDouble()<0.001){
+                					mlog.say("eat; pro " + k + " value "+value );
+                				}*/
                 				//record interaction
                 				interacting.add(i);
                 				interactedOn.add(m);
@@ -255,7 +256,6 @@ public class Map {
 			
 			//if "eat", delete prey and turn predator to black
 			if(interaction.get(i) == Constants.ActEat){
-				//mlog.say("eat; ");
 				int predator = interacting.get(i);
 				int prey = interactedOn.get(i);
 				//are energies compatible with this?
@@ -284,12 +284,14 @@ public class Map {
 					double ePred = c.creatures.get(predator).getEnergy();
 					double ePrey = c.creatures.get(prey).getEnergy();
 					//wound predator
-					double energy = ePred-ePrey*Constants.ErrorCost;//0.1
+					double energy = ePred-ePrey*Constants.ErrorCost/2;
 					c.creatures.get(predator).setEnergy(energy);
 					//wound prey 
-					//c.creatures.get(prey).energy = ePrey-(ePred/14);
+					energy = ePrey-ePred*Constants.ErrorCost;
+					c.creatures.get(prey).setEnergy(energy);
 					//mlog.say("died "+ok);
 					c.creatures.get(predator).setBorderColor(Color.red);
+					c.creatures.get(prey).setBorderColor(Color.gray);
 					//mlog.say("wounded "+ c.creatures.get(predator).energy);
 				}
 			}
@@ -411,16 +413,16 @@ public class Map {
 			case 0:
 				r = luminosity;
 				break;
-			case 2:
+			case 1:
 				r = sound;
 				break;
-			case 3:
+			case 2:
 				r = smell;
 				break;
-			case 4:
+			case 3:
 				r = temperature;
 				break;
-			case 5:
+			case 4:
 				r = electric;
 				break;
 			default:

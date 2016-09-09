@@ -13,19 +13,29 @@ public class Constants {
 	/** update graphics */
 	//TODO make a better UI!
 	public static boolean draw = true;
+	/** percentage of elements drawn*/
+	public static double draw_coarse = 1;
+	
+	/** equivalent to refresh rate */
+	public static int refresh_rate = 500;
+
 
 	
 	/** grid limits*/
-	public static final int GridMax =50;// 10+40+10;//20+20+10+(security)10 
+	public static final int GridMax = 50;// 10+40+10;//20+20+10+(security)10 
 	public static final int GridStep = 20;
 	
 	/** actions*/
 	public static final int ActEat = 0;
 	public static final int ActMate = 1;
+	public static final int MoveUp = 2;
+	public static final int MoveDown = 3;
+	public static final int MoveRigh = 4;
+	public static final int MoveLeft = 5;
 	
 	// factors on property values
 	/** speed*/
-	public static final double SpeedFactor = 0.2;//
+	public static final double SpeedFactor = 0.02;//0.02
 	/** absolute max value*/
 	public static final int speedMax= 10;
 	/** absolute max value*/
@@ -33,13 +43,13 @@ public class Constants {
 	/** coarse graining of property values*/
 	public static final int propGrain = 10;
 
-	public static final double SpeedCost= 0.2;
+	public static final double SpeedCost= 1;//0.2
 	/** cost of being alive */
-	public static final double StepCost = 0.15;//0.15;//0.3
+	public static final double StepCost = 0.05;//0.15;
 	/** niche motion */
 	public static final double NicheSpeed = 2.0;
 	/** cost of having sensors*/
-	public static final double SensorCost = 0.1;//0.5;
+	public static final double SensorCost = 0.2;//0.5;
 	/**cost of making sensory errors, ratio of prey energy*/
 	public static final double ErrorCost = 0.2;
 	/** energy iput into system */
@@ -48,7 +58,7 @@ public class Constants {
 	/** how far the kids are from the parents*/
 	public static final double BirthDistance = 1.7;
 	/** how far the kids are from the parents*/
-	public static final double LightBirthDistance = 1.7;
+	public static final double LightBirthDistance = 0.5;//1.7;
 
 	
 	public static final int ActionTypes = 2;

@@ -23,38 +23,45 @@ public class Starter {
 
 		MyLog mlog = new MyLog("starter",true);
 		
-		String dname = "sensor cost high";
+		String dname = "draw coarse";
 		Display d = new Display(dname);
 		int lightLimit = 30;//30
+		//islands
+		double coarse = 0.002;
 		int of = 10;
+		
+		int isle_size = 10;
+		
+		
 		//worldmap		
 		Map map = new Map(Constants.GridMax,d);
 		
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){
 			for(int j=0; j<lightLimit; j++){
-				int id = map.incrementGlobalID();
-				//mlog.say("id "+id);
-				Individual l = new EmbodiedIndividual(i+of,j+of,id,0,0, -1);//IndividualV1(i+of,j+of,id,0,0, -1);// EmbodiedIndividual(i+of,j+of,id,0,0, -1);
-				//mlog.say("id "+l.getID());
-				map.addIndividual(i+of, j+of, l);
-				d.addComponent(l);		
+				int x = i+of;
+				int y = j+of;
+				
+				/*if(Constants.uniformDouble()<coarse){
+					
+					/for(int k=0; k<isle_size; k++){
+						for(int ll=0; ll<isle_size; ll++){
+							int x = i+k+of;
+							int y = j+ll+of;
+							if(x<Constants.GridMax & y<Constants.GridMax){*/
+								int id = map.incrementGlobalID();
+								Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);//IndividualV1(i+of,j+of,id,0,0, -1);// EmbodiedIndividual(i+of,j+of,id,0,0, -1);
+								map.addIndividual(x, y, l);
+								d.addComponent(l);	
+							/*}
+						}
+					}
+					
+				}*/
+				
 			}
 		}
-		
-//
-//		of = lightLimit +of+ 8;
-//		for(int i=0; i<lightLimit; i++){
-//			for(int j=0; j<lightLimit; j++){
-//				int id = map.incrementGlobalID();
-//				//mlog.say("id "+id);
-//				Individual l = new Individual(i+of,j+of,id,0,0, -1);
-//				//mlog.say("id "+l.getID());
-//				map.addIndividual(i+of, j+of, l);
-//				d.addComponent(l);		
-//			}
-//		}
-		
+
 		LifeRunnable life = new LifeRunnable(map);
 		new Thread(life).start();
 	}	
@@ -83,7 +90,7 @@ public class Starter {
 				update();
 				
 				try {
-					Thread.sleep(10);
+					Thread.sleep(1);
 							} catch (InterruptedException e) {
 					e.printStackTrace();
 				}		
@@ -97,9 +104,7 @@ public class Starter {
 		void update(){
 			for(int i=0; i<mapSize;i++){
 				for(int j=0; j<mapSize;j++){
-					boolean hasLight = false;
-					if((i<15) &(j<15)) hasLight = true; //useless?
-					map.updateCell(i, j, hasLight);
+					map.updateCell(i, j);
 				}
 			}
 			map.updateMoved();

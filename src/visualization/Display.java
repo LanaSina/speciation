@@ -56,7 +56,7 @@ public class Display extends JFrame {
 	        setLocationRelativeTo(null);
 	        
 	        //refresh
-	        int delay = 200; //milliseconds
+	        int delay = Constants.refresh_rate; //milliseconds
 
 	        ActionListener taskPerformer = new ActionListener() {
 	          public void actionPerformed(ActionEvent evt) {
@@ -148,15 +148,12 @@ public class Display extends JFrame {
 	        
 	        if(Constants.draw){
 		        for(int i=0;i<components.size();i++){
-		        	//if(!components.get(i).onTop)
+		        	if(Constants.uniformDouble()<Constants.draw_coarse){
 		        		components.get(i).draw(g,step);
+		        	}
 		        }
 	        }
 	        
-//	        for(int i=0;i<components.size();i++){
-//	        	if(components.get(i).onTop)
-//	        		components.get(i).draw(g,step);
-//	        }
 	    }
 	    
 	    public int getWidth(){
