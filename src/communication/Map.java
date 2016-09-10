@@ -284,12 +284,12 @@ public class Map {
 					double ePred = c.creatures.get(predator).getEnergy();
 					double ePrey = c.creatures.get(prey).getEnergy();
 					//wound predator
-					double energy = ePred-ePrey*Constants.ErrorCost/2;
+					/*double energy = ePred-ePrey*Constants.ErrorCost;
 					c.creatures.get(predator).setEnergy(energy);
 					//wound prey 
-					energy = ePrey-ePred*Constants.ErrorCost;
+					energy = ePrey-ePred*Constants.ErrorCost*3;
 					c.creatures.get(prey).setEnergy(energy);
-					//mlog.say("died "+ok);
+					//mlog.say("died "+ok);*/
 					c.creatures.get(predator).setBorderColor(Color.red);
 					c.creatures.get(prey).setBorderColor(Color.gray);
 					//mlog.say("wounded "+ c.creatures.get(predator).energy);

@@ -56,9 +56,9 @@ public class Constants {
 	public static final double FreeEnergy = 5;//5
 	
 	/** how far the kids are from the parents*/
-	public static final double BirthDistance = 1.7;
+	public static final double BirthDistance = 1.5;
 	/** how far the kids are from the parents*/
-	public static final double LightBirthDistance = 0.5;//1.7;
+	public static final double LightBirthDistance = 1.7;
 
 	
 	public static final int ActionTypes = 2;

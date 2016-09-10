@@ -22,9 +22,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	//int lifespan;
 	int maxEnergy;
 	//energy level transmitted to offspring
-	int haveKids = 2;//(int)(Constants.uniformDouble(0,4)-2+0.5)+2;
+	int kidEnergy = 2;
+	//level of energy at which to have kids
+	int matForKids = 4;
 	//nr of kids
-	private int nKids =  2;//(int)(Constants.uniformDouble(0,3)-1+0.5)+1;
+	private int nKids =  2;
 	//sensors: map of property value to action
 	public int death =  (int)(Constants.uniformDouble(0,4)-2+0.5)+20;//50
 	
@@ -41,7 +43,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	/** a tree with properties->pair(value,action)*/
 	public Tree sensors;
 
-	int nProperties = 6;//sum of above
+	int nProperties = 7;//sum of above
 	int nPhysicalProperties = 5;
 	public int[] properties = new int[nProperties-1];
 	//energy lost per tour
@@ -93,9 +95,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		properties[0] = speed;
 		properties[1] = maxEnergy;
-		properties[2] = haveKids;
+		properties[2] = kidEnergy;
 		properties[3] = getNKids();
 		properties[4] =  death;
+		properties[5] = matForKids;
 		
 		sensors = new Tree(0);//root is not important
 		for(int i=0; i<(nPhysicalProperties);i++){
@@ -128,7 +131,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			firstAncestorID = ID;
 		}
 
-		energy = in.haveKids;
+		energy = in.kidEnergy;
 		birthDate = date;
 		parentID = in.ID;
 		
@@ -166,9 +169,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			//do this after too
 			properties[0] = speed;
 			properties[1] = maxEnergy;
-			properties[2] = haveKids;
+			properties[2] = kidEnergy;
 			properties[3] = getNKids();
 			properties[4] =  death;
+			properties[5] = matForKids;
 
 			//maybe make this a mutable value!
 			double bias = 0.3;
@@ -187,8 +191,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				haveKids+=plus;
-				if(haveKids<0) haveKids = 0;
+				kidEnergy+=plus;
+				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
 				//create or modify sensor
@@ -271,20 +275,21 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 		properties[0] = speed;
 		properties[1] = maxEnergy;
-		properties[2] = haveKids;
+		properties[2] = kidEnergy;
 		properties[3] = getNKids();
 		properties[4] =  death;
+		properties[5] = matForKids;
 		
 		//now calculate luminosity etc with a random formula
 		double midSpeed = Math.abs(speed-(Constants.speedMax/2));
 		luminosity = (maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
 		warm = (speed+energy)/(Constants.speedMax+maxEnergy);
-		if(maxEnergy>=haveKids && maxEnergy>0){
-			loud = haveKids/maxEnergy;
+		if(maxEnergy>=kidEnergy && maxEnergy>0){
+			loud = kidEnergy/maxEnergy;
 		}else{
 			loud = 1;
 		}
-		smelly = haveKids/death;
+		smelly = kidEnergy+matForKids/(death+maxEnergy);
 		electric = warm*smelly;
 		//mlog.say("physProp lum "+ luminosity + " warm "+ warm+ " loud "+ loud + " smelly "+ smelly + " electric " + electric);
 
@@ -299,7 +304,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		int green = maxEnergy*255/70;//20
 		//green = 255-green;
 		if(green>255) green = 255; if(green<0) green =0;
-		int blue = haveKids*255/10;//13
+		int blue = kidEnergy*255/10;//13
 		if(blue>255) blue = 255; if(green<0) green =0;
 		//blue = 255 - blue;
 		color = new Color(red,green,blue);
@@ -329,28 +334,30 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(energy>maxEnergy){
 				energy=maxEnergy;
 			}
-		//energy = energy ;	
 		} else {
 			//free energy into light
 			energy = energy + Constants.FreeEnergy;
 		}
 		
-		if(energy>=haveKids){//(energy>=maxEnergy) & 
+		if(energy>=matForKids){//(energy>=maxEnergy) & 
 			//add children to the map		
 			int n = 0;
 			if(isLight){
-				while(energy-haveKids>0){
+				while(energy-kidEnergy>0){//matForKids
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
-					energy = energy-haveKids;
+					energy = energy-kidEnergy;
 					n++;
 				}
 			}else{
-				while((energy-haveKids>=0) & (n<getNKids())){
+				while((energy>kidEnergy)){//& (n<getNKids())){
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
-					energy = energy-haveKids;
+					energy = energy-kidEnergy;
 					n++;
+				}
+				if(n<getNKids()){
+					energy =-1;
 				}
 			}
 			borderColor = Color.green;
@@ -368,10 +375,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.color = in.color;
 		this.position = in.position.clone();
 		this.maxEnergy = in.maxEnergy;
-		this.energy = haveKids; //TODO change
+		this.energy = kidEnergy;
 		//this.lifespan = in.lifespan;
-		this.haveKids = in.haveKids;
+		this.kidEnergy = in.kidEnergy;
 		this.speed = in.speed;
+		this.matForKids = in.matForKids;
 		this.setNKids(in.getNKids());
 		this.death = in.death;
 		
@@ -451,7 +459,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 	
 	public int getKidEnergy(){
-		return haveKids;
+		return kidEnergy;
 	}
 	
 	public int getAncestor(){
