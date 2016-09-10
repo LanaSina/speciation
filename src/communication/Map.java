@@ -132,6 +132,8 @@ public class Map {
 			Individual creature = c.creatures.get(i);
             boolean alive = creature.update(babies, time,c.transparency);
             double[] position = creature.getPosition();
+        	int numberActions = 0;
+
             
             if(!alive){
             	remove.add(creature);
@@ -143,9 +145,9 @@ public class Map {
         			if(generateBool()){
 //        				if(creature.speed>0)
 //        					creature.color = Color.blue;
-        				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor*c.density);
+        				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
         			}else{
-        				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor*c.density);
+        				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
         			}
         			if(np[j]<0) np[j]=0;
         			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
@@ -181,6 +183,12 @@ public class Map {
 							if(act<2){
 								//iterate creatures on this cell
 		                		for(int m=0; m<c.creatures.size();m++){
+		                			double p = 1*3/(double)c.creatures.size();
+		                			if(Constants.uniformDouble()>p){
+		                				continue;
+		                			}
+		                			
+		                			
 		                			Individual cr2 = c.creatures.get(m);
 		                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
 		                				continue;
@@ -210,18 +218,30 @@ public class Map {
 		                			//value is integer between 0:10
 		                			double ind_prop = c.getProp(k);
 		                			
-		                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
+		                			if( (value == (int) (Constants.PropGrain*ind_prop)) ){
 		                				//record interaction
 		                				interacting.add(i);
 		                				interactedOn.add(m);
 		                				interaction.add(act);
+		                				numberActions++;
 		                			}//*/
 		                		}
 							} else if (act>5) {
-								double ind_prop = c.getProp(k);
-	                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
+								//niche building
+								/*double ind_prop = c.getProp(k);
+	                			if( (value == (int) (Constants.PropGrain*ind_prop)) ){
 	                				c.changeProperties(act);
-	                			}
+	                				numberActions++;
+	                			}*/
+								//bad way of dealing with this
+								//7 = n phys prop
+								int kk = (int) ((k/5.0)+0.5);
+								double phy_prop = c.getPhy(kk);
+								if( (value != (int) (Constants.PropGrain*phy_prop)) ){
+									c.changeProperties(act);
+	                				numberActions++;
+								}
+								
 							}
 						}
                 	}
@@ -233,7 +253,7 @@ public class Map {
         			moving.add(creature);
         			//costs energy
         			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - creature.getSpeed()*Constants.SpeedCost;//0.15;//0.2//(creature.speed*Constants.SpeedFactor*0.3);//make motion expensive
+        				double energy = creature.getEnergy() - creature.getSpeed()*Constants.SpeedCost - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
         		}
@@ -407,6 +427,23 @@ public class Map {
 			creatures = new LinkedList<Individual>();	
 		}
 		
+		public double getPhy(int kk) {
+			double p = 0;
+			switch (kk) {
+			case 0:{
+				p = transparency;
+				break;
+			}
+			case 1:{
+				p = density;
+				break;
+			}
+			default:
+				break;
+			}
+			return p;
+		}
+
 		/** return a property of the cell*/
 		public double getProp(int k) {
 			double r = 0;
@@ -500,12 +537,34 @@ public class Map {
 				electric += ind.getElectric();
 			}
 			
-			luminosity = luminosity*transparency/creatures.size();
+			/*luminosity = luminosity*transparency/creatures.size();
 			sound = (sound * density)/creatures.size();
 			smell = smell*(1-transparency)/creatures.size();
 			temperature = temperature* (1-density)/creatures.size();
-			electric = electric*density*transparency/creatures.size();;
+			electric = electric*density*transparency/creatures.size();*/
+			
+			luminosity = luminosity/creatures.size();
+			sound = sound/creatures.size();
+			smell = smell/creatures.size();
+			temperature = temperature/creatures.size();
+			electric = electric/creatures.size();
+			
+			luminosity = shiftMax(luminosity, transparency);
+			sound = shiftMax(sound, density);
+			smell = shiftMax(smell, 1-transparency);
+			temperature = shiftMax(temperature, 1-density);
+			electric = shiftMax(electric, density*transparency);
 		}
+	}
+	
+	/**
+	 * shifts a number so values closest to max are 1
+	 * @param m between 0..1
+	 * @return
+	 */
+	private double shiftMax(double val, double m) {
+		double s = val/(val+Math.pow(m-val,2));
+		return s;
 	}
 	
 	private boolean generateBool(){

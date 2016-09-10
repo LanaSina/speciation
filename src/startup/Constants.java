@@ -46,21 +46,19 @@ public class Constants {
 	
 	// factors on property values
 	/** speed*/
-	public static final double SpeedFactor = 0.2;//0.02
+	public static final double SpeedFactor = 0.05;//0.02
 	/** absolute max value*/
-	public static final int speedMax= 10;
+	public static final int SpeedMax= 10;
 	/** absolute max value*/
-	public static final int energyMax = 1000;
+	public static final int EnergyMax = 1000;
 	/** coarse graining of property values*/
-	public static final int propGrain = 10;
+	public static final int PropGrain = 10;
 
-	public static final double SpeedCost= 1;//0.2
+	public static final double SpeedCost= 0.2;//0.2
 	/** cost of being alive */
-	public static final double StepCost = 0.05;//0.15;
-	/** niche motion */
-	public static final double NicheSpeed = 2.0;
+	public static final double StepCost = 0.002;//0.15;
 	/** cost of having sensors*/
-	public static final double SensorCost = 0.2;//0.5;
+	public static final double SensorCost = 0.2;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
 	public static final double ErrorCost = 0.2;
 	/** energy iput into system */
@@ -76,6 +74,7 @@ public class Constants {
 	
 	/** folder where data file will be recorded*/
 	public static String DataPath = "/Users/lana/Development/new_OEE_data";
+	public static double ActionCost = 0.5;
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals.csv";
 	

@@ -188,15 +188,15 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(generateBool(bias)){
 				speed += plus;//speed + plus*0.7;
 				if(speed<0) speed = 0;
-				if(speed>Constants.speedMax) speed = Constants.speedMax;
+				if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
 				//break;
 			}
 			if(generateBool(bias)){
 				maxEnergy += plus;
 				if(maxEnergy<0){
 					maxEnergy = 0;
-				}else if (maxEnergy>Constants.energyMax) {
-					maxEnergy = Constants.energyMax;
+				}else if (maxEnergy>Constants.EnergyMax) {
+					maxEnergy = Constants.EnergyMax;
 				}
 			}
 			if(generateBool(bias)){
@@ -230,8 +230,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							int value = (int) (sensor.data + Constants.uniformDouble(-2, 2));
 							if(value<0){
 								value = 0;
-							}else if (value>Constants.propGrain) {
-								value = Constants.propGrain;
+							}else if (value>Constants.PropGrain) {
+								value = Constants.PropGrain;
 							}
 							sensor.data = value;
 							//mlog.say("---- sensor " + prop + " data "+ sensor.data);
@@ -299,16 +299,17 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	/** calculate luminosity etc with a random formula*/
 	private void makePhysics() {
-		double midSpeed = Math.abs(speed-(Constants.speedMax/2));
-		luminosity = (matForKids+midSpeed)/(double)(maxEnergy+ (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
-		warm = (speed+energy)/(double)(Constants.speedMax+maxEnergy);
-		if(maxEnergy>=kidEnergy && maxEnergy>0){
-			loud = kidEnergy/(double)(1+maxEnergy);
-		}else{
-			loud = 1;
-		}
-		smelly = (kidEnergy+matForKids)/(double)(death+1+maxEnergy);
-		electric = warm*smelly;
+		luminosity = check(nKids/10.0,0,1);
+		warm = check(hasSensors()/(double)(nKids+0.01), 0, 1);
+		loud = check(matForKids/(double)(maxEnergy+0.01), 0, 1);
+		smelly = check(kidEnergy/(double)(death+0.01), 0, 1);
+		electric = check(nKids/(double)(speed+0.01), 0, 1);
+	}
+	
+	private double check(double val, double low, double high) {
+		if(val<low) val = low;
+		if(val>high) val = high;
+		return val;
 	}
 	
 			
@@ -336,14 +337,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	public boolean update(LinkedList<Individual> babies, int date, double transparency){
 		life= life+1;
-		cellTransparency = transparency;
+		//cellTransparency = transparency;
 		
 		//remove energy due to sensors
-		double se = sensors.root.getChildCount() - (nPhysicalProperties-1);
+		double se = sensors.root.getChildCount() - (nPhysicalProperties);
+		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
-			energy = energy - se*Constants.SensorCost - Constants.StepCost*maxEnergy;	//6*0.2//3*10
-			//mlog.say("energy "+energy);
+			energy = energy - se*se*Constants.SensorCost - Constants.StepCost*maxEnergy*maxEnergy;	//6*0.2//3*10
 			if(life == death){
 				energy = -1;
 			}
@@ -491,7 +492,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public int hasSensors(){
 		int n = 0; 
 	
-		n = sensors.root.getChildCount();
+		n = (sensors.root.getChildCount()-nPhysicalProperties)/2;
 		
 		return n;
 	}

@@ -162,7 +162,7 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 				if(generateBool(bias)){
 					speed += plus;//speed + plus*0.7;
 					if(speed<0) speed = 0;
-					if(speed>Constants.speedMax) speed = Constants.speedMax;
+					if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
 					//break;
 				}
 				//case 1:{
