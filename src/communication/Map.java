@@ -64,8 +64,9 @@ public class Map {
 		summaryWriter = fb.getFileWriter();
 		fb = null;
 		//csv file header
-		String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath\n";
-		//sensors will just be 0 or 1. People who eat others get their own file.
+		String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath, matForKids,"
+				+ "luminosity,warm,loud,smelly,electric,eaten\n";
+		//"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath\n";
 		//Parents and kids have the same ID.
     	try {
 			summaryWriter.append(str);
@@ -121,7 +122,6 @@ public class Map {
 		
 		
 		//if no one here add light if needed
-		boolean hadLight = false;
 		//interactions: max is everyone interacts with everyone
 		ArrayList<Integer> interacting = new ArrayList<Integer>();
 		ArrayList<Integer> interactedOn = new ArrayList<Integer>();
@@ -129,16 +129,12 @@ public class Map {
 		
 		for (int i = 0; i < size; i++) {
 			Individual creature = c.creatures.get(i);
-            boolean alive = creature.update(babies, time);
+            boolean alive = creature.update(babies, time,c.transparency);
             double[] position = creature.getPosition();
             
             if(!alive){
             	remove.add(creature);
             } else{
-            	//is light?
-            	if(creature.isLight()){
-            		hadLight = true;
-            	}
             	//move
             	double np[] = new double[2];
             	boolean moved = false;
@@ -146,9 +142,9 @@ public class Map {
         			if(generateBool()){
 //        				if(creature.speed>0)
 //        					creature.color = Color.blue;
-        				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor);
+        				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor*c.density);
         			}else{
-        				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor);
+        				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor*c.density);
         			}
         			if(np[j]<0) np[j]=0;
         			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
@@ -173,54 +169,57 @@ public class Map {
                 	
                 	for(int l=0; l<pChildren.size();l++){
                 		int value = pChildren.get(l).data;
-                		//iterate creatures on this cell
-                		for(int m=0; m<c.creatures.size();m++){
-                			Individual cr2 = c.creatures.get(m);
-                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
-                				continue;
-                			}
-                			//creature can't interact on itself
-                			if(m==i){
-                				continue;
-                			}
-                			
-                			//based on direct perception of other creatures properties
-                			/*int[] properties = cr2.getProperties();
-                			if(value == properties[k]){
-                				if(Constants.uniformDouble()>0.6){
-                					mlog.say("eat; property " + prop.data + " value "+value);
-                				}
-                				//record interaction
-                				interacting.add(i);
-                				interactedOn.add(m);
-                				//get random action
-                				ArrayList<Node> actions = pChildren.get(l).getChildren();
-    							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
-    							int a = actions.get(ia).data;
-                				interaction.add(a);
-                			}//*/
-                			
-                			//based on perception of cell properties
-                			//TODO later will be based on properties gradient, when one individual can affect several cells
-                			
-                			//value is integer between 0:10
-                			double ind_prop = c.getProp(k);
-                			
-                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
-                				/*if(Constants.uniformDouble()<0.001){
-                					mlog.say("eat; pro " + k + " value "+value );
-                				}*/
-                				//record interaction
-                				interacting.add(i);
-                				interactedOn.add(m);
-                				//get random action
-                				ArrayList<Node> actions = pChildren.get(l).getChildren();
-    							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
-    							int a = actions.get(ia).data;
-                				interaction.add(a);
-                			}//*/
-
-                		}
+                		//actions
+        				ArrayList<Node> actions = pChildren.get(l).getChildren();
+        				for (Iterator<Node> iterator = actions.iterator(); iterator.hasNext();) {
+							Node node = (Node) iterator.next();
+							//action
+							int act = node.data;
+							
+							//interactions with other creatures
+							if(act<2){
+								//iterate creatures on this cell
+		                		for(int m=0; m<c.creatures.size();m++){
+		                			Individual cr2 = c.creatures.get(m);
+		                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
+		                				continue;
+		                			}
+		                			//creature can't interact on itself
+		                			if(m==i){
+		                				continue;
+		                			}
+		                			
+		                			//based on direct perception of other creatures properties
+		                			/*int[] properties = cr2.getProperties();
+		                			if(value == properties[k]){
+		                				if(Constants.uniformDouble()>0.6){
+		                					mlog.say("eat; property " + prop.data + " value "+value);
+		                				}
+		                				//record interaction
+		                				interacting.add(i);
+		                				interactedOn.add(m);
+		                				//get random action
+		                				ArrayList<Node> actions = pChildren.get(l).getChildren();
+		    							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
+		    							int a = actions.get(ia).data;
+		                				interaction.add(a);
+		                			}//*/
+		                			
+		                			//based on perception of cell properties
+		                			//value is integer between 0:10
+		                			double ind_prop = c.getProp(k);
+		                			
+		                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
+		                				//record interaction
+		                				interacting.add(i);
+		                				interactedOn.add(m);
+		                				interaction.add(act);
+		                			}//*/
+		                		}
+							} else if (act>5) {
+								c.changeProperties(act);
+							}
+						}
                 	}
                 }
         		
@@ -272,7 +271,7 @@ public class Map {
 						//mlog.say("total "+ c.creatures.get(predator).energy);
 						//record prey as dead
 						c.creatures.get(prey).setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
-						
+						c.creatures.get(prey).setEaten(1);
 						//change predator color 
 //						if((c.creatures.get(predator).color == Color.blue) | (c.creatures.get(predator).color == Color.gray)){
 //							c.creatures.get(predator).color = Color.gray;
@@ -320,7 +319,6 @@ public class Map {
 				// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
 				String str = creature.stringDesc();
 				//mlog.say(str);
-				//mlog.say("parent "+creature.getParentID()+" self "+creature.getID());
 				try {
 					summaryWriter.append(str);
 					summaryWriter.flush();
@@ -434,12 +432,34 @@ public class Map {
 			return r;
 		}
 
+		public void changeProperties(int action) {
+			switch (action) {
+			case Constants.LessTransparency:{
+				changeProperties(-0.1,0);
+				break;
+			}
+			case Constants.MoreTransparency:{
+				changeProperties(0.1,0);
+				break;
+			}
+			case Constants.LessDensity:{
+				changeProperties(0,-0.1);
+				break;
+			}
+			case Constants.MoreDensity:{
+				changeProperties(0,0.1);
+				break;
+			}
+			default:
+				break;
+			}
+		}
 		/**
 		 * 
 		 * @param t transparency
 		 * @param d density
 		 */
-		public void changeProperties(double t, double d){
+		private void changeProperties(double t, double d){
 			transparency+=t;
 			density+=d;
 			
@@ -478,17 +498,12 @@ public class Map {
 				electric += ind.getElectric();
 			}
 			
-			luminosity = luminosity/creatures.size();
-			sound = sound/creatures.size();
-			smell = smell/creatures.size();
-			temperature = temperature/creatures.size();
-			electric = electric/creatures.size();;
+			luminosity = luminosity*transparency/creatures.size();
+			sound = (sound * (1-density))/creatures.size();
+			smell = smell*luminosity* (1-density)/creatures.size();
+			temperature = temperature* (1-density)/creatures.size();
+			electric = electric*density/creatures.size();;
 		}
-		
-		public double getLuminosity(){
-			return luminosity;
-		}
-		
 	}
 	
 	private boolean generateBool(){

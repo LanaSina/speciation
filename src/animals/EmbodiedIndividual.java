@@ -14,11 +14,17 @@ import communication.MyLog;
 public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	MyLog mlog = new MyLog("embodied ind",true);
 	
+	//cell
+	/** 1 = completely transparent*/
+	double cellTransparency = 1;
+	
 	//general
 	public int speed = 0;
 	//total cost per unit
 	double speedCost = 3;
-	
+	//death by being eaten
+	int eaten = 0;//1 = true;
+
 	//int lifespan;
 	int maxEnergy;
 	//energy level transmitted to offspring
@@ -108,6 +114,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		}
 
 		makeColor();	
+		makePhysics();
 	}
 	
 	/**
@@ -161,10 +168,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			int plus = 1;
+			/*int plus = 1;
 			if(generateBool()){
 				plus = -1;
-			}
+			}*/
+			
+			int plus = (int)(Constants.uniformDouble(-3, 3)+0.5);
 			
 			//do this after too
 			properties[0] = speed;
@@ -193,6 +202,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(generateBool(bias)){
 				kidEnergy+=plus;
 				if(kidEnergy<0) kidEnergy = 0;
+			}
+			if(generateBool(bias)){
+				matForKids+=plus;
+				if(matForKids<0) matForKids = 0;
 			}
 			if(generateBool(bias)){
 				//create or modify sensor
@@ -280,23 +293,25 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[4] =  death;
 		properties[5] = matForKids;
 		
-		//now calculate luminosity etc with a random formula
-		double midSpeed = Math.abs(speed-(Constants.speedMax/2));
-		luminosity = (maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
-		warm = (speed+energy)/(Constants.speedMax+maxEnergy);
-		if(maxEnergy>=kidEnergy && maxEnergy>0){
-			loud = kidEnergy/(1+maxEnergy);
-		}else{
-			loud = 1;
-		}
-		smelly = kidEnergy+matForKids/(death+1+maxEnergy);
-		electric = warm*smelly;
-		//mlog.say("physProp lum "+ luminosity + " warm "+ warm+ " loud "+ loud + " smelly "+ smelly + " electric " + electric);
-
-		
+		makePhysics();
 		makeColor();
 	}
 	
+	/** calculate luminosity etc with a random formula*/
+	private void makePhysics() {
+		double midSpeed = Math.abs(speed-(Constants.speedMax/2));
+		luminosity = (matForKids+midSpeed)/(double)(maxEnergy+ (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
+		warm = (speed+energy)/(double)(Constants.speedMax+maxEnergy);
+		if(maxEnergy>=kidEnergy && maxEnergy>0){
+			loud = kidEnergy/(double)(1+maxEnergy);
+		}else{
+			loud = 1;
+		}
+		smelly = (kidEnergy+matForKids)/(double)(death+1+maxEnergy);
+		electric = warm*smelly;
+	}
+	
+			
 	private void makeColor() {
 		int red = (hasSensors()-(nPhysicalProperties-1))*256/(2*10);
 		if(red>255) red = 255; if(red<0) red =0;
@@ -319,8 +334,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 //		
 //	}
 	
-	public boolean update(LinkedList<Individual> babies, int date){
+	public boolean update(LinkedList<Individual> babies, int date, double transparency){
 		life= life+1;
+		cellTransparency = transparency;
 		
 		//remove energy due to sensors
 		double se = sensors.root.getChildCount() - (nPhysicalProperties-1);
@@ -354,7 +370,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					n++;
 				}
 			}else{
-				while((energy>kidEnergy)){//& (n<getNKids())){
+				while((energy>kidEnergy)& (n<getNKids())){//
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
 					energy = energy-kidEnergy;
@@ -395,7 +411,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 			//draw a yellow square .
 			Graphics2D g2d = (Graphics2D) g;
-	        g2d.setColor(color);
+	        Color c = new Color(color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, (float)(cellTransparency));
+	        g2d.setColor(c);
 	        
 	        int x = (int) (position[0]*gridStep +0.5);
 	        int y = (int) (position[1]*gridStep +0.5);
@@ -510,10 +527,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 * @return a csv string description of this creature
 	 */
 	public String stringDesc() {
+		
 		String description =  ID +","+parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + "\n";
+				+ death + ","+ matForKids + ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten + "\n";
 		return description;
 	}
 	
@@ -573,6 +591,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public void setSpeed(int speed) {
 		this.speed = speed;
 	}
-
+	
+	public void setEaten(int eaten) {
+		this.eaten = eaten;
+	}
 
 }

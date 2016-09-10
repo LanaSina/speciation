@@ -9,7 +9,6 @@ public interface Individual extends GraphicalComponent {
 
 	public double[] position = null;
 
-	public boolean update(LinkedList<Individual> l, int i);
 	public boolean isLight();
 	public double[] getPosition();
 	public double getSpeed();
@@ -24,8 +23,10 @@ public interface Individual extends GraphicalComponent {
 	public int[] getProperties();
 	public void setPosition(double[] position2);
 
-	public double getWarm() ;
+	public double getWarm();
 	public double getLoud();
 	public double getSmelly();
 	public double getElectric();
+	public void setEaten(int i);
+	public boolean update(LinkedList<Individual> babies, int time, double transparency);
 }

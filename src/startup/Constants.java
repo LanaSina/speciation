@@ -28,10 +28,21 @@ public class Constants {
 	/** actions*/
 	public static final int ActEat = 0;
 	public static final int ActMate = 1;
+	
 	public static final int MoveUp = 2;
 	public static final int MoveDown = 3;
 	public static final int MoveRigh = 4;
 	public static final int MoveLeft = 5;
+	
+	public static final int MoreTransparency = 6;
+	public static final int LessTransparency = 7;
+	public static final int MoreDensity = 8;
+	public static final int LessDensity = 9;
+	
+	public static final int ActionTypes = 10;
+
+
+
 	
 	// factors on property values
 	/** speed*/
@@ -61,7 +72,6 @@ public class Constants {
 	public static final double LightBirthDistance = 1.7;
 
 	
-	public static final int ActionTypes = 2;
 	public static final int EnergyTypes = 2;
 	
 	/** folder where data file will be recorded*/

@@ -284,7 +284,7 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 //		
 //	}
 	
-	public boolean update(LinkedList<Individual> babies, int date){
+	public boolean update(LinkedList<Individual> babies, int date, double t){
 		life= life+1;
 		
 //if(color == Color.black) mlog.say("energy before "+energy);
@@ -512,5 +512,10 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 	public double getElectric() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public void setEaten(int i) {
+		// TODO Auto-generated method stub
+		
 	}
 }
