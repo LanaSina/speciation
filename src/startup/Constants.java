@@ -35,7 +35,7 @@ public class Constants {
 	
 	// factors on property values
 	/** speed*/
-	public static final double SpeedFactor = 0.02;//0.02
+	public static final double SpeedFactor = 0.2;//0.02
 	/** absolute max value*/
 	public static final int speedMax= 10;
 	/** absolute max value*/

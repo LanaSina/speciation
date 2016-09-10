@@ -285,11 +285,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		luminosity = (maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));//(maxEnergy+midSpeed)/(Constants.energyMax + (Constants.speedMax/2));
 		warm = (speed+energy)/(Constants.speedMax+maxEnergy);
 		if(maxEnergy>=kidEnergy && maxEnergy>0){
-			loud = kidEnergy/maxEnergy;
+			loud = kidEnergy/(1+maxEnergy);
 		}else{
 			loud = 1;
 		}
-		smelly = kidEnergy+matForKids/(death+maxEnergy);
+		smelly = kidEnergy+matForKids/(death+1+maxEnergy);
 		electric = warm*smelly;
 		//mlog.say("physProp lum "+ luminosity + " warm "+ warm+ " loud "+ loud + " smelly "+ smelly + " electric " + electric);
 
@@ -331,6 +331,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(life == death){
 				energy = -1;
 			}
+			//kill the immortals with 0 kids
+			if(generateBool(0.005)){
+				energy = -1;
+			}
 			if(energy>maxEnergy){
 				energy=maxEnergy;
 			}
@@ -339,7 +343,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			energy = energy + Constants.FreeEnergy;
 		}
 		
-		if(energy>=matForKids){//(energy>=maxEnergy) & 
+		if(energy>0 && energy>=matForKids){//(energy>=maxEnergy) & 
 			//add children to the map		
 			int n = 0;
 			if(isLight){
@@ -413,7 +417,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 */
 	private boolean generateBool(double bias){
 		boolean b = false;
-		if(Constants.uniformDouble()>bias){
+		if(Constants.uniformDouble()<bias){
 			b = true;
 		}
 		

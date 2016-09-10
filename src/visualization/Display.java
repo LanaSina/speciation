@@ -60,7 +60,12 @@ public class Display extends JFrame {
 
 	        ActionListener taskPerformer = new ActionListener() {
 	          public void actionPerformed(ActionEvent evt) {
-	            s.repaint();
+	        	Thread t = new Thread(new Runnable() {
+					public void run() {
+			        	  s.repaint();
+					}
+				});
+	        	t.start();
 	          }
 	        };
 
@@ -75,14 +80,19 @@ public class Display extends JFrame {
 	    	s.addComponent(c);
 	    }
 	    
+	   /* public void removeComponent(GraphicalComponent c) {
+			s.removeComponent(c);
+		}*/
+	    
 	    //hem ?
 	    public JPanel getSurface(){
 	    	return s;
 	    }
 
 		public void removeComponent(GraphicalComponent c) {
-			int i = s.components.indexOf(c);
-			s.components.remove(i);
+			//int i = s.components.indexOf(c);
+			//s.components.remove(i);
+			s.removeComponent(c);
 		}
 	    
 	    /**
@@ -104,6 +114,7 @@ public class Display extends JFrame {
 		int h = 1200;
         //grid step size
         int step = Constants.GridStep;
+        boolean pause = false;
 
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
@@ -113,8 +124,33 @@ public class Display extends JFrame {
 	     * @param c the object implementing the component interface
 	     */
 	    public void addComponent(GraphicalComponent c){
+	    	while(pause){
+	    		try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    	}
+	    	pause = true;
 	    	components.add(c);
+	    	pause = false;
 	    }
+	    
+	    public void removeComponent(GraphicalComponent c) {
+	    	while(pause){
+	    		try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	    	}
+	    	pause = true;
+			int i = components.indexOf(c);
+			components.remove(i);
+			pause = false;
+		}
 	    
 		private static final long serialVersionUID = 6523850037367826272L;
 
@@ -147,11 +183,24 @@ public class Display extends JFrame {
 	        init(g);
 	        
 	        if(Constants.draw){
+	        	while(pause){
+		    		try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		    	}
+	        	
+	        	pause = true;
+	        	
 		        for(int i=0;i<components.size();i++){
 		        	if(Constants.uniformDouble()<Constants.draw_coarse){
 		        		components.get(i).draw(g,step);
 		        	}
 		        }
+		        
+		        pause = false;
 	        }
 	        
 	    }
