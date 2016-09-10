@@ -80,6 +80,7 @@ public class Map {
 	
 	public void addIndividual(int x, int y, Individual i){
 		Cell c = map[x][y];
+		i.setCellTransparency(c.transparency);
 		c.creatures.add(i);
 	}
 	
@@ -217,7 +218,10 @@ public class Map {
 		                			}//*/
 		                		}
 							} else if (act>5) {
-								c.changeProperties(act);
+								double ind_prop = c.getProp(k);
+	                			if( (value == (int) (Constants.propGrain*ind_prop)) ){
+	                				c.changeProperties(act);
+	                			}
 							}
 						}
                 	}
@@ -427,8 +431,6 @@ public class Map {
 				r = 0;
 				break;
 			}
-			//mlog.say("r "+r);
-			
 			return r;
 		}
 
@@ -499,10 +501,10 @@ public class Map {
 			}
 			
 			luminosity = luminosity*transparency/creatures.size();
-			sound = (sound * (1-density))/creatures.size();
-			smell = smell*luminosity* (1-density)/creatures.size();
+			sound = (sound * density)/creatures.size();
+			smell = smell*(1-transparency)/creatures.size();
 			temperature = temperature* (1-density)/creatures.size();
-			electric = electric*density/creatures.size();;
+			electric = electric*density*transparency/creatures.size();;
 		}
 	}
 	

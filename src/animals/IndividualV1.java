@@ -518,4 +518,9 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void setCellTransparency(double transparency) {
+		// TODO Auto-generated method stub
+		
+	}
 }

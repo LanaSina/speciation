@@ -402,6 +402,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.matForKids = in.matForKids;
 		this.setNKids(in.getNKids());
 		this.death = in.death;
+		this.cellTransparency = in.cellTransparency;
 		
 		this.sensors = in.sensors.copy();
 	}
@@ -594,6 +595,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	public void setEaten(int eaten) {
 		this.eaten = eaten;
+	}
+
+
+	public void setCellTransparency(double cellTransparency) {
+		this.cellTransparency = cellTransparency;
 	}
 
 }
