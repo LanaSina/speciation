@@ -56,9 +56,10 @@ public class Map {
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				map[i][j] = new Cell();
-				if(j<size/2)
+				if(j<size/2){
 					map[i][j].ntransparency = 0.1;
-					map[i][j].ndensity = 0.9;
+				}
+				//	map[i][j].ndensity = 0.9;
 			}
 		}
 		
@@ -141,22 +142,28 @@ public class Map {
             if(!alive){
             	remove.add(creature);
             } else{
-            	//move
             	double np[] = new double[2];
-            	boolean moved = false;
-        		for(int j=0;j<2;j++){
-        			if(generateBool()){
-        				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
-        			}else{
-        				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
-        			}
-        			if(np[j]<0) np[j]=0;
-        			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
-        			if(np[j] != position[j]){
-        				moved = true;
-        			}
-        		}
-        		
+	            boolean moved = false;
+	            double modSpeed = 0;
+	            		
+            	if(!creature.isLight()){
+	            	//move
+	            	modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
+	            	//mlog.say("tp "+c.transparency);
+	        		for(int j=0;j<2;j++){
+	        			if(generateBool()){
+	        				np[j]= position[j]+(modSpeed*Constants.SpeedFactor);//(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
+	        			}else{
+	        				np[j] = position[j]-(modSpeed*Constants.SpeedFactor);
+	        			}
+	        			if(np[j]<0) np[j]=0;
+	        			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
+	        			if(np[j] != position[j]){
+	        				moved = true;
+	        			}
+	        		}
+            	}
+            	
         		Tree sensors = creature.getSensors();
         		
         		//interactions between creatures
@@ -252,7 +259,8 @@ public class Map {
         			moving.add(creature);
         			//costs energy
         			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - creature.getSpeed()*Constants.SpeedCost - numberActions*Constants.ActionCost;
+        				//double modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
+        				double energy = creature.getEnergy() - modSpeed*Constants.SpeedCost - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
         		}
@@ -474,26 +482,26 @@ public class Map {
 		}
 
 		public void changeProperties(int action) {
-			/*switch (action) {
+			switch (action) {
 			case Constants.LessTransparency:{
-				changeProperties(-0.1,0);
+				changeProperties(-0.01,0);
 				break;
 			}
 			case Constants.MoreTransparency:{
-				changeProperties(0.1,0);
+				changeProperties(0.01,0);
 				break;
 			}
 			case Constants.LessDensity:{
-				changeProperties(0,-0.1);
+				changeProperties(0,-0.01);
 				break;
 			}
 			case Constants.MoreDensity:{
-				changeProperties(0,0.1);
+				changeProperties(0,0.01);
 				break;
 			}
 			default:
 				break;
-			}*/
+			}
 		}
 		/**
 		 * 
@@ -501,7 +509,7 @@ public class Map {
 		 * @param d density
 		 */
 		private void changeProperties(double t, double d){
-			ntransparency+=t;
+			/*ntransparency+=t;
 			ndensity+=d;
 			
 			if(ntransparency<0){
@@ -513,7 +521,7 @@ public class Map {
 				ndensity = 0;
 			} else if (ndensity>1){
 				ndensity = 1;
-			}
+			}*/
 		}
 		
 		
@@ -570,8 +578,23 @@ public class Map {
 	 * @return
 	 */
 	private double shiftMax(double val, double m) {
-		double s = val/(val+Math.pow(m-val,2));
+		double s = 1-Math.abs(m-val);//triangular
+		s = checkZero(s, m-0.2, m+0.2);
 		return s;
+	}
+	
+	//sets at 0 if out of bounds
+	private double checkZero(double val, double low, double high) {
+		if(val<low) val = 0;
+		if(val>high) val = 0;
+		return val;
+	}
+	
+	//set at bounds
+	private double check(double val, double low, double high) {
+		if(val<low) val = low;
+		if(val>high) val = high;
+		return val;
 	}
 	
 	private boolean generateBool(){

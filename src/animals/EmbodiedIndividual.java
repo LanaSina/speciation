@@ -181,7 +181,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			properties[5] = matForKids;
 
 			//maybe make this a mutable value!
-			double bias = 0.3;
+			double bias = 0.6;
 			if(generateBool(bias)){
 				speed = (int)(speed*(1+plus)+minMut+0.5);
 				if(speed<0) speed = 0;
@@ -283,7 +283,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	/** calculate luminosity etc with a random formula*/
 	private void makePhysics() {
-		luminosity = check(nKids/(double)death,0,1);
+		luminosity = check(death/(double)maxEnergy,0,1);
 		warm = check(hasSensors()/(double)(nKids+0.01), 0, 1);
 		loud = check(matForKids/(double)(maxEnergy+0.01), 0, 1);
 		smelly = check(kidEnergy/(double)(death+0.01), 0, 1);
@@ -298,7 +298,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 			
 	private void makeColor() {
-		int red = (hasSensors()-(nPhysicalProperties-1))*256/(2*10);
+		/*int red = (hasSensors()-(nPhysicalProperties-1))*256/(2*10);
 		if(red>255) red = 255; if(red<0) red =0;
 		//red = 255-red;
 		int green = maxEnergy*255/70;//20
@@ -306,7 +306,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		if(green>255) green = 255; if(green<0) green =0;
 		int blue = kidEnergy*255/10;//13
 		if(blue>255) blue = 255; if(green<0) green =0;
-		//blue = 255 - blue;
+		//blue = 255 - blue;*/
+		int red = (int) (loud*255 +0.5);
+		int green = (int) (smelly*255 +0.5);
+		int blue = (int) (warm*255 +0.5);
 		color = new Color(red,green,blue);
 	}
 
@@ -322,22 +325,20 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public boolean update(LinkedList<Individual> babies, int date, double transparency){
 		life= life+1;
 		cellTransparency = transparency;
+		double effect = 0.5;
 		
 		//remove energy due to sensors
 		double se = sensors.root.getChildCount() - (nPhysicalProperties);
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
-			energy = energy - se*se*Constants.SensorCost*(1.5-transparency) - Constants.StepCost*maxEnergy*maxEnergy;	//6*0.2//3*10
-			if(life == (int)(death*(transparency+0.5) + 0.5)){
+			energy = energy - Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect) - Constants.StepCost*Math.pow(maxEnergy,1.5)*(1+transparency*effect);	//6*0.2//3*10
+			if(life == (int)(death*(1+transparency*effect) + 0.5)){
 				energy = -1;
 			}
-			//kill the immortals with 0 kids
-			if(generateBool(0.005)){
-				energy = -1;
-			}
-			if(energy>(maxEnergy*(transparency+0.5))){
-				energy = maxEnergy*(transparency+0.5);
+			
+			if(energy>(maxEnergy*(1+transparency*effect))){
+				energy = maxEnergy*(1+transparency*effect);
 			}
 		} else {
 			//free energy into light
@@ -358,11 +359,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				while((energy>kidEnergy)& (n<getNKids())){//
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
-					energy = energy-kidEnergy*(1.5-transparency);
+					energy = energy-kidEnergy*(1-transparency*effect);
 					n++;
 				}
 				if(n<getNKids()){
-					energy =-1;
+					energy = energy-0.1*(n-nKids)*(n-nKids);
 				}
 			}
 			borderColor = Color.BLUE;
@@ -399,7 +400,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
         int size = 8;
 
 		if(!parentIsLight){
-	        Color c = new Color(color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, (float)(cellTransparency));
+	        Color c = color; //new Color(color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, (float)(cellTransparency));
 	        g2d.setColor(c);
 	        if(isLight){
 	        	g2d.drawRect(x, y, size,size);
