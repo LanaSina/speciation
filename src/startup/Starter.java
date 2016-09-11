@@ -41,7 +41,7 @@ public class Starter {
 			for(int j=0; j<lightLimit; j++){
 				int x = i+of;
 				int y = j+of;
-				
+								
 				/*if(Constants.uniformDouble()<coarse){
 					
 					/for(int k=0; k<isle_size; k++){

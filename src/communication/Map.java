@@ -56,6 +56,9 @@ public class Map {
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				map[i][j] = new Cell();
+				if(j<size/2)
+					map[i][j].ntransparency = 0.1;
+					map[i][j].ndensity = 0.9;
 			}
 		}
 		
@@ -130,7 +133,7 @@ public class Map {
 		
 		for (int i = 0; i < size; i++) {
 			Individual creature = c.creatures.get(i);
-            boolean alive = creature.update(babies, time,c.transparency);
+            boolean alive = creature.update(babies, time, c.transparency);
             double[] position = creature.getPosition();
         	int numberActions = 0;
 
@@ -143,8 +146,6 @@ public class Map {
             	boolean moved = false;
         		for(int j=0;j<2;j++){
         			if(generateBool()){
-//        				if(creature.speed>0)
-//        					creature.color = Color.blue;
         				np[j]= position[j]+(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
         			}else{
         				np[j] = position[j]-(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
@@ -162,13 +163,11 @@ public class Map {
                 Node s = sensors.root;
                 //iterate on properties
                 ArrayList<Node> sChildren = s.getChildren();
-                //mlog.say("c " + sChildren.size());
                 for(int k=0; k<sChildren.size();k++){
                 	//this is the property
                 	Node prop = sChildren.get(k);
                 	//these are the value-action pairs
                 	ArrayList<Node> pChildren = prop.getChildren();
-                	//mlog.say("c " + pChildren.size());
                 	
                 	for(int l=0; l<pChildren.size();l++){
                 		int value = pChildren.get(l).data;
@@ -413,6 +412,9 @@ public class Map {
 		/** how easy it is to move through (1=cannot move) */
 		double density = 0;//TODO use. may also change how sound etc travels.
 		
+		double ntransparency = 1;
+		double ndensity = 0;//TODO use. may also change how sound etc travels.
+		
 		/** determined by animals and transparency on this cell*/
 		double luminosity;
 		double sound;
@@ -472,7 +474,7 @@ public class Map {
 		}
 
 		public void changeProperties(int action) {
-			switch (action) {
+			/*switch (action) {
 			case Constants.LessTransparency:{
 				changeProperties(-0.1,0);
 				break;
@@ -491,7 +493,7 @@ public class Map {
 			}
 			default:
 				break;
-			}
+			}*/
 		}
 		/**
 		 * 
@@ -499,18 +501,18 @@ public class Map {
 		 * @param d density
 		 */
 		private void changeProperties(double t, double d){
-			transparency+=t;
-			density+=d;
+			ntransparency+=t;
+			ndensity+=d;
 			
-			if(transparency<0){
-				transparency = 0;
-			} else if (transparency>1){
-				transparency = 1;
+			if(ntransparency<0){
+				ntransparency = 0;
+			} else if (ntransparency>1){
+				ntransparency = 1;
 			}
-			if(density<0){
-				density = 0;
-			} else if (density>1){
-				density = 1;
+			if(ndensity<0){
+				ndensity = 0;
+			} else if (ndensity>1){
+				ndensity = 1;
 			}
 		}
 		
@@ -526,6 +528,11 @@ public class Map {
 			smell = 0;
 			temperature = 0;
 			electric = 0;
+			
+			//ntransparency = transparency;
+			//ndensity = density;
+			transparency = ntransparency;
+			density = ndensity;
 			
 			//make modular function for this
 			for (Iterator<Individual> iterator = creatures.iterator(); iterator.hasNext();) {

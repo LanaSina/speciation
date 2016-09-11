@@ -45,6 +45,8 @@ public class Constants {
 
 	
 	// factors on property values
+	/** mutation factor*/
+	public static final double MutFactor = 0.2;
 	/** speed*/
 	public static final double SpeedFactor = 0.05;//0.02
 	/** absolute max value*/
@@ -52,7 +54,7 @@ public class Constants {
 	/** absolute max value*/
 	public static final int EnergyMax = 1000;
 	/** coarse graining of property values*/
-	public static final int PropGrain = 10;
+	public static final int PropGrain = 100;
 
 	public static final double SpeedCost= 0.2;//0.2
 	/** cost of being alive */

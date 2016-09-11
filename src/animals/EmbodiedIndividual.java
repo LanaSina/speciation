@@ -168,12 +168,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			/*int plus = 1;
-			if(generateBool()){
-				plus = -1;
-			}*/
+			double minMut = Constants.uniformDouble(-3, 3);
 			
-			int plus = (int)(Constants.uniformDouble(-3, 3)+0.5);
+			double plus = Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor);
 			
 			//do this after too
 			properties[0] = speed;
@@ -186,13 +183,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			//maybe make this a mutable value!
 			double bias = 0.3;
 			if(generateBool(bias)){
-				speed += plus;//speed + plus*0.7;
+				speed = (int)(speed*(1+plus)+minMut+0.5);
 				if(speed<0) speed = 0;
 				if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
 				//break;
 			}
 			if(generateBool(bias)){
-				maxEnergy += plus;
+				maxEnergy = (int)(maxEnergy*(1+plus)+minMut+0.5);
 				if(maxEnergy<0){
 					maxEnergy = 0;
 				}else if (maxEnergy>Constants.EnergyMax) {
@@ -200,26 +197,22 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				kidEnergy+=plus;
+				kidEnergy = (int) (kidEnergy*(1+plus)+minMut+0.5);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
-				matForKids+=plus;
+				matForKids = (int) (matForKids*(1+plus)+minMut+0.5);
 				if(matForKids<0) matForKids = 0;
 			}
 			if(generateBool(bias)){
 				//create or modify sensor
 				if(plus>0){
-					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);
-					//mlog.say("****  prop " + prop);
+					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);//-1
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> senses = props.get(prop).getChildren();
-					//mlog.say(" senses "+ senses.size());
 					//modify
 					if(generateBool()){
-						//mlog.say("**** modify ");
-
 						//tree nodes: root-> 3properties -> detectionValue -> action
 						//          0          id              value            id
 						boolean hasSensors = !senses.isEmpty();
@@ -227,20 +220,17 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							//get random sensor
 							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
 							Node sensor = senses.get(s);	
-							int value = (int) (sensor.data + Constants.uniformDouble(-2, 2));
+							int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
 							if(value<0){
 								value = 0;
 							}else if (value>Constants.PropGrain) {
 								value = Constants.PropGrain;
 							}
 							sensor.data = value;
-							//mlog.say("---- sensor " + prop + " data "+ sensor.data);
 						}
 					} else {
 						//create sensor. 
-						//mlog.say("**** create ");
 						Node value = new Node();
-						//bias it to be like self
 						/*int selfValue = properties[prop];
 						if(generateBool()){//cannibal
 							value.data = selfValue; //(int) (selfValue + Constants.uniformDouble(0, 4)+0.5)-2;		
@@ -248,22 +238,15 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							value.data = (int) (Constants.uniformDouble(0, 4)+0.5);		
 						}*/
 						
-						value.data = (int) Constants.uniformDouble(0, 10);
-						
-						//mlog.say("*** sensor " + prop + " data "+ value.data);
+						value.data = (int) (Constants.uniformDouble(0, Constants.PropGrain-1)+0.5);
 						Node action = new Node();
 						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 						value.addChild(action);
 						
 						sensors.root.getChildren().get(prop).addChild(value);
-						//mlog.say("c " + sensors.root.getChildren().get(prop).getChildren().size());
-
 					}							
 				}else{
-					//mlog.say("**** delete ");
-					//or delete sensor
 					//tree nodes: root-> 3properties -> detectionValue -> action
-					//property (-1 = size; -2 = size - sensormap)
 					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
@@ -277,11 +260,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				setNKids(getNKids() + plus);
-				if(getNKids()<0) setNKids(0);
+				int n = (int) (getNKids()*(plus+1)+minMut+0.5);
+				if(n<0) n=0;
+				setNKids(n);
 			}
 			if(generateBool(bias)){
-				death = death + plus;
+				death = (int) (death*(1+plus)+minMut+0.5);
 				if(death<0) death = 0;
 			}
 		}
@@ -299,7 +283,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	/** calculate luminosity etc with a random formula*/
 	private void makePhysics() {
-		luminosity = check(nKids/10.0,0,1);
+		luminosity = check(nKids/(double)death,0,1);
 		warm = check(hasSensors()/(double)(nKids+0.01), 0, 1);
 		loud = check(matForKids/(double)(maxEnergy+0.01), 0, 1);
 		smelly = check(kidEnergy/(double)(death+0.01), 0, 1);
@@ -337,23 +321,23 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	public boolean update(LinkedList<Individual> babies, int date, double transparency){
 		life= life+1;
-		//cellTransparency = transparency;
+		cellTransparency = transparency;
 		
 		//remove energy due to sensors
 		double se = sensors.root.getChildCount() - (nPhysicalProperties);
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
-			energy = energy - se*se*Constants.SensorCost - Constants.StepCost*maxEnergy*maxEnergy;	//6*0.2//3*10
-			if(life == death){
+			energy = energy - se*se*Constants.SensorCost*(1.5-transparency) - Constants.StepCost*maxEnergy*maxEnergy;	//6*0.2//3*10
+			if(life == (int)(death*(transparency+0.5) + 0.5)){
 				energy = -1;
 			}
 			//kill the immortals with 0 kids
 			if(generateBool(0.005)){
 				energy = -1;
 			}
-			if(energy>maxEnergy){
-				energy=maxEnergy;
+			if(energy>(maxEnergy*(transparency+0.5))){
+				energy = maxEnergy*(transparency+0.5);
 			}
 		} else {
 			//free energy into light
@@ -374,14 +358,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				while((energy>kidEnergy)& (n<getNKids())){//
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
-					energy = energy-kidEnergy;
+					energy = energy-kidEnergy*(1.5-transparency);
 					n++;
 				}
 				if(n<getNKids()){
 					energy =-1;
 				}
 			}
-			borderColor = Color.green;
+			borderColor = Color.BLUE;
 		}	
 				
 		if(energy<=0){
@@ -409,16 +393,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 	
 	public void draw(Graphics g, int gridStep) {
+		Graphics2D g2d = (Graphics2D) g;
+		int x = (int) (position[0]*gridStep +0.5);
+        int y = (int) (position[1]*gridStep +0.5);
+        int size = 8;
+
 		if(!parentIsLight){
-		
-			//draw a yellow square .
-			Graphics2D g2d = (Graphics2D) g;
 	        Color c = new Color(color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, (float)(cellTransparency));
 	        g2d.setColor(c);
-	        
-	        int x = (int) (position[0]*gridStep +0.5);
-	        int y = (int) (position[1]*gridStep +0.5);
-	        int size = 8;
 	        if(isLight){
 	        	g2d.drawRect(x, y, size,size);
 	        }else{
@@ -426,6 +408,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	        }      
 	        g2d.setColor(borderColor);
 	        g2d.drawRect(x, y, size,size);
+		}
+		if(isLight){
+			borderColor = Color.black;
+			Color c = new Color(borderColor.getRed()/255.0f, borderColor.getGreen()/255.0f, borderColor.getBlue()/255.0f, (float)(cellTransparency));
+	        g2d.setColor(c);
+	        g2d.setColor(c);
+	        g2d.fillRect(x, y, size,size);
 		}
 	}
 	
