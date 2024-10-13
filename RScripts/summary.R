@@ -1,5 +1,5 @@
 
-folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
+folder = "../../new_data/2024_10_13_16_58"
 
 # honestly this one seems to be the best even if the video is not great
 # folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
