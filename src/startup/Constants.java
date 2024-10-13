@@ -75,7 +75,7 @@ public class Constants {
 	public static final int EnergyTypes = 2;
 	
 	/** folder where data file will be recorded*/
-	public static String DataPath = "/Users/lana/Development/new_OEE_data";
+	public static String DataPath = "../new_data";
 	public static double ActionCost = 0.5;
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals.csv";
