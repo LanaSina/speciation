@@ -1,0 +1,103 @@
+---
+title: "oee-md"
+author: "Lana"
+date: "2024-10-13"
+output: html_document
+---
+
+# OEE
+
+## setup
+
+```{r}
+library(scatterplot3d)
+options(rgl.useNULL = TRUE)
+library(rgl)
+
+base_folder = "../../new_data/"
+```
+
+Read data
+
+```{r}
+
+folder = "2024_10_16_14_35"
+
+# honestly this one seems to be the best even if the video is not great
+# folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
+
+fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
+
+whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
+# create a vector the same length as the dataframe
+sample_vector=c(1:nrow(whole_world))
+# sample elements from the vector (in this example 30 elements sampled without replacement)
+the_sample = sample(sample_vector, 30000, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+world = whole_world[the_sample,]
+
+```
+
+3D plots
+
+```{r}
+colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
+
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
+rglwidget()
+```
+
+
+```{r}
+colors = rgb(world$smelly/max(world$smelly), world$loud/max(world$loud), world$warm/max(world$warm))
+
+plot3d(x= world$created, y=world$warm, z = world$matForKids, col = colors, main = folder)
+rglwidget()
+
+```
+
+
+3D plots
+
+```{r}
+
+plot3d(x= world$created, y=world$maxEnergy, z = world$kidEnergy, col = colors, main = folder)
+rglwidget()
+
+```
+
+2D plots
+
+```{r}
+colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
+scatterplot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, color = colors, main = folder)
+```
+
+
+```{r}
+
+plot(x = world$created, y=world$speed, main = folder)
+# plot(x = world$created, y=world$lifeSpan, main = folder)
+plot(x = world$created, y=world$sensors, main = folder)
+plot(x = world$created, y=world$kidEnergy, main = folder)
+plot(x = world$created, y=world$maxEnergy, main = folder)
+plot(x = world$created, y=world$nkids, main = folder)
+plot(x = world$created, y=world$pgmDeath, main = folder)
+
+```
+
+```{r}
+plot(x = world$created, y=world$hunger, main = folder)
+
+```
+
+
+```{r}
+plot(x = world$created, y=world$luminosity, main = folder)
+plot(x = world$created, y=world$warm, main = folder)
+plot(x = world$created, y=world$loud, main = folder)
+plot(x = world$created, y=world$smelly, main = folder)
+plot(x = world$created, y=world$electric, main = folder)
+
+```
+

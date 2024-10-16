@@ -46,11 +46,11 @@ public class Constants {
 	
 	// factors on property values
 	/** mutation factor*/
-	public static final double MutFactor = 0.2;
+	public static final double MutFactor = 0.01;
 	/** speed*/
-	public static final double SpeedFactor = 0.05;//0.02
+	public static final double SpeedFactor = 0.005;//0.02
 	/** absolute max value*/
-	public static final int SpeedMax= 10;
+	public static final int SpeedMax= 100;
 	/** absolute max value*/
 	public static final int EnergyMax = 1000;
 	/** coarse graining of property values*/
@@ -60,9 +60,9 @@ public class Constants {
 	/** cost of being alive */
 	public static final double StepCost = 0.002;//0.15;
 	/** cost of having sensors*/
-	public static final double SensorCost = 0.05;//0.2;
+	public static final double SensorCost = 0.5;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
-	public static final double ErrorCost = 0.2;
+	public static final double ErrorCost = 0.02;
 	/** energy iput into system */
 	public static final double FreeEnergy =3;//5
 	

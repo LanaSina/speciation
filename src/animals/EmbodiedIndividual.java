@@ -11,6 +11,8 @@ import visualization.GraphicalComponent;
 
 import communication.MyLog;
 
+import static java.lang.Math.abs;
+
 public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	MyLog mlog = new MyLog("embodied ind",true);
 	
@@ -204,6 +206,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				matForKids = (int) (matForKids*(1+plus)+minMut+0.5);
 				if(matForKids<0) matForKids = 0;
 			}
+
 			if(generateBool(bias)){
 				//create or modify sensor
 				if(plus>0){
@@ -332,13 +335,15 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
-			energy = energy - Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect) - Constants.StepCost*Math.pow(maxEnergy,1.5)*(1+transparency*effect);	//6*0.2//3*10
+			energy = energy -
+					abs(Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect))
+					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
 			if(life == (int)(death*(1+transparency*effect) + 0.5)){
 				energy = -1;
 			}
 			
-			if(energy>(maxEnergy*(1+transparency*effect))){
-				energy = maxEnergy*(1+transparency*effect);
+			if(energy>(maxEnergy)){//*(1+transparency*effect))){
+				energy = maxEnergy;//*(1+transparency*effect);
 			}
 		} else {
 			//free energy into light
@@ -356,14 +361,17 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					n++;
 				}
 			}else{
-				while((energy>kidEnergy)& (n<getNKids())){//
+				while( (n<getNKids())){//
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
 					babies.add(baby);
-					energy = energy-kidEnergy*(1-transparency*effect);
+					energy = energy-kidEnergy;//*(1-transparency*effect);
 					n++;
-				}
-				if(n<getNKids()){
-					energy = energy-0.1*(n-nKids)*(n-nKids);
+
+					if(energy<kidEnergy){
+						energy = -1;
+						break;
+					}
+
 				}
 			}
 			borderColor = Color.BLUE;

@@ -15,6 +15,8 @@ import animals.Tree;
 import startup.Constants;
 import visualization.Display;
 
+import static java.lang.Math.abs;
+
 public class Map {
 	MyLog mlog = new MyLog("map", true);
 	/**graphic panel*/
@@ -260,7 +262,7 @@ public class Map {
         			//costs energy
         			if(!creature.isLight()){
         				//double modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
-        				double energy = creature.getEnergy() - modSpeed*Constants.SpeedCost - numberActions*Constants.ActionCost;
+        				double energy = creature.getEnergy() - modSpeed*Constants.SpeedCost;// - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
         		}
@@ -314,10 +316,10 @@ public class Map {
 					double ePred = c.creatures.get(predator).getEnergy();
 					double ePrey = c.creatures.get(prey).getEnergy();
 					//wound predator
-					/*double energy = ePred-ePrey*Constants.ErrorCost;
+					double energy = ePred-abs(ePrey*Constants.ErrorCost);
 					c.creatures.get(predator).setEnergy(energy);
 					//wound prey 
-					energy = ePrey-ePred*Constants.ErrorCost*3;
+					energy = ePrey-abs(ePred*Constants.ErrorCost);//*3
 					c.creatures.get(prey).setEnergy(energy);
 					//mlog.say("died "+ok);*/
 					c.creatures.get(predator).setBorderColor(Color.red);
@@ -578,7 +580,7 @@ public class Map {
 	 * @return
 	 */
 	private double shiftMax(double val, double m) {
-		double s = 1-Math.abs(m-val);//triangular
+		double s = 1- abs(m-val);//triangular
 		s = checkZero(s, m-0.2, m+0.2);
 		return s;
 	}
