@@ -286,6 +286,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	/** calculate luminosity etc with a random formula*/
 	private void makePhysics() {
+		/* 		int red = (int) (loud*255 +0.5);
+		int green = (int) (smelly*255 +0.5);
+		int blue = (int) (warm*255 +0.5);
+		 */
 		luminosity = check(death/(double)maxEnergy,0,1);
 		warm = check(hasSensors()/(double)(nKids+0.01), 0, 1);
 		loud = check(matForKids/(double)(maxEnergy+0.01), 0, 1);

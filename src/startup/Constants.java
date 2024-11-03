@@ -79,8 +79,9 @@ public class Constants {
 	public static double ActionCost = 0.5;
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals.csv";
-	
-	
+	public static boolean Save = false;
+
+
 	/**
 	 * from http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
 	 * and http://stackoverflow.com/questions/3680637/how-to-generate-a-random-double-in-a-given-range

@@ -66,20 +66,22 @@ public class Map {
 		}
 		
 		//writing data
-		FileBuilder fb = new FileBuilder();
-		summaryWriter = fb.getFileWriter();
-		fb = null;
-		//csv file header
-		String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath, matForKids,"
-				+ "luminosity,warm,loud,smelly,electric,eaten\n";
-		//"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath\n";
-		//Parents and kids have the same ID.
-    	try {
-			summaryWriter.append(str);
-			summaryWriter.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(Constants.Save) {
+			FileBuilder fb = new FileBuilder();
+			summaryWriter = fb.getFileWriter();
+			fb = null;
+			//csv file header
+			String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath, matForKids,"
+					+ "luminosity,warm,loud,smelly,electric,eaten\n";
+			//"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath\n";
+			//Parents and kids have the same ID.
+			try {
+				summaryWriter.append(str);
+				summaryWriter.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -347,17 +349,19 @@ public class Map {
 		//update dead
 		for(int i=0; i<remove.size();i++){
 			Individual creature = remove.get(i);
-			if(!creature.isLight() & !creature.parentIsLight()){
-				//write down info
-				// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
-				String str = creature.stringDesc();
-				//mlog.say(str);
-				try {
-					summaryWriter.append(str);
-					summaryWriter.flush();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if(Constants.Save) {
+				if (!creature.isLight() & !creature.parentIsLight()) {
+					//write down info
+					// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
+					String str = creature.stringDesc();
+					//mlog.say(str);
+					try {
+						summaryWriter.append(str);
+						summaryWriter.flush();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 

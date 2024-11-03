@@ -21,14 +21,15 @@ Read data
 
 ```{r}
 
-folder = "2024_10_16_14_35"
+folder = "trees/_good-2024_10_16_15_49" 
 
 # honestly this one seems to be the best even if the video is not great
 # folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
 
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
+# fileName = paste(base_folder, folder,"xad",sep="/")
 
-whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
+whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 # create a vector the same length as the dataframe
 sample_vector=c(1:nrow(whole_world))
 # sample elements from the vector (in this example 30 elements sampled without replacement)
@@ -38,12 +39,53 @@ world = whole_world[the_sample,]
 
 ```
 
+```{r}
+colnames(world) = cl
+```
+
+```{r}
+cl = colnames(world)
+```
+
+
 3D plots
 
 ```{r}
 colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
 
+close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
+rglwidget()
+# close3d()
+
+```
+
+
+```{r}
+
+close3d()
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
+rglwidget()
+```
+
+
+```{r}
+# colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
+close3d()
+
+a = log(world$pgmDeath)
+b = log(world$maxEnergy)
+
+plot3d(x= world$created, y=a, z =b , main = folder)
+
+rglwidget()
+```
+
+```{r}
+# colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
+close3d()
+
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder, ylim = c(150,250), zlim = c(35,80))
 rglwidget()
 ```
 
@@ -61,7 +103,7 @@ rglwidget()
 
 ```{r}
 
-plot3d(x= world$created, y=world$maxEnergy, z = world$kidEnergy, col = colors, main = folder)
+plot3d(x= world$created, y=world$maxEnergy, z = world$speed, col = colors, main = folder)
 rglwidget()
 
 ```
@@ -86,6 +128,27 @@ plot(x = world$created, y=world$pgmDeath, main = folder)
 
 ```
 
+
+```{r}
+plot(x = world$created, y=log(world$maxEnergy), main = folder)
+plot(x = world$created, y=log(world$kidEnergy), main = folder)
+plot(x = world$created, y=log(world$nkids), main = folder)
+plot(x = world$created, y=log(world$pgmDeath), main = folder)
+
+```
+
+```{r}
+
+plot(x = world$created, y=world$speed, main = folder, ylim = c(30, 80))
+
+plot(x = world$created, y=world$kidEnergy, main = folder, ylim = c(0, 25))
+plot(x = world$created, y=world$maxEnergy, main = folder, ylim = c(0, 40))
+plot(x = world$created, y=world$nkids, main = folder, ylim = c(0, 25))
+plot(x = world$created, y=world$pgmDeath, main = folder, ylim = c(90, 150))
+
+
+```
+
 ```{r}
 plot(x = world$created, y=world$hunger, main = folder)
 
@@ -98,6 +161,22 @@ plot(x = world$created, y=world$warm, main = folder)
 plot(x = world$created, y=world$loud, main = folder)
 plot(x = world$created, y=world$smelly, main = folder)
 plot(x = world$created, y=world$electric, main = folder)
+
+```
+
+
+Some stat measures
+
+```{r}
+# count the number of agents per time step (approx since we use a subsample anyway)
+# oh not there is no time step
+n_range = 1000
+n = 0
+n_end = max(world$)
+while(n<n_end){
+  sub = subset(world, )
+  count = 
+}
 
 ```
 
