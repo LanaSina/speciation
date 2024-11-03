@@ -8,10 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import animals.EmbodiedIndividual;
-import animals.Individual;
-import animals.Node;
-import animals.Tree;
+import animals.*;
 import startup.Constants;
 import visualization.Display;
 
@@ -29,6 +26,7 @@ public class Map {
 	int globalID = 0;
 	/** data recording*/
 	FileWriter summaryWriter;
+	FileWriter predationWriter;
 	/** simulation time*/
 	int time = 0;
 	
@@ -67,17 +65,32 @@ public class Map {
 		
 		//writing data
 		if(Constants.Save) {
-			FileBuilder fb = new FileBuilder();
+			// individuals info
+			FileBuilder fb = new FileBuilder(Constants.SummaryFileName);
 			summaryWriter = fb.getFileWriter();
 			fb = null;
+
 			//csv file header
 			String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath, matForKids,"
 					+ "luminosity,warm,loud,smelly,electric,eaten\n";
-			//"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath\n";
-			//Parents and kids have the same ID.
 			try {
 				summaryWriter.append(str);
 				summaryWriter.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(Constants.SavePredation) {
+			// predation info
+			FileBuilder fb_predation = new FileBuilder("predation");
+			predationWriter = fb_predation.getFileWriter();
+			fb_predation = null;
+
+			String header_predation = "r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
+			try {
+				predationWriter.append(header_predation);
+				predationWriter.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -102,9 +115,6 @@ public class Map {
 	}
 	
 	/**
-	 * 
-	 * @param x1 old x
-	 * @param y1 old y
 	 * @param x2 new x
 	 * @param y2 nex y
 	 * @param i individual
@@ -128,7 +138,6 @@ public class Map {
 		if(size==0){
 			return;
 		}
-		
 		
 		//if no one here add light if needed
 		//interactions: max is everyone interacts with everyone
@@ -197,8 +206,7 @@ public class Map {
 		                			if(Constants.uniformDouble()>p){
 		                				continue;
 		                			}
-		                			
-		                			
+
 		                			Individual cr2 = c.creatures.get(m);
 		                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
 		                				continue;
@@ -287,59 +295,60 @@ public class Map {
 				continue;
 			}
 			
-			
 			//if "eat", delete prey and turn predator to black
 			if(interaction.get(i) == Constants.ActEat){
-				int predator = interacting.get(i);
-				int prey = interactedOn.get(i);
+				int predator_id = interacting.get(i);
+				int prey_id = interactedOn.get(i);
+				Individual prey = c.creatures.get(prey_id);
+				Individual predator = c.creatures.get(predator_id);
 				//are energies compatible with this?
-				double ok = c.creatures.get(predator).getEnergy() - c.creatures.get(prey).getEnergy();
+				double ok = predator.getEnergy() - prey.getEnergy();
 				if(ok>=0){					
 					//delete prey from arrays
-					Collections.replaceAll(interacting, prey,-1);
-					Collections.replaceAll(interactedOn, prey,-1);
+					Collections.replaceAll(interacting, prey_id,-1);
+					Collections.replaceAll(interactedOn, prey_id,-1);
 					//give energy to predator
-					double e = c.creatures.get(prey).getEnergy();
+					double e = prey.getEnergy();
 					if(e>0){
-						double energy = c.creatures.get(predator).getEnergy() + e;
-						c.creatures.get(predator).setEnergy(energy); 
+						double energy = predator.getEnergy() + e;
+						predator.setEnergy(energy);
 						//mlog.say("total "+ c.creatures.get(predator).energy);
 						//record prey as dead
-						c.creatures.get(prey).setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
-						c.creatures.get(prey).setEaten(1);
-						//change predator color 
-//						if((c.creatures.get(predator).color == Color.blue) | (c.creatures.get(predator).color == Color.gray)){
-//							c.creatures.get(predator).color = Color.gray;
-//						}else{
-							c.creatures.get(predator).setBorderColor(Color.black);
-//						}
+						prey.setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
+						prey.setEaten(1);
+						predator.setBorderColor(Color.black);
+					}
+					// only save successful predation
+					if(Constants.SavePredation){
+						// reduce file size
+						if(Constants.uniformDouble()<0.1){
+							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
+							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
+							String str = "" + ei_pred.color.getRed() + "," + ei_pred.color.getGreen() + "," + ei_pred.color.getBlue() + ","
+											+ ei_prey.color.getRed() + "," + ei_prey.color.getGreen() + "," + ei_prey.color.getBlue() + "\n";
+							try {
+								predationWriter.append(str);
+								predationWriter.flush();
+							} catch (IOException ep) {
+								// TODO Auto-generated catch block
+								ep.printStackTrace();
+							}
+						}
 					}
 				} else if(ok<=0){
-					double ePred = c.creatures.get(predator).getEnergy();
-					double ePrey = c.creatures.get(prey).getEnergy();
+					double ePred = predator.getEnergy();
+					double ePrey = prey.getEnergy();
 					//wound predator
 					double energy = ePred-abs(ePrey*Constants.ErrorCost);
-					c.creatures.get(predator).setEnergy(energy);
+					predator.setEnergy(energy);
 					//wound prey 
 					energy = ePrey-abs(ePred*Constants.ErrorCost);//*3
-					c.creatures.get(prey).setEnergy(energy);
-					//mlog.say("died "+ok);*/
-					c.creatures.get(predator).setBorderColor(Color.red);
-					c.creatures.get(prey).setBorderColor(Color.gray);
-					//mlog.say("wounded "+ c.creatures.get(predator).energy);
+					prey.setEnergy(energy);
+					predator.setBorderColor(Color.red);
+					prey.setBorderColor(Color.gray);
 				}
 			}
 		}
-		
-		/*if(!hadLight & hasLight){
-			mlog.say("======= not called ?");
-			globalID++;
-			Individual l = new EmbodiedIndividual(x,y,globalID,globalID,time, -1);
-			addIndividual(x, y, l);
-			d.addComponent(l);		
-		}*/
-		
-
 	}
 
 

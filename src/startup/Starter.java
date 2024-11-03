@@ -84,9 +84,6 @@ public class Starter {
 		public void run() {
 			
 			while(run){
-				
-				//mlog.say("runs "+run);
-				
 				update();
 				
 				try {

@@ -78,8 +78,9 @@ public class Constants {
 	public static String DataPath = "../new_data";
 	public static double ActionCost = 0.5;
 	/** files*/
-	public static final String SummaryFileName = "SummaryIndividuals.csv";
+	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = false;
+	public static boolean SavePredation = true;
 
 
 	/**

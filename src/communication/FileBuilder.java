@@ -14,22 +14,17 @@ public class FileBuilder {
 	/**File writer*/
 	FileWriter filew;
 	
-	public FileBuilder(){
+	public FileBuilder(String name){
 		
 		/**data directory*/
 		String folderName;
-
 		
 		//get current date
 	    DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
 	    Date date = new Date();
 	    String strDate = dateFormat.format(date);
 	
-//	    if((name.compareTo("")==0)){
-	    	folderName = Constants.DataPath + "/" + strDate + "/";
-//	    }else{
-//	    	folderName = Constants.DataPath + "\\" +name + "\\";
-//	    }
+		folderName = Constants.DataPath + "/" + strDate + "/";
 	    	
     	//first create directory
 		File theDir = new File(folderName);
@@ -52,8 +47,8 @@ public class FileBuilder {
 		
 		//now create csv files
 		try {			
-			filew = new FileWriter(folderName+"/"+ Constants.SummaryFileName);
-			mlog.say("stream opened "+ Constants.SummaryFileName);
+			filew = new FileWriter(folderName+"/"+ name + ".csv");
+			mlog.say("stream opened "+ name);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
