@@ -17,7 +17,7 @@ public class Constants {
 	public static double draw_coarse = 1;
 	
 	/** equivalent to refresh rate */
-	public static int refresh_rate = 500;
+	public static int refresh_rate = 100;//500
 
 
 	
@@ -56,7 +56,7 @@ public class Constants {
 	/** coarse graining of property values*/
 	public static final int PropGrain = 100;
 
-	public static final double SpeedCost= 0.2;//0.2
+	public static final double SpeedCost= 0.02;//0.2
 	/** cost of being alive */
 	public static final double StepCost = 0.1;//0.002
 	/** cost of having sensors*/

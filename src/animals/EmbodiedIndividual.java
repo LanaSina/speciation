@@ -349,7 +349,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			energy = energy -
 					abs(Math.pow(se,1.2)*Constants.SensorCost)//*0.1
 					- abs(Constants.StepCost);///*maxEnergy);	//6*0.2//3*10
-			if(life == (int)(death*(1+transparency*effect) + 0.5)){
+//			if(life == (int)(death*(1+transparency*effect) + 0.5)){
+			if(life >= death){
 				energy = -1;
 			}
 			

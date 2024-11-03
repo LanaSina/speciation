@@ -177,17 +177,18 @@ public class Map {
             } else{
             	double np[] = new double[2];
 	            boolean moved = false;
-	            double modSpeed = 0;
+				double speed = creature.getSpeed();
+	            //double modSpeed = 0;
 	            		
             	if(!creature.isLight()){
 	            	//move
-	            	modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
+
 	            	//mlog.say("tp "+c.transparency);
 	        		for(int j=0;j<2;j++){
 	        			if(generateBool()){
-	        				np[j]= position[j]+(modSpeed*Constants.SpeedFactor);//(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
+	        				np[j]= position[j]+(speed*Constants.SpeedFactor);//(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
 	        			}else{
-	        				np[j] = position[j]-(modSpeed*Constants.SpeedFactor);
+	        				np[j] = position[j]-(speed*Constants.SpeedFactor);
 	        			}
 	        			if(np[j]<0) np[j]=0;
 	        			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
@@ -295,7 +296,7 @@ public class Map {
         			//costs energy
         			if(!creature.isLight()){
         				//double modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
-        				double energy = creature.getEnergy() - modSpeed*Constants.SpeedCost;// - numberActions*Constants.ActionCost;
+        				double energy = creature.getEnergy() - speed*Constants.SpeedCost;// - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
         		}
