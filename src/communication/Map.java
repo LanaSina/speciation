@@ -87,7 +87,7 @@ public class Map {
 			predationWriter = fb_predation.getFileWriter();
 			fb_predation = null;
 
-			String header_predation = "r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
+			String header_predation = "t,r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
 			try {
 				predationWriter.append(header_predation);
 				predationWriter.flush();
@@ -324,8 +324,9 @@ public class Map {
 						if(Constants.uniformDouble()<0.1){
 							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-							String str = "" + ei_pred.color.getRed() + "," + ei_pred.color.getGreen() + "," + ei_pred.color.getBlue() + ","
-											+ ei_prey.color.getRed() + "," + ei_prey.color.getGreen() + "," + ei_prey.color.getBlue() + "\n";
+							String str = time + ","
+									       + ei_pred.color.getRed() + "," + ei_pred.color.getGreen() + "," + ei_pred.color.getBlue() + ","
+									       + ei_prey.color.getRed() + "," + ei_prey.color.getGreen() + "," + ei_prey.color.getBlue() + "\n";
 							try {
 								predationWriter.append(str);
 								predationWriter.flush();

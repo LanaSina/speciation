@@ -39,6 +39,7 @@ world = whole_world[the_sample,]
 
 ```
 
+
 ```{r}
 colnames(world) = cl
 ```
@@ -163,6 +164,37 @@ plot(x = world$created, y=world$smelly, main = folder)
 plot(x = world$created, y=world$electric, main = folder)
 
 ```
+
+
+Read predation data
+
+```{r}
+
+folder = "2024_11_03_11_45" 
+fileName = paste(base_folder, folder,"predation.csv",sep="/")
+
+interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
+```
+
+
+
+```{r}
+
+l = length(interactions$r_pred)
+interactions$int_id = c(1:l)
+
+colors_pred =  rgb(interactions$r_pred, interactions$g_pred, interactions$b_pred, maxColorValue=255)
+colors_prey =  rgb(interactions$r_prey, interactions$g_prey, interactions$b_prey, maxColorValue=255)
+
+```
+
+```{r}
+plot(x = interactions$int_id, y = rep(1, l), col = colors_pred, ylim = c(-1,2))
+points(x = interactions$int_id, y = rep(0, l), col = colors_prey)
+```
+
+
+----
 
 
 Some stat measures
