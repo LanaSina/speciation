@@ -170,7 +170,7 @@ Read predation data
 
 ```{r}
 
-folder = "2024_11_03_11_45" 
+folder = "2024_11_03_13_26" 
 fileName = paste(base_folder, folder,"predation.csv",sep="/")
 
 interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
@@ -179,18 +179,34 @@ interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
 
 
 ```{r}
-
 l = length(interactions$r_pred)
 interactions$int_id = c(1:l)
 
-colors_pred =  rgb(interactions$r_pred, interactions$g_pred, interactions$b_pred, maxColorValue=255)
-colors_prey =  rgb(interactions$r_prey, interactions$g_prey, interactions$b_prey, maxColorValue=255)
+# subset
+late_interactions = subset(interactions, t>50500)
 
+colors_pred =  rgb(late_interactions$r_pred, late_interactions$g_pred, late_interactions$b_pred, maxColorValue=255)
+colors_prey =  rgb(late_interactions$r_prey, late_interactions$g_prey, late_interactions$b_prey, maxColorValue=255)
 ```
+
 
 ```{r}
 plot(x = interactions$int_id, y = rep(1, l), col = colors_pred, ylim = c(-1,2))
 points(x = interactions$int_id, y = rep(0, l), col = colors_prey)
+```
+
+
+Divide predators in color clusters
+
+```{r}
+# plot predators
+plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_pred)
+
+plot(late_interactions$g_prey, late_interactions$b_prey, col = colors_prey)
+
+# plot preys as function of predators
+plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
+
 ```
 
 
