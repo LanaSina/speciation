@@ -58,7 +58,7 @@ public class Constants {
 
 	public static final double SpeedCost= 0.2;//0.2
 	/** cost of being alive */
-	public static final double StepCost = 0.002;//0.15;
+	public static final double StepCost = 0.01;//0.002
 	/** cost of having sensors*/
 	public static final double SensorCost = 0.5;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
