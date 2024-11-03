@@ -276,12 +276,12 @@ public class Map {
 	                			}*/
 								//bad way of dealing with this
 								//7 = n phys prop
-								int kk = (int) ((k/5.0)+0.5);
-								double phy_prop = c.getPhy(kk);
-								if( (value != (int) (Constants.PropGrain*phy_prop)) ){
-									c.changeProperties(act);
-	                				numberActions++;
-								}
+//								int kk = (int) ((k/5.0)+0.5);
+//								double phy_prop = c.getPhy(kk);
+//								if( (value != (int) (Constants.PropGrain*phy_prop)) ){
+//									c.changeProperties(act);
+//	                				numberActions++;
+//								}
 								
 							}
 						}
@@ -344,7 +344,7 @@ public class Map {
 					// only save successful predation
 					if(Constants.SavePredation){
 						// reduce file size
-						if(Constants.uniformDouble()<0.1){
+						if(Constants.uniformDouble()<0.01){
 							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
 							/*

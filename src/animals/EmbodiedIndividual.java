@@ -170,7 +170,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			double minMut = Constants.uniformDouble(-3, 3);
+			double minMut = Constants.uniformDouble(-2, 2);
 			
 			double plus = Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor);
 			
@@ -185,13 +185,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			//maybe make this a mutable value!
 			double bias = 0.6;
 			if(generateBool(bias)){
-				speed = (int)(speed*(1+plus)+minMut+0.5);
+				speed = (int)(speed+minMut);
 				if(speed<0) speed = 0;
 				if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
 				//break;
 			}
 			if(generateBool(bias)){
-				maxEnergy = (int)(maxEnergy*(1+plus)+minMut+0.5);
+				maxEnergy = (int)(maxEnergy+minMut);
 				if(maxEnergy<0){
 					maxEnergy = 0;
 				}else if (maxEnergy>Constants.EnergyMax) {
@@ -199,11 +199,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				kidEnergy = (int) (kidEnergy*(1+plus)+minMut+0.5);
+				kidEnergy = (int) (kidEnergy+minMut);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
-				matForKids = (int) (matForKids*(1+plus)+minMut+0.5);
+				matForKids = (int) (matForKids+minMut);
 				if(matForKids<0) matForKids = 0;
 			}
 
@@ -348,7 +348,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 //					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
 			energy = energy -
 					abs(Math.pow(se,1.2)*Constants.SensorCost)//*0.1
-					- abs(Constants.StepCost*maxEnergy);	//6*0.2//3*10
+					- abs(Constants.StepCost);///*maxEnergy);	//6*0.2//3*10
 			if(life == (int)(death*(1+transparency*effect) + 0.5)){
 				energy = -1;
 			}

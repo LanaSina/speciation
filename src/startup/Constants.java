@@ -48,7 +48,7 @@ public class Constants {
 	/** mutation factor*/
 	public static final double MutFactor = 0.01;
 	/** speed*/
-	public static final double SpeedFactor = 0.005;//0.02
+	public static final double SpeedFactor = 0.02;//0.005
 	/** absolute max value*/
 	public static final int SpeedMax= 100;
 	/** absolute max value*/
@@ -58,7 +58,7 @@ public class Constants {
 
 	public static final double SpeedCost= 0.2;//0.2
 	/** cost of being alive */
-	public static final double StepCost = 0.01;//0.002
+	public static final double StepCost = 0.1;//0.002
 	/** cost of having sensors*/
 	public static final double SensorCost = 0.2;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/

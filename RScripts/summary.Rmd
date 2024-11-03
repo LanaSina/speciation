@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_11_03_14_47" 
+folder = "2024_11_03_15_59" 
 
 # honestly this one seems to be the best even if the video is not great
 # folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
@@ -31,17 +31,17 @@ fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 # create a vector the same length as the dataframe
+
+world = whole_world
+```
+
+
+```{r}
 sample_vector=c(1:nrow(whole_world))
 # sample elements from the vector (in this example 30 elements sampled without replacement)
 the_sample = sample(sample_vector, 30000, replace=FALSE)
 # the vector of randomly selected elements is then used to select rows from the dataframe
 world = whole_world[the_sample,]
-
-```
-
-
-```{r}
-colnames(world) = cl
 ```
 
 ```{r}
@@ -165,31 +165,40 @@ plot(x = world$created, y=world$electric, main = folder)
 
 ```
 
-
 Read predation data
 
 ```{r}
 
-folder = "2024_11_03_14_47" 
+# folder = "2024_11_03_15_47" 
 fileName = paste(base_folder, folder,"predation.csv",sep="/")
 
 interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
+
+l = length(interactions$t)
+interactions$int_id = c(1:l)
+sub_interactions = interactions
 ```
 
 
 
-```{r}
-l = length(interactions$r_pred)
-interactions$int_id = c(1:l)
 
+```{r}
 # subset
 sample_vector=c(1:l)
 the_sample = sample(sample_vector, 30000, replace=FALSE)
 # the vector of randomly selected elements is then used to select rows from the dataframe
 sub_interactions = interactions[the_sample,]
+```
 
-colors_pred =  rgb(sub_interactions$r_pred, sub_interactions$g_pred, sub_interactions$b_pred, maxColorValue=255)
-colors_prey =  rgb(sub_interactions$r_prey, sub_interactions$g_prey, sub_interactions$b_prey, maxColorValue=255)
+
+
+
+```{r}
+colors_pred =  rgb(sub_interactions$pred_nkids/max(sub_interactions$pred_nkids), sub_interactions$pred_pgmDeath/max(sub_interactions$pred_pgmDeath), sub_interactions$pred_matForKids/max(sub_interactions$pred_matForKids))
+
+colors_prey =  rgb(sub_interactions$pred_nkids/max(sub_interactions$pred_nkids), sub_interactions$pred_pgmDeath/max(sub_interactions$pred_pgmDeath), sub_interactions$pred_matForKids/max(sub_interactions$pred_matForKids))
+
+
 ```
 
 
@@ -203,17 +212,26 @@ Divide predators in color clusters
 
 ```{r}
 # plot predators
-plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_pred)
+plot(sub_interactions$pred_speed, sub_interactions$pred_maxEnergy, col = colors_pred)
 
-plot(late_interactions$g_prey, late_interactions$b_prey, col = colors_prey)
+plot(sub_interactions$prey_speed, sub_interactions$prey_maxEnergy, col = colors_prey)
 
+plot(sub_interactions$pred_sensors, sub_interactions$prey_sensors)
 # plot preys as function of predators
-plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
+# plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
 
 ```
+Histograms ftw
 
 ```{r}
-plot(sub_interactions$pred_id, sub_interactions$prey_id)
+hist(sub_interactions$prey_sensors)
+hist(sub_interactions$prey_maxEnergy)
+hist(sub_interactions$prey_nkids)
+
+```
+```{r}
+hps = hist(sub_interactions$prey_sensors)
+plot(log(hps$counts), hps$mids)
 ```
 
 
