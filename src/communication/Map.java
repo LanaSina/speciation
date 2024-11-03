@@ -87,7 +87,7 @@ public class Map {
 			predationWriter = fb_predation.getFileWriter();
 			fb_predation = null;
 
-			String header_predation = "t,r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
+			String header_predation = "t,pred_id,prey_id,r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
 			try {
 				predationWriter.append(header_predation);
 				predationWriter.flush();
@@ -327,7 +327,7 @@ public class Map {
 						if(Constants.uniformDouble()<0.1){
 							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-							String str = time + ","
+							String str = time + "," + ei_pred.getID() +  "," + ei_prey.getID() + ","
 									       + ei_pred.color.getRed() + "," + ei_pred.color.getGreen() + "," + ei_pred.color.getBlue() + ","
 									       + ei_prey.color.getRed() + "," + ei_prey.color.getGreen() + "," + ei_prey.color.getBlue() + "\n";
 							try {
@@ -363,17 +363,19 @@ public class Map {
 		for(int i=0; i<remove.size();i++){
 			Individual creature = remove.get(i);
 			if(Constants.Save) {
-				if (!creature.isLight() & !creature.parentIsLight()) {
-					//write down info
-					// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
-					String str = creature.stringDesc();
-					//mlog.say(str);
-					try {
-						summaryWriter.append(str);
-						summaryWriter.flush();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				if(Constants.uniformDouble()<0.01) {
+					if (!creature.isLight() & !creature.parentIsLight()) {
+						//write down info
+						// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
+						String str = creature.stringDesc();
+						//mlog.say(str);
+						try {
+							summaryWriter.append(str);
+							summaryWriter.flush();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}

@@ -79,7 +79,7 @@ public class Constants {
 	public static double ActionCost = 0.5;
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals";
-	public static boolean Save = false;
+	public static boolean Save = true;
 	public static boolean SavePredation = true;
 
 

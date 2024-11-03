@@ -342,9 +342,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
+//			energy = energy -
+//					abs(Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect))
+//					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
 			energy = energy -
-					abs(Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect))
-					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
+					abs(Math.pow(se,1.2)*Constants.SensorCost*0.1)
+					- abs(Constants.StepCost*maxEnergy*0.1);	//6*0.2//3*10
 			if(life == (int)(death*(1+transparency*effect) + 0.5)){
 				energy = -1;
 			}
