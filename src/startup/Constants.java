@@ -17,7 +17,7 @@ public class Constants {
 	public static double draw_coarse = 1;
 	
 	/** equivalent to refresh rate */
-	public static int refresh_rate = 100;//500
+	public static int refresh_rate = 200;//500
 
 
 	
@@ -48,7 +48,7 @@ public class Constants {
 	/** mutation factor*/
 	public static final double MutFactor = 0.01;
 	/** speed*/
-	public static final double SpeedFactor = 0.02;//0.005
+	public static final double SpeedFactor = 0.02;//0.02
 	/** absolute max value*/
 	public static final int SpeedMax= 100;
 	/** absolute max value*/

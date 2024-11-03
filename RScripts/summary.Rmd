@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_11_03_15_59" 
+folder = "2024_11_03_20_25" 
 
 # honestly this one seems to be the best even if the video is not great
 # folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
@@ -44,15 +44,11 @@ the_sample = sample(sample_vector, 30000, replace=FALSE)
 world = whole_world[the_sample,]
 ```
 
-```{r}
-cl = colnames(world)
-```
-
 
 3D plots
 
 ```{r}
-colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
+colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
 
 close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
@@ -118,7 +114,7 @@ scatterplot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, color = c
 
 
 ```{r}
-
+# par(mfrow=c(2,3))
 plot(x = world$created, y=world$speed, main = folder)
 # plot(x = world$created, y=world$lifeSpan, main = folder)
 plot(x = world$created, y=world$sensors, main = folder)
@@ -202,11 +198,6 @@ colors_prey =  rgb(sub_interactions$pred_nkids/max(sub_interactions$pred_nkids),
 ```
 
 
-```{r}
-plot(x = interactions$int_id, y = rep(1, l), col = colors_pred, ylim = c(-1,2))
-points(x = interactions$int_id, y = rep(0, l), col = colors_prey)
-```
-
 
 Divide predators in color clusters
 
@@ -230,11 +221,29 @@ hist(sub_interactions$prey_nkids)
 
 ```
 ```{r}
-hps = hist(sub_interactions$prey_sensors)
-plot(log(hps$counts), hps$mids)
+significant_counts = as.data.frame(table(sub_interactions$pred_id), stringsAsFactors = FALSE)
+hist(significant_counts$Freq)
+significant_counts = subset(significant_counts, significant_counts$Freq > 1)
+significant_counts$pred_id = as.integer(significant_counts$Var1)
+```
+
+```{r}
+significant_interactions = subset(sub_interactions, pred_id %in% significant_counts$pred_id)
+
+```
+
+```{r}
+plot(significant_interactions$pred_id, significant_interactions$prey_speed)
 ```
 
 
+
+We want to know who eats who
+
+
+
+
+-----
 
 ```{r}
 # subset

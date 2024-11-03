@@ -56,9 +56,9 @@ public class Map {
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				map[i][j] = new Cell();
-				if(j<size/2){
-					map[i][j].ntransparency = 0.1;
-				}
+//				if(j<size/2){
+//					map[i][j].ntransparency = 0.1;
+//				}
 				//	map[i][j].ndensity = 0.9;
 			}
 		}
