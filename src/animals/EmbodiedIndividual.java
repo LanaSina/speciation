@@ -12,6 +12,7 @@ import visualization.GraphicalComponent;
 import communication.MyLog;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.max;
 
 public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	MyLog mlog = new MyLog("embodied ind",true);
@@ -223,12 +224,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							//get random sensor
 							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
 							Node sensor = senses.get(s);	
-							int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
-							if(value<0){
-								value = 0;
-							}else if (value>Constants.PropGrain) {
-								value = Constants.PropGrain;
-							}
+							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
+							int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
+
+//							if(value<0){
+//								value = 0;
+//							}else if (value>Constants.PropGrain) {
+//								value = Constants.PropGrain;
+//							}
 							sensor.data = value;
 						}
 					} else {
@@ -241,7 +244,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							value.data = (int) (Constants.uniformDouble(0, 4)+0.5);		
 						}*/
 						
-						value.data = (int) (Constants.uniformDouble(0, Constants.PropGrain-1)+0.5);
+						value.data = (int) Constants.uniformDouble(0, Constants.EnergyMax);
 						Node action = new Node();
 						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 						value.addChild(action);

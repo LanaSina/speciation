@@ -234,9 +234,12 @@ public class Map {
 		                			
 		                			//based on perception of cell properties
 		                			//value is integer between 0:10
-		                			double ind_prop = c.getProp(k);
+		                			// double ind_prop = c.getProp(k);
+									// direct perception
+									double ind_prop = cr2.getProperties()[k];
 		                			
-		                			if( (value == (int) (Constants.PropGrain*ind_prop)) ){
+		                			//if( (value == (int) (Constants.PropGrain*ind_prop)) ){
+									if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
 		                				//record interaction
 		                				interacting.add(i);
 		                				interactedOn.add(m);
