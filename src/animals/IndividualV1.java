@@ -514,7 +514,7 @@ public class IndividualV1 implements GraphicalComponent, Individual{
 		return 0;
 	}
 
-	public void setEaten(int i) {
+	public void setEatenBy(int i) {
 		// TODO Auto-generated method stub
 		
 	}

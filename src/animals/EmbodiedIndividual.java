@@ -11,8 +11,7 @@ import visualization.GraphicalComponent;
 
 import communication.MyLog;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 
 public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	MyLog mlog = new MyLog("embodied ind",true);
@@ -26,7 +25,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	//total cost per unit
 	double speedCost = 3;
 	//death by being eaten
-	int eaten = 0;//1 = true;
+	int eaten_by = -1;//1 = true;
 
 	//int lifespan;
 	int maxEnergy;
@@ -317,9 +316,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		int blue = kidEnergy*255/10;//13
 		if(blue>255) blue = 255; if(green<0) green =0;
 		//blue = 255 - blue;*/
-		int red = (int) (loud*255 +0.5);
-		int green = (int) (smelly*255 +0.5);
-		int blue = (int) (warm*255 +0.5);
+		int red = (int) ((speed*1.0/Constants.SpeedMax)*255 +0.5);
+		double d = min(1, (death*1.0/500));
+		int green = (int) (d*255 +0.5);
+		int blue = (int) ((maxEnergy*1.0/Constants.EnergyMax)*255 +0.5);
 		color = new Color(red,green,blue);
 	}
 
@@ -346,7 +346,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 //					abs(Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect))
 //					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
 			energy = energy -
-					abs(Math.pow(se,1.2)*Constants.SensorCost*0.1)
+					abs(Math.pow(se,1.2)*Constants.SensorCost)//*0.1
 					- abs(Constants.StepCost*maxEnergy);	//6*0.2//3*10
 			if(life == (int)(death*(1+transparency*effect) + 0.5)){
 				energy = -1;
@@ -541,7 +541,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		String description =  ID +","+parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids + ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten + "\n";
+				+ death + ","+ matForKids ;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
 		return description;
 	}
 	
@@ -602,8 +602,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.speed = speed;
 	}
 	
-	public void setEaten(int eaten) {
-		this.eaten = eaten;
+	public void setEatenBy(int eaten) {
+		this.eaten_by = eaten;
 	}
 
 

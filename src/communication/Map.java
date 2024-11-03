@@ -71,8 +71,13 @@ public class Map {
 			fb = null;
 
 			//csv file header
-			String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath, matForKids,"
-					+ "luminosity,warm,loud,smelly,electric,eaten\n";
+			/*
+			String description =  ID +","+parentID+","+birthDate+","+life+","
+				+ speed+","+maxEnergy+","+ getKidEnergy()+","
+				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
+				+ death + ","+ matForKids ;
+			 */
+			String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 			try {
 				summaryWriter.append(str);
 				summaryWriter.flush();
@@ -87,7 +92,23 @@ public class Map {
 			predationWriter = fb_predation.getFileWriter();
 			fb_predation = null;
 
-			String header_predation = "t,pred_id,prey_id,r_pred,g_pred,b_pred,r_prey,g_prey,b_prey\n";
+			/*
+			String description =  ID +","+parentID+","+birthDate+","+life+","
+				+ speed+","+maxEnergy+","+ getKidEnergy()+","
+				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
+				+ death + ","+ matForKids ;
+			 */
+			String header_predation = "t, pred_id," +
+					"pred_parent, pred_parent, pred_created, pred_lifeSpan," +
+					"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
+					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids" +
+					"prey_id,"+
+					"prey_parent, prey_parent, prey_created, prey_lifeSpan," +
+					"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
+					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids" +
+					"\n";
+
+
 			try {
 				predationWriter.append(header_predation);
 				predationWriter.flush();
@@ -151,7 +172,6 @@ public class Map {
             double[] position = creature.getPosition();
         	int numberActions = 0;
 
-            
             if(!alive){
             	remove.add(creature);
             } else{
@@ -318,7 +338,7 @@ public class Map {
 						//mlog.say("total "+ c.creatures.get(predator).energy);
 						//record prey as dead
 						prey.setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
-						prey.setEaten(1);
+						prey.setEatenBy(predator_id);
 						predator.setBorderColor(Color.black);
 					}
 					// only save successful predation
@@ -327,9 +347,14 @@ public class Map {
 						if(Constants.uniformDouble()<0.1){
 							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-							String str = time + "," + ei_pred.getID() +  "," + ei_prey.getID() + ","
-									       + ei_pred.color.getRed() + "," + ei_pred.color.getGreen() + "," + ei_pred.color.getBlue() + ","
-									       + ei_prey.color.getRed() + "," + ei_prey.color.getGreen() + "," + ei_prey.color.getBlue() + "\n";
+							/*
+								String header_predation = "t, pred_id, prey_id," +
+								"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
+								"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids," +
+								"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
+								"prey_pgmDeath, prey_matForKids\n";
+							 */
+							String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
 							try {
 								predationWriter.append(str);
 								predationWriter.flush();

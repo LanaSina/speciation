@@ -60,7 +60,7 @@ public class Constants {
 	/** cost of being alive */
 	public static final double StepCost = 0.01;//0.002
 	/** cost of having sensors*/
-	public static final double SensorCost = 0.5;//0.2;
+	public static final double SensorCost = 0.2;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
 	public static final double ErrorCost = 0.02;
 	/** energy iput into system */
@@ -80,7 +80,7 @@ public class Constants {
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = true;
-	public static boolean SavePredation = true;
+	public static boolean SavePredation = false; // header and data do not match
 
 
 	/**

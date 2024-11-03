@@ -27,7 +27,7 @@ public interface Individual extends GraphicalComponent {
 	public double getLoud();
 	public double getSmelly();
 	public double getElectric();
-	public void setEaten(int i);
+	public void setEatenBy(int i);
 	public boolean update(LinkedList<Individual> babies, int time, double transparency);
 	public void setCellTransparency(double transparency);
 }

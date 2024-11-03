@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "trees/_good-2024_10_16_15_49" 
+folder = "2024_11_03_14_47" 
 
 # honestly this one seems to be the best even if the video is not great
 # folder = "/Users/lana/Desktop/prgm/old/oee-old-01/0_OEE/2015_10_05_01_19"
@@ -170,7 +170,7 @@ Read predation data
 
 ```{r}
 
-folder = "2024_11_03_13_26" 
+folder = "2024_11_03_14_47" 
 fileName = paste(base_folder, folder,"predation.csv",sep="/")
 
 interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE)
@@ -183,10 +183,13 @@ l = length(interactions$r_pred)
 interactions$int_id = c(1:l)
 
 # subset
-late_interactions = subset(interactions, t>50500)
+sample_vector=c(1:l)
+the_sample = sample(sample_vector, 30000, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+sub_interactions = interactions[the_sample,]
 
-colors_pred =  rgb(late_interactions$r_pred, late_interactions$g_pred, late_interactions$b_pred, maxColorValue=255)
-colors_prey =  rgb(late_interactions$r_prey, late_interactions$g_prey, late_interactions$b_prey, maxColorValue=255)
+colors_pred =  rgb(sub_interactions$r_pred, sub_interactions$g_pred, sub_interactions$b_pred, maxColorValue=255)
+colors_prey =  rgb(sub_interactions$r_prey, sub_interactions$g_prey, sub_interactions$b_prey, maxColorValue=255)
 ```
 
 
@@ -199,6 +202,30 @@ points(x = interactions$int_id, y = rep(0, l), col = colors_prey)
 Divide predators in color clusters
 
 ```{r}
+# plot predators
+plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_pred)
+
+plot(late_interactions$g_prey, late_interactions$b_prey, col = colors_prey)
+
+# plot preys as function of predators
+plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
+
+```
+
+```{r}
+plot(sub_interactions$pred_id, sub_interactions$prey_id)
+```
+
+
+
+```{r}
+# subset
+late_interactions = subset(interactions, t>45000 & t<45500)
+
+colors_pred =  rgb(late_interactions$r_pred, late_interactions$g_pred, late_interactions$b_pred, maxColorValue=255)
+colors_prey =  rgb(late_interactions$r_prey, late_interactions$g_prey, late_interactions$b_prey, maxColorValue=255)
+
+
 # plot predators
 plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_pred)
 
