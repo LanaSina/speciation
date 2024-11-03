@@ -80,7 +80,7 @@ public class Constants {
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = true;
-	public static boolean SavePredation = false; // header and data do not match
+	public static boolean SavePredation = true; // header and data do not match
 
 
 	/**

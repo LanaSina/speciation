@@ -99,11 +99,11 @@ public class Map {
 				+ death + ","+ matForKids ;
 			 */
 			String header_predation = "t, pred_id," +
-					"pred_parent, pred_parent, pred_created, pred_lifeSpan," +
+					"pred_parent, pred_created, pred_lifeSpan," +
 					"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
-					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids" +
+					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids," +
 					"prey_id,"+
-					"prey_parent, prey_parent, prey_created, prey_lifeSpan," +
+					"prey_parent, prey_created, prey_lifeSpan," +
 					"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
 					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids" +
 					"\n";
@@ -392,7 +392,7 @@ public class Map {
 					if (!creature.isLight() & !creature.parentIsLight()) {
 						//write down info
 						// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
-						String str = creature.stringDesc();
+						String str = creature.stringDesc() + "\n";
 						//mlog.say(str);
 						try {
 							summaryWriter.append(str);

@@ -316,10 +316,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		int blue = kidEnergy*255/10;//13
 		if(blue>255) blue = 255; if(green<0) green =0;
 		//blue = 255 - blue;*/
-		int red = (int) ((speed*1.0/Constants.SpeedMax)*255 +0.5);
-		double d = min(1, (death*1.0/500));
-		int green = (int) (d*255 +0.5);
-		int blue = (int) ((maxEnergy*1.0/Constants.EnergyMax)*255 +0.5);
+		int green = (int) ((speed*1.0/Constants.SpeedMax)*255 +0.5);
+		double d = min(1, (death*1.0/200));
+		int blue = (int) (d*255 +0.5);
+		d = min(1, (maxEnergy*1.0/200));
+		int red = (int) (d*255 +0.5);
 		color = new Color(red,green,blue);
 	}
 
