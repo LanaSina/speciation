@@ -163,7 +163,7 @@ public class Map {
 		ArrayList<Integer> interaction = new ArrayList<Integer>();
 
 		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
-		Collections.shuffle(shuffled_creatures_arr);
+		Collections.shuffle(shuffled_creatures_arr, Constants.rand);
 
 		for (int temp_i = 0; temp_i < size; temp_i++) {
 			int i = shuffled_creatures_arr.get(temp_i);
