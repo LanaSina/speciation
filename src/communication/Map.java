@@ -13,7 +13,6 @@ import startup.Constants;
 import visualization.Display;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.min;
 
 public class Map {
 	MyLog mlog = new MyLog("map", true);
@@ -288,7 +287,7 @@ public class Map {
         			moving.add(creature);
         			//costs energy
         			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - speed*Constants.SpeedCost;// - numberActions*Constants.ActionCost;
+        				double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
         		}
@@ -337,10 +336,10 @@ public class Map {
 			double ePred = predator.getEnergy();
 			double ePrey = prey.getEnergy();
 			//wound predator
-			double energy = ePred-abs(ePrey*Constants.ErrorCost);
+			double energy = ePred-abs(ePrey*cst_error_cost);
 			predator.setEnergy(energy);
 			//wound prey
-			energy = ePrey-abs(ePred*Constants.ErrorCost);//*3
+			energy = ePrey-abs(ePred*cst_error_cost);//*3
 			prey.setEnergy(energy);
 			predator.setBorderColor(Color.red);
 			prey.setBorderColor(Color.gray);
@@ -495,28 +494,6 @@ public class Map {
 			return r;
 		}
 
-		public void changeProperties(int action) {
-			switch (action) {
-			case Constants.LessTransparency:{
-				changeProperties(-0.01,0);
-				break;
-			}
-			case Constants.MoreTransparency:{
-				changeProperties(0.01,0);
-				break;
-			}
-			case Constants.LessDensity:{
-				changeProperties(0,-0.01);
-				break;
-			}
-			case Constants.MoreDensity:{
-				changeProperties(0,0.01);
-				break;
-			}
-			default:
-				break;
-			}
-		}
 		/**
 		 * 
 		 * @param t transparency
