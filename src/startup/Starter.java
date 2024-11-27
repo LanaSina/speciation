@@ -9,6 +9,18 @@ import communication.Map;
 import communication.MyLog;
 import visualization.Display;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
+
 /**
  * @author lana
  * This class is the main class.
@@ -22,8 +34,56 @@ public class Starter {
 	public static void main(String[] args) {
 
 		MyLog mlog = new MyLog("starter",true);
-		
-		String dname = "draw coarse";
+
+		//get current date
+		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+		Date date = new Date();
+		String strDate = dateFormat.format(date);
+		String dataFolderName = Constants.DataPath + "/" + strDate + "/";
+
+		//first create directory
+		File theDir = new File(dataFolderName);
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+			mlog.say("creating directory: " + dataFolderName);
+			boolean result = false;
+
+			try{
+				theDir.mkdir();
+				result = true;
+			}
+			catch(SecurityException se){
+				//handle it
+			}
+			if(result) {
+				System.out.println("DIR created");
+			}
+		}
+
+		// move config file (todo: path in constants)
+		Path src = Paths.get("src/config.properties");
+		Path target = Paths.get(dataFolderName+"config.properties");
+		try {
+			Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		mlog.say("properties copied to " + dataFolderName);
+
+
+		// read configuration file
+		Properties properties = new Properties();
+		FileInputStream propsFile = null;
+		try {
+			propsFile = new FileInputStream("src/config.properties");
+			properties.load(propsFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		String dname = properties.getProperty("sim_name");
+		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
+
 		Display d = new Display(dname);
 		int lightLimit = 30;//30
 		//islands
@@ -34,7 +94,7 @@ public class Starter {
 		
 		
 		//worldmap		
-		Map map = new Map(Constants.GridMax,d);
+		Map map = new Map(Constants.GridMax,d, dataFolderName);
 		
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){

@@ -1,6 +1,7 @@
 package communication;
 
 import java.awt.Color;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -29,7 +30,22 @@ public class Map {
 	FileWriter predationWriter;
 	/** simulation time*/
 	int time = 0;
-	
+
+	// global contstants
+	double cst_mut_factor;
+	double cst_speed_factor;
+	int cst_speed_max;
+	double cst_light_birth_dst;
+	double cst_birth_dst;
+	int cst_grid_max;
+	int cst_energy_max;
+	double cst_speed_cost;
+	double cst_sensor_cost;
+	double cst_error_cost;
+	int cst_free_energy;
+	int cst_sensor_precision;
+	int cst_max_number_actions;
+	double cst_energy_cost_factor;
 	
 	//for updates
 	//for new ones
@@ -40,8 +56,35 @@ public class Map {
 	LinkedList<Individual> moving;
 	LinkedList<Double> newPositions;
 	
-	public Map(int mapSize, Display d){
+	public Map(int mapSize, Display d, String dataFolderName){
 		this.d  = d;
+
+		// read configuration file
+		Properties properties = new Properties();
+		FileInputStream propsFile = null;
+		try {
+			propsFile = new FileInputStream("src/config.properties");
+			properties.load(propsFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		cst_mut_factor = Double.parseDouble(properties.getProperty("mut_factor"));
+		cst_speed_factor = Double.parseDouble(properties.getProperty("mut_factor"));
+		cst_speed_max = Integer.parseInt(properties.getProperty("speed_max"));
+		cst_light_birth_dst = Double.parseDouble(properties.getProperty("light_birth_dst"));
+		cst_birth_dst = Double.parseDouble(properties.getProperty("birth_dst"));
+		cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
+		cst_energy_max = Integer.parseInt(properties.getProperty("energy_max"));
+		cst_speed_cost = Double.parseDouble(properties.getProperty("speed_cost"));
+		cst_sensor_cost = Double.parseDouble(properties.getProperty("sensor_cost"));
+		cst_error_cost = Double.parseDouble(properties.getProperty("error_cost"));
+		cst_free_energy = Integer.parseInt(properties.getProperty("free_energy"));
+		cst_sensor_precision = Integer.parseInt(properties.getProperty("sensor_precision"));
+		cst_max_number_actions = Integer.parseInt(properties.getProperty("max_number_actions"));
+		cst_energy_cost_factor = Double.parseDouble(properties.getProperty("energy_cost_factor"));
+
+
 		size = mapSize;		
 		//create map
 		map = new Cell[size][size];
@@ -62,7 +105,7 @@ public class Map {
 		//writing data
 		if(Constants.Save) {
 			// individuals info
-			FileBuilder fb = new FileBuilder(Constants.SummaryFileName);
+			FileBuilder fb = new FileBuilder(dataFolderName, Constants.SummaryFileName);
 			summaryWriter = fb.getFileWriter();
 			fb = null;
 
@@ -84,7 +127,7 @@ public class Map {
 		}
 		if(Constants.SavePredation) {
 			// predation info
-			FileBuilder fb_predation = new FileBuilder("predation");
+			FileBuilder fb_predation = new FileBuilder(dataFolderName, "predation");
 			predationWriter = fb_predation.getFileWriter();
 			fb_predation = null;
 
@@ -155,7 +198,7 @@ public class Map {
 		if(size==0){
 			return;
 		}
-	
+
 		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
 		Collections.shuffle(shuffled_creatures_arr, Constants.rand);
 
@@ -319,7 +362,6 @@ public class Map {
 						//write down info
 						// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
 						String str = creature.stringDesc() + "\n";
-						//mlog.say(str);
 						try {
 							summaryWriter.append(str);
 							summaryWriter.flush();
