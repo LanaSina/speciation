@@ -309,7 +309,7 @@ public class Map {
 		for(int i=0;i<interacting.size();i++){
 			randomList.add(i);
 		}
-		Collections.shuffle(randomList);
+		Collections.shuffle(randomList, Constants.rand);
 		
 		for(int j=0;j<randomList.size();j++){
 			int i = randomList.get(j);
