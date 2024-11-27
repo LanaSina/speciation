@@ -3,10 +3,9 @@ package communication;
 import java.awt.Color;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import animals.*;
 import startup.Constants;
@@ -162,12 +161,16 @@ public class Map {
 		ArrayList<Integer> interacting = new ArrayList<Integer>();
 		ArrayList<Integer> interactedOn = new ArrayList<Integer>();
 		ArrayList<Integer> interaction = new ArrayList<Integer>();
-		
-		for (int i = 0; i < size; i++) {
+
+		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
+		Collections.shuffle(shuffled_creatures_arr);
+
+		for (int temp_i = 0; temp_i < size; temp_i++) {
+			int i = shuffled_creatures_arr.get(temp_i);
+
 			Individual creature = c.creatures.get(i);
             boolean alive = creature.update(babies, time, c.transparency);
             double[] position = creature.getPosition();
-        	int numberActions = 0;
 
             if(!alive){
             	remove.add(creature);
@@ -175,12 +178,9 @@ public class Map {
             	double np[] = new double[2];
 	            boolean moved = false;
 				double speed = creature.getSpeed();
-	            //double modSpeed = 0;
-	            		
+
             	if(!creature.isLight()){
 	            	//move
-
-	            	//mlog.say("tp "+c.transparency);
 	        		for(int j=0;j<2;j++){
 	        			if(generateBool()){
 	        				np[j]= position[j]+(speed*Constants.SpeedFactor);//(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
@@ -233,21 +233,14 @@ public class Map {
 		                			if(m==i){
 		                				continue;
 		                			}
-		                			
 
-		                			//based on perception of cell properties
-		                			//value is integer between 0:10
-		                			// double ind_prop = c.getProp(k);
-									// direct perception
 									double ind_prop = cr2.getProperties()[k];
 		                			
-		                			//if( (value == (int) (Constants.PropGrain*ind_prop)) ){
 									if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
 		                				//record interaction
 		                				interacting.add(i);
 		                				interactedOn.add(m);
 		                				interaction.add(act);
-		                				numberActions++;
 		                			}//*/
 		                		}
 							} else if (act>5) {
