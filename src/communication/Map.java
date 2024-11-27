@@ -158,9 +158,9 @@ public class Map {
 		
 		//if no one here add light if needed
 		//interactions: max is everyone interacts with everyone
-		ArrayList<Integer> interacting = new ArrayList<Integer>();
-		ArrayList<Integer> interactedOn = new ArrayList<Integer>();
-		ArrayList<Integer> interaction = new ArrayList<Integer>();
+		// ArrayList<Integer> interacting = new ArrayList<Integer>();
+		// ArrayList<Integer> interactedOn = new ArrayList<Integer>();
+		// ArrayList<Integer> interaction = new ArrayList<Integer>();
 
 		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
 		Collections.shuffle(shuffled_creatures_arr, Constants.rand);
@@ -238,10 +238,13 @@ public class Map {
 		                			
 									if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
 		                				//record interaction
-		                				interacting.add(i);
+		                				/* interacting.add(i);
 		                				interactedOn.add(m);
-		                				interaction.add(act);
-		                			}//*/
+		                				interaction.add(act);*/
+
+										tryEat(creature, cr2);
+
+									}//*/
 		                		}
 							} else if (act>5) {
 								
@@ -265,7 +268,7 @@ public class Map {
 		
 		
 		//sort out the interactions (order should be random)
-		ArrayList<Integer> randomList = new ArrayList<Integer>();
+		/*ArrayList<Integer> randomList = new ArrayList<Integer>();
 		for(int i=0;i<interacting.size();i++){
 			randomList.add(i);
 		}
@@ -285,18 +288,18 @@ public class Map {
 				int prey_id = interactedOn.get(i);
 				tryEat(predator_id, prey_id, c, interacting, interactedOn);
 			}
-		}
+		}*/
 	}
 
-	private void tryEat(int predator_id, int prey_id, Cell c, ArrayList<Integer> interacting, ArrayList<Integer> interactedOn) {
-		Individual prey = c.creatures.get(prey_id);
-		Individual predator = c.creatures.get(predator_id);
+	private void tryEat(Individual predator, Individual prey) {
+		// Individual prey = c.creatures.get(prey_id);
+		// Individual predator = c.creatures.get(predator_id);
 
 		double ok = predator.getEnergy() - prey.getEnergy();
 		if(ok>=0){
 			//delete prey from arrays
-			Collections.replaceAll(interacting, prey_id,-1);
-			Collections.replaceAll(interactedOn, prey_id,-1);
+			/*Collections.replaceAll(interacting, prey_id,-1);
+			Collections.replaceAll(interactedOn, prey_id,-1);*/
 			//give energy to predator
 			double e = prey.getEnergy();
 			if(e>0){
@@ -305,7 +308,7 @@ public class Map {
 				//mlog.say("total "+ c.creatures.get(predator).energy);
 				//record prey as dead
 				prey.setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
-				prey.setEatenBy(predator_id);
+				prey.setEatenBy(predator.getID());
 				predator.setBorderColor(Color.black);
 			}
 			// only save successful predation

@@ -30,4 +30,5 @@ public interface Individual extends GraphicalComponent {
 	public void setEatenBy(int i);
 	public boolean update(LinkedList<Individual> babies, int time, double transparency);
 	public void setCellTransparency(double transparency);
+	public int getID();
 }
