@@ -94,31 +94,18 @@ public class Starter {
 		
 		
 		//worldmap		
-		Map map = new Map(Constants.GridMax,d, dataFolderName);
+		Map map = new Map(cst_grid_max,d, dataFolderName);
 		
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){
 			for(int j=0; j<lightLimit; j++){
 				int x = i+of;
 				int y = j+of;
-								
-				/*if(Constants.uniformDouble()<coarse){
-					
-					/for(int k=0; k<isle_size; k++){
-						for(int ll=0; ll<isle_size; ll++){
-							int x = i+k+of;
-							int y = j+ll+of;
-							if(x<Constants.GridMax & y<Constants.GridMax){*/
-								int id = map.incrementGlobalID();
-								Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);//IndividualV1(i+of,j+of,id,0,0, -1);// EmbodiedIndividual(i+of,j+of,id,0,0, -1);
-								map.addIndividual(x, y, l);
-								d.addComponent(l);	
-							/*}
-						}
-					}
-					
-				}*/
-				
+
+				int id = map.incrementGlobalID();
+				Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
+				map.addIndividual(x, y, l);
+				d.addComponent(l);
 			}
 		}
 

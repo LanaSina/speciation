@@ -70,7 +70,7 @@ public class Map {
 		}
 
 		cst_mut_factor = Double.parseDouble(properties.getProperty("mut_factor"));
-		cst_speed_factor = Double.parseDouble(properties.getProperty("mut_factor"));
+		cst_speed_factor = Double.parseDouble(properties.getProperty("speed_factor"));
 		cst_speed_max = Integer.parseInt(properties.getProperty("speed_max"));
 		cst_light_birth_dst = Double.parseDouble(properties.getProperty("light_birth_dst"));
 		cst_birth_dst = Double.parseDouble(properties.getProperty("birth_dst"));
@@ -220,12 +220,12 @@ public class Map {
 	            	//move
 	        		for(int j=0;j<2;j++){
 	        			if(generateBool()){
-	        				np[j]= position[j]+(speed*Constants.SpeedFactor);//(creature.getSpeed()*Constants.SpeedFactor*c.density*c.transparency);
+	        				np[j]= position[j]+(speed*cst_speed_factor);
 	        			}else{
-	        				np[j] = position[j]-(speed*Constants.SpeedFactor);
+	        				np[j] = position[j]-(speed*cst_speed_factor);
 	        			}
 	        			if(np[j]<0) np[j]=0;
-	        			if(np[j]>=Constants.GridMax-1) np[j] = Constants.GridMax-2; //something wrong but what
+	        			if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
 	        			if(np[j] != position[j]){
 	        				moved = true;
 	        			}

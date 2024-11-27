@@ -19,21 +19,10 @@ public class Constants {
 	/** equivalent to refresh rate */
 	public static int refresh_rate = 20;//500
 
-
-	
 	/** grid limits*/
-	public static final int GridMax = 50;// 10+40+10;//20+20+10+(security)10 
+	public static final int GridMax = 50;
 	public static final int GridStep = 20;
-	
-	/** actions*/
-	public static final int ActEat = 0;
-	public static final int ActMate = 1;
-	
-	public static final int MoveUp = 2;
-	public static final int MoveDown = 3;
-	public static final int MoveRigh = 4;
-	public static final int MoveLeft = 5;
-	
+
 	public static final int MoreTransparency = 6;
 	public static final int LessTransparency = 7;
 	public static final int MoreDensity = 8;
@@ -42,13 +31,9 @@ public class Constants {
 	public static final int ActionTypes = 10;
 
 
-
-	
 	// factors on property values
 	/** mutation factor*/
 	public static final double MutFactor = 0.01;
-	/** speed*/
-	public static final double SpeedFactor = 0.02;//0.02
 	/** absolute max value*/
 	public static final int SpeedMax= 100;
 	/** absolute max value*/
