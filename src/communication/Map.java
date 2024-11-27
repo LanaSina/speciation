@@ -384,6 +384,9 @@ public class Map {
 
 	public void updateMoved(){
 		time++;
+		if (time%1000==0){
+			mlog.say("step " + time);
+		}
 		
 		//update dead
 		for(int i=0; i<remove.size();i++){

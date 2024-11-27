@@ -10,14 +10,14 @@ import java.util.Random;
  * Class containing all the constants variable and generic functions.
  */
 public class Constants {
-	public static Random rand = new Random(100);
+	public static Random rand = new Random(5);
 
 	public static boolean draw = true;
 	/** percentage of elements drawn*/
 	public static double draw_coarse = 1;
 	
 	/** equivalent to refresh rate */
-	public static int refresh_rate = 200;//500
+	public static int refresh_rate = 20;//500
 
 
 	
