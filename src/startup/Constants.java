@@ -39,16 +39,12 @@ public class Constants {
 	/** absolute max value*/
 	public static final int EnergyMax = 1000;
 	/** coarse graining of property values*/
-	public static final int PropGrain = 100;
 
-	public static final double SpeedCost= 0.02;//0.2
 	/** cost of being alive */
 	public static final double StepCost = 0.1;//0.002
 	/** cost of having sensors*/
 	public static final double SensorCost = 0.2;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
-	public static final double ErrorCost = 0.02;
-	/** energy iput into system */
 	public static final double FreeEnergy =3;//5
 	
 	/** how far the kids are from the parents*/
@@ -56,12 +52,8 @@ public class Constants {
 	/** how far the kids are from the parents*/
 	public static final double LightBirthDistance = 1.5;
 
-	
-	public static final int EnergyTypes = 2;
-	
 	/** folder where data file will be recorded*/
 	public static String DataPath = "../new_data";
-	public static double ActionCost = 0.5;
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = true;
