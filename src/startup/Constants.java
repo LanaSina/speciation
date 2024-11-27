@@ -10,8 +10,8 @@ import java.util.Random;
  * Class containing all the constants variable and generic functions.
  */
 public class Constants {
-	/** update graphics */
-	//TODO make a better UI!
+	public static Random rand = new Random(100);
+
 	public static boolean draw = true;
 	/** percentage of elements drawn*/
 	public static double draw_coarse = 1;
@@ -97,11 +97,6 @@ public class Constants {
 	 * @see java.util.Random#nextInt(int)
 	 */
 	public static double uniformDouble(double min, double max) {
-
-	    // NOTE: Usually this should be a field rather than a method
-	    // variable so that it is not re-seeded every call.
-	    Random rand = new Random();
-
 	    // nextInt is normally exclusive of the top value,
 	    // so add 1 to make it inclusive
 	    double randomNum = min + (max - min) * rand.nextDouble();
@@ -117,10 +112,6 @@ public class Constants {
 	public static double uniformDouble() {
 		double min = 0;
 		double max = 1;
-	    // NOTE: Usually this should be a field rather than a method
-	    // variable so that it is not re-seeded every call.
-	    Random rand = new Random();
-
 	    // nextInt is normally exclusive of the top value,
 	    // so add 1 to make it inclusive
 	    double randomNum = min + (max - min) * rand.nextDouble();
