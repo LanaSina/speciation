@@ -13,6 +13,7 @@ import startup.Constants;
 import visualization.Display;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 public class Map {
 	MyLog mlog = new MyLog("map", true);
@@ -56,10 +57,6 @@ public class Map {
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				map[i][j] = new Cell();
-//				if(j<size/2){
-//					map[i][j].ntransparency = 0.1;
-//				}
-				//	map[i][j].ndensity = 0.9;
 			}
 		}
 		
@@ -237,22 +234,7 @@ public class Map {
 		                				continue;
 		                			}
 		                			
-		                			//based on direct perception of other creatures properties
-		                			/*int[] properties = cr2.getProperties();
-		                			if(value == properties[k]){
-		                				if(Constants.uniformDouble()>0.6){
-		                					mlog.say("eat; property " + prop.data + " value "+value);
-		                				}
-		                				//record interaction
-		                				interacting.add(i);
-		                				interactedOn.add(m);
-		                				//get random action
-		                				ArrayList<Node> actions = pChildren.get(l).getChildren();
-		    							int ia = (int) (Constants.uniformDouble(0, actions.size()-1)+0.5);
-		    							int a = actions.get(ia).data;
-		                				interaction.add(a);
-		                			}//*/
-		                			
+
 		                			//based on perception of cell properties
 		                			//value is integer between 0:10
 		                			// double ind_prop = c.getProp(k);
@@ -269,20 +251,6 @@ public class Map {
 		                			}//*/
 		                		}
 							} else if (act>5) {
-								//niche building
-								/*double ind_prop = c.getProp(k);
-	                			if( (value == (int) (Constants.PropGrain*ind_prop)) ){
-	                				c.changeProperties(act);
-	                				numberActions++;
-	                			}*/
-								//bad way of dealing with this
-								//7 = n phys prop
-//								int kk = (int) ((k/5.0)+0.5);
-//								double phy_prop = c.getPhy(kk);
-//								if( (value != (int) (Constants.PropGrain*phy_prop)) ){
-//									c.changeProperties(act);
-//	                				numberActions++;
-//								}
 								
 							}
 						}
@@ -295,7 +263,6 @@ public class Map {
         			moving.add(creature);
         			//costs energy
         			if(!creature.isLight()){
-        				//double modSpeed = shiftMax(creature.getSpeed()*1.0/Constants.SpeedMax, c.density*c.transparency);
         				double energy = creature.getEnergy() - speed*Constants.SpeedCost;// - numberActions*Constants.ActionCost;
         				creature.setEnergy(energy);
         			}
@@ -323,31 +290,37 @@ public class Map {
 			if(interaction.get(i) == Constants.ActEat){
 				int predator_id = interacting.get(i);
 				int prey_id = interactedOn.get(i);
-				Individual prey = c.creatures.get(prey_id);
-				Individual predator = c.creatures.get(predator_id);
-				//are energies compatible with this?
-				double ok = predator.getEnergy() - prey.getEnergy();
-				if(ok>=0){					
-					//delete prey from arrays
-					Collections.replaceAll(interacting, prey_id,-1);
-					Collections.replaceAll(interactedOn, prey_id,-1);
-					//give energy to predator
-					double e = prey.getEnergy();
-					if(e>0){
-						double energy = predator.getEnergy() + e;
-						predator.setEnergy(energy);
-						//mlog.say("total "+ c.creatures.get(predator).energy);
-						//record prey as dead
-						prey.setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
-						prey.setEatenBy(predator_id);
-						predator.setBorderColor(Color.black);
-					}
-					// only save successful predation
-					if(Constants.SavePredation){
-						// reduce file size
-						if(Constants.uniformDouble()<0.01){
-							EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
-							EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
+				tryEat(predator_id, prey_id, c, interacting, interactedOn);
+			}
+		}
+	}
+
+	private void tryEat(int predator_id, int prey_id, Cell c, ArrayList<Integer> interacting, ArrayList<Integer> interactedOn) {
+		Individual prey = c.creatures.get(prey_id);
+		Individual predator = c.creatures.get(predator_id);
+
+		double ok = predator.getEnergy() - prey.getEnergy();
+		if(ok>=0){
+			//delete prey from arrays
+			Collections.replaceAll(interacting, prey_id,-1);
+			Collections.replaceAll(interactedOn, prey_id,-1);
+			//give energy to predator
+			double e = prey.getEnergy();
+			if(e>0){
+				double energy = predator.getEnergy() + e;
+				predator.setEnergy(energy);
+				//mlog.say("total "+ c.creatures.get(predator).energy);
+				//record prey as dead
+				prey.setEnergy(0); //if(c.creatures.get(prey).color == Color.black) mlog.say("predator confusion 1");
+				prey.setEatenBy(predator_id);
+				predator.setBorderColor(Color.black);
+			}
+			// only save successful predation
+			if(Constants.SavePredation){
+				// reduce file size
+				if(Constants.uniformDouble()<0.01){
+					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
+					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
 							/*
 								String header_predation = "t, pred_id, prey_id," +
 								"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
@@ -355,32 +328,29 @@ public class Map {
 								"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
 								"prey_pgmDeath, prey_matForKids\n";
 							 */
-							String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
-							try {
-								predationWriter.append(str);
-								predationWriter.flush();
-							} catch (IOException ep) {
-								// TODO Auto-generated catch block
-								ep.printStackTrace();
-							}
-						}
+					String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
+					try {
+						predationWriter.append(str);
+						predationWriter.flush();
+					} catch (IOException ep) {
+						// TODO Auto-generated catch block
+						ep.printStackTrace();
 					}
-				} else if(ok<=0){
-					double ePred = predator.getEnergy();
-					double ePrey = prey.getEnergy();
-					//wound predator
-					double energy = ePred-abs(ePrey*Constants.ErrorCost);
-					predator.setEnergy(energy);
-					//wound prey 
-					energy = ePrey-abs(ePred*Constants.ErrorCost);//*3
-					prey.setEnergy(energy);
-					predator.setBorderColor(Color.red);
-					prey.setBorderColor(Color.gray);
 				}
 			}
+		} else if(ok<=0){
+			double ePred = predator.getEnergy();
+			double ePrey = prey.getEnergy();
+			//wound predator
+			double energy = ePred-abs(ePrey*Constants.ErrorCost);
+			predator.setEnergy(energy);
+			//wound prey
+			energy = ePrey-abs(ePred*Constants.ErrorCost);//*3
+			prey.setEnergy(energy);
+			predator.setBorderColor(Color.red);
+			prey.setBorderColor(Color.gray);
 		}
 	}
-
 
 	public void updateMoved(){
 		time++;
@@ -559,19 +529,7 @@ public class Map {
 		 * @param d density
 		 */
 		private void changeProperties(double t, double d){
-			/*ntransparency+=t;
-			ndensity+=d;
-			
-			if(ntransparency<0){
-				ntransparency = 0;
-			} else if (ntransparency>1){
-				ntransparency = 1;
-			}
-			if(ndensity<0){
-				ndensity = 0;
-			} else if (ndensity>1){
-				ndensity = 1;
-			}*/
+
 		}
 		
 		
@@ -602,12 +560,7 @@ public class Map {
 				electric += ind.getElectric();
 			}
 			
-			/*luminosity = luminosity*transparency/creatures.size();
-			sound = (sound * density)/creatures.size();
-			smell = smell*(1-transparency)/creatures.size();
-			temperature = temperature* (1-density)/creatures.size();
-			electric = electric*density*transparency/creatures.size();*/
-			
+
 			luminosity = luminosity/creatures.size();
 			sound = sound/creatures.size();
 			smell = smell/creatures.size();
