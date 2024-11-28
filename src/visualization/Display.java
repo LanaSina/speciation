@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import startup.Constants;
-import animals.IndividualV1;
 
 /**
  * Graphic panel

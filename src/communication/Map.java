@@ -205,7 +205,10 @@ public class Map {
 			int i = shuffled_creatures_arr.get(temp_i);
 
 			Individual creature = c.creatures.get(i);
-            boolean alive = creature.update(babies, time, c.transparency);
+            boolean alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
+					cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
+					cst_sensor_cost, cst_free_energy, cst_energy_cost_factor
+			);
             double[] position = creature.getPosition();
 
             if(!alive){

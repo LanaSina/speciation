@@ -125,7 +125,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 * @param glID id of this one
 	 * @param date birth date
 	 */
-	EmbodiedIndividual(EmbodiedIndividual in, int glID, int date){
+	EmbodiedIndividual(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+					   double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
+	){
 		copy(in);
 		if(in.isLight) parentIsLight = true;
 		
@@ -156,23 +158,23 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			j = -1;
 		}		
 		if(parentIsLight){
-			position[0] = (in.position[0]+i*Constants.LightBirthDistance*Constants.uniformDouble());
-			position[1] = (in.position[1]+j*Constants.LightBirthDistance*Constants.uniformDouble());
+			position[0] = (in.position[0]+i*cst_light_birth_dst*Constants.uniformDouble());
+			position[1] = (in.position[1]+j*cst_light_birth_dst*Constants.uniformDouble());
 		} else {
-			position[0] = (in.position[0]+i*Constants.BirthDistance*Constants.uniformDouble());
-			position[1] = (in.position[1]+j*Constants.BirthDistance*Constants.uniformDouble());
+			position[0] = (in.position[0]+i*birth_dst*Constants.uniformDouble());
+			position[1] = (in.position[1]+j*birth_dst*Constants.uniformDouble());
 		}
 		
 		for(int k=0;k<2;k++){
 			if(position[k]<0) position[k]=0;
-			if(position[k]>=Constants.GridMax-1) position[k] = Constants.GridMax-2;
+			if(position[k]>=cst_grid_max-1) position[k] = cst_grid_max-2;
 		}
 		
 		if(generateBool()){
 
 			double minMut = Constants.uniformDouble(-2, 2);
 			
-			double plus = Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor);
+			double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
 			
 			//do this after too
 			properties[0] = speed;
@@ -186,16 +188,17 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			double bias = 0.6;
 			if(generateBool(bias)){
 				speed = (int)(speed+minMut);
+				// todo speed = check()
 				if(speed<0) speed = 0;
-				if(speed>Constants.SpeedMax) speed = Constants.SpeedMax;
+				if(speed>cst_speed_max) speed = cst_speed_max;
 				//break;
 			}
 			if(generateBool(bias)){
 				maxEnergy = (int)(maxEnergy+minMut);
 				if(maxEnergy<0){
 					maxEnergy = 0;
-				}else if (maxEnergy>Constants.EnergyMax) {
-					maxEnergy = Constants.EnergyMax;
+				}else if (maxEnergy>cst_energy_max) {
+					maxEnergy = cst_energy_max;
 				}
 			}
 			if(generateBool(bias)){
@@ -243,7 +246,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							value.data = (int) (Constants.uniformDouble(0, 4)+0.5);		
 						}*/
 						
-						value.data = (int) Constants.uniformDouble(0, Constants.EnergyMax);
+						value.data = (int) Constants.uniformDouble(0, cst_energy_max);
 						Node action = new Node();
 						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 						value.addChild(action);
@@ -316,7 +319,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		int blue = kidEnergy*255/10;//13
 		if(blue>255) blue = 255; if(green<0) green =0;
 		//blue = 255 - blue;*/
-		int green = (int) ((speed*1.0/Constants.SpeedMax)*255 +0.5);
+		int green = (int) (min(1,(speed*1.0/100))*255 +0.5);
 		double d = min(1, (death*1.0/200));
 		int blue = (int) (d*255 +0.5);
 		d = min(1, (maxEnergy*1.0/200));
@@ -324,16 +327,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		color = new Color(red,green,blue);
 	}
 
-	/**
-	 * creates from parents
-	 * @param p1
-	 * @param p2
-	 */
-//	Individual(Individual p1, Individual p2){
-//		
-//	}
+
 	
-	public boolean update(LinkedList<Individual> babies, int date, double transparency){
+	public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
+						  double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,
+						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor
+	){
 		life= life+1;
 		cellTransparency = transparency;
 		double effect = 0.5;
@@ -367,14 +366,16 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			int n = 0;
 			if(isLight){
 				while(energy-kidEnergy>0){//matForKids
-					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
+					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
+							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
 					babies.add(baby);
 					energy = energy-kidEnergy;
 					n++;
 				}
 			}else{
 				while( (n<getNKids())){//
-					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date);
+					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
+							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
 					babies.add(baby);
 					energy = energy-kidEnergy;//*(1-transparency*effect);
 					n++;
