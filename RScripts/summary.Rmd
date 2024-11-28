@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_11_27_15_26" # "2024_11_27_08_43"  
+folder = "2024_11_28_13_47"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)

@@ -313,7 +313,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
 						  double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,
-						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor
+						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor, double cst_step_cost
 	){
 		life= life+1;
 		cellTransparency = transparency;
@@ -325,8 +325,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		//mlog.say("se "+se);
 		if(!isLight){
 			energy = energy -
-					abs(Math.pow(se,1.2)*Constants.SensorCost)//*0.1
-					- abs(Constants.StepCost);///*maxEnergy);
+					abs(Math.pow(se,1.2)*cst_sensor_cost)//*0.1
+					- abs(cst_step_cost);///*maxEnergy);
 			if(life >= death){
 				energy = -1;
 			}
@@ -336,7 +336,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			}
 		} else {
 			//free energy into light
-			energy = energy + Constants.FreeEnergy;
+			energy = energy + cst_free_energy;
 		}
 		
 		if(energy>0 && energy>=matForKids){
