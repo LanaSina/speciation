@@ -22,8 +22,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	//general
 	public int speed = 0;
-	//total cost per unit
-	double speedCost = 3;
 	//death by being eaten
 	int eaten_by = -1;//1 = true;
 
@@ -54,9 +52,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	int nProperties = 7;//sum of above
 	int nPhysicalProperties = 5;
 	public int[] properties = new int[nProperties-1];
-	//energy lost per tour
-	//double stepCost = 0.3;
-	//for data writing
 	int ID;
 	int parentID;
 	private int firstAncestorID;
@@ -94,10 +89,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		//mlog.say("id " + ID);
 		birthDate = date;
 		
-		speed = 0; //1
-		//lifespan = 1;
+		speed = 0;
 		maxEnergy = 4;
-		energy = 3;//+(int)(Constants.uniformDouble(0,2)+0.5);//(unbiasing)//maxEnergy;
+		energy = 3;
 		isLight = true;
 		//mlog.say("--------------- IS LIGHT");
 		
@@ -228,23 +222,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							Node sensor = senses.get(s);	
 							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
 							int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
-
-//							if(value<0){
-//								value = 0;
-//							}else if (value>Constants.PropGrain) {
-//								value = Constants.PropGrain;
-//							}
 							sensor.data = value;
 						}
 					} else {
 						//create sensor. 
 						Node value = new Node();
-						/*int selfValue = properties[prop];
-						if(generateBool()){//cannibal
-							value.data = selfValue; //(int) (selfValue + Constants.uniformDouble(0, 4)+0.5)-2;		
-						} else {//0 to 4
-							value.data = (int) (Constants.uniformDouble(0, 4)+0.5);		
-						}*/
 						
 						value.data = (int) Constants.uniformDouble(0, cst_energy_max);
 						Node action = new Node();
@@ -342,26 +324,22 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
-//			energy = energy -
-//					abs(Math.pow(se,1.2)*Constants.SensorCost*(1-transparency*effect))
-//					- abs(Constants.StepCost*(1+transparency*effect));	//6*0.2//3*10
 			energy = energy -
 					abs(Math.pow(se,1.2)*Constants.SensorCost)//*0.1
-					- abs(Constants.StepCost);///*maxEnergy);	//6*0.2//3*10
-//			if(life == (int)(death*(1+transparency*effect) + 0.5)){
+					- abs(Constants.StepCost);///*maxEnergy);
 			if(life >= death){
 				energy = -1;
 			}
 			
-			if(energy>(maxEnergy)){//*(1+transparency*effect))){
-				energy = maxEnergy;//*(1+transparency*effect);
+			if(energy>(maxEnergy)){
+				energy = maxEnergy;
 			}
 		} else {
 			//free energy into light
 			energy = energy + Constants.FreeEnergy;
 		}
 		
-		if(energy>0 && energy>=matForKids){//(energy>=maxEnergy) & 
+		if(energy>0 && energy>=matForKids){
 			//add children to the map		
 			int n = 0;
 			if(isLight){

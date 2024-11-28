@@ -22,23 +22,8 @@ public class Constants {
 	/** grid limits*/
 	public static final int GridMax = 50;
 	public static final int GridStep = 20;
-
-	public static final int MoreTransparency = 6;
-	public static final int LessTransparency = 7;
-	public static final int MoreDensity = 8;
-	public static final int LessDensity = 9;
 	
 	public static final int ActionTypes = 10;
-
-
-	// factors on property values
-	/** mutation factor*/
-	public static final double MutFactor = 0.01;
-	/** absolute max value*/
-	public static final int SpeedMax= 100;
-	/** absolute max value*/
-	public static final int EnergyMax = 1000;
-	/** coarse graining of property values*/
 
 	/** cost of being alive */
 	public static final double StepCost = 0.1;//0.002
@@ -46,11 +31,6 @@ public class Constants {
 	public static final double SensorCost = 0.2;//0.2;
 	/**cost of making sensory errors, ratio of prey energy*/
 	public static final double FreeEnergy =3;//5
-	
-	/** how far the kids are from the parents*/
-	public static final double BirthDistance = 1.5;
-	/** how far the kids are from the parents*/
-	public static final double LightBirthDistance = 1.5;
 
 	/** folder where data file will be recorded*/
 	public static String DataPath = "../new_data";
