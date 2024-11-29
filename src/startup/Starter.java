@@ -84,15 +84,11 @@ public class Starter {
 		String dname = properties.getProperty("sim_name");
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 
-		Display d = new Display(dname);
+		LifeRunnable life = new LifeRunnable();
+		Display d = new Display(dname, life);
 		int lightLimit = 30;//30
-		//islands
-		double coarse = 0.002;
 		int of = 10;
-		
-		int isle_size = 10;
-		
-		
+
 		//worldmap		
 		Map map = new Map(cst_grid_max,d, dataFolderName);
 		
@@ -109,40 +105,54 @@ public class Starter {
 			}
 		}
 
-		LifeRunnable life = new LifeRunnable(map);
+		life.setMap(map);
 		new Thread(life).start();
 	}	
 	
 	
 	public static class LifeRunnable implements Runnable{
 
-		boolean run = true;
 		MyLog mlog = new MyLog("lifeRunnable",true);
+		boolean run = true;
+		public boolean running = true;
 
 		//map
-		Map map;
+		Map map = null;
 		int mapSize = Constants.GridMax;
 		
-		public LifeRunnable(Map map){
-			//this.d = d;
+		public LifeRunnable(){
+		}
+
+		public void setMap(Map map){
 			this.map = map;
 		}
 		
 		public void run() {
 			
 			while(run){
-				update();
+				if(running) {
+					update();
+
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 				
-				try {
-					Thread.sleep(1);
-							} catch (InterruptedException e) {
-					e.printStackTrace();
-				}		
+
 			}
 			
 			mlog.say("dies");
 			
 		}
+
 		
 		/** updates each individual and each cell of the map */
 		void update(){
@@ -156,7 +166,6 @@ public class Starter {
 		
 		public void kill(){
 			run = false;
-			
 		}
 	}
 

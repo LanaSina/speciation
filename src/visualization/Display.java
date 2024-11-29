@@ -10,6 +10,7 @@ import javax.swing.*;
 
 import communication.MyLog;
 import startup.Constants;
+import startup.Starter;
 
 /**
  * Graphic panel
@@ -30,21 +31,21 @@ public class Display extends JFrame {
 		 * 
 		 * @param n name of window;
 		 */
-		public Display(String n) {
+		public Display(String n, Starter.LifeRunnable lifeRunnable) {
 			name = n;
-	        initUI();
+	        initUI(lifeRunnable);
 	        this.setVisible(true);
 	    }
 
-		public Display() {
-			name = "Open Ended Evolution";
-	        initUI();
-	        this.setVisible(true);
-	    }
-	    private void initUI() {
+//		public Display(Object lock) {
+//			name = "Open Ended Evolution";
+//	        initUI(lock);
+//	        this.setVisible(true);
+//	    }
+	    private void initUI(Starter.LifeRunnable lifeRunnable) {
 	    	
 	        setTitle(name);
-	        s = new Surface();
+	        s = new Surface(lifeRunnable);
 	        add(s);
 	        int width = s.getWidth();
 	        int length = s.getLength();
@@ -114,27 +115,32 @@ public class Display extends JFrame {
         //grid step size
         int step = Constants.GridStep;
         boolean pause = false;
+		boolean pauseLife = false;
 
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
 
-		public Surface(){
+		public Surface(Starter.LifeRunnable lifeRunnable){
 			super();
 
 			// add button
-			JButton pause = new JButton("Pause");
-			pause.addActionListener(new ActionListener() {
+			JButton pauseButton = new JButton("Pause");
+			pauseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					// Insert code here
-					mlog.say("pause pressed");
+					pauseLife = !pauseLife;
+					mlog.say("pause is " + pauseLife);
+					pauseButton.setText(pauseLife?"Resume":"Pause");
+					lifeRunnable.running = !pauseLife;
+
 				}
 			});
 
 
-			this.add(pause);
-			pause.setVisible(true);
+			this.add(pauseButton);
+			pauseButton.setVisible(true);
 			int x = this.getWidth()*2-200; // no effect??
-			pause.setLocation(new Point(x, 0));
+			pauseButton.setLocation(new Point(x, 0));
 			this.revalidate();
 			this.repaint();
 		}
