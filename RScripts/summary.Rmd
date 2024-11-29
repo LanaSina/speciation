@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_11_28_13_47"   
+folder = "2024_11_29_10_41"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -100,11 +100,76 @@ summary(pc)
 
 plot(pc$x[,1])
 plot(pc$x[,2])
-
 plot(pc$x[,3])
 
 
 ```
+
+Do PCA over time!
+
+```{r}
+t = 0
+max_t = max(world$created)
+step_size = 500
+pc1 = c()
+pc2 = c()
+pc_t <- data.frame(Ints=integer(), Doubles=double(), Doubles=double())
+colnames(pc_t) = c("created", "pc1", "pc2")
+
+while (t < max_t) {
+  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
+  pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
+             center = TRUE,
+            scale. = TRUE)
+  
+  temp_df = data.frame(part_world$created, pc$x[,1], pc$x[,2])
+  colnames(temp_df) = c("created", "pc1", "pc2")
+  pc_t = rbind(pc_t, temp_df)
+  
+  plot(pc$x[,1],pc$x[,2],main=t)
+  
+  t = t + step_size
+} 
+```
+
+
+```{r}
+t=10000
+part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
+pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
+           center = TRUE,
+          scale. = TRUE)
+
+projected = predict(pc, world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")])
+
+plot(projected[,1])
+plot(projected[,2])
+plot(projected[,3])
+
+```
+
+
+```{r}
+close3d()
+plot3d(x=world$created, y = projected[,1], z = projected[,2], col = colors, main = folder)
+rglwidget()
+```
+
+
+```{r}
+plot(pc_t$created, pc_t$pc1)
+plot(pc_t$created, pc_t$pc2)
+
+```
+
+```{r}
+close3d()
+plot3d(x=pc_t$created, y = pc_t$pc1, z = pc_t$pc2, col = colors, main = folder)
+rglwidget()
+```
+
+
+
 ```{r}
 close3d()
 plot3d(x=pc$x[,1], y = pc$x[,2], z = pc$x[,3], col = colors, main = folder)
@@ -195,7 +260,7 @@ plot(x = world$created, y=world$lifeSpan, main = folder)
 plot(x = world$created, y=world$sensors, main = folder)
 plot(x = world$created, y=world$kidEnergy, main = folder)
 plot(x = world$created, y=world$maxEnergy, main = folder)
-plot(x = world$created, y=world$hunger, main = folder)
+# plot(x = world$created, y=world$hunger, main = folder)
 plot(x = world$created, y=world$nkids, main = folder)
 plot(x = world$created, y=world$pgmDeath, main = folder)
 
