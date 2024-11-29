@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_11_29_10_41"   
+folder = "trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -134,7 +134,7 @@ while (t < max_t) {
 
 
 ```{r}
-t=10000
+t=53000
 part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
 pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
            center = TRUE,
@@ -268,9 +268,24 @@ plot(x = world$created, y=world$pgmDeath, main = folder)
 
 ```
 
+Number of agents
 
 ```{r}
-plot(x = world$maxEnergy, y=world$hunger, main = folder)
+t = 0
+max_t = max(world$created)
+step_size = 100
+n_agents_t <- data.frame(Ints=integer(), Ints=integer())
+colnames(n_agents_t) = c("t", "n")
+
+while (t < max_t) {
+  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
+  n_agents_t = rbind(n_agents_t, c(t, length(part_world$created)))
+  t = t + step_size
+} 
+
+colnames(n_agents_t) = c("t", "n")
+
+plot(n_agents_t, type = "l", main="Number of agents")
 
 ```
 
