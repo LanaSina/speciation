@@ -204,8 +204,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 			if(generateBool(bias)){
 				//create or modify sensor
-				double plus = Constants.uniformDouble(-1, 1);
-				if(plus>0){
+				double add = Constants.uniformDouble(-1, 1);
+				if(add>0){
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
@@ -220,7 +220,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
 							Node sensor = senses.get(s);	
 							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
-							int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
+
+							double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+							double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+							int value = (int) max(0, (sensor.data *(plus+1)+minMut+0.5));
 							sensor.data = value;
 						}
 					} else {
