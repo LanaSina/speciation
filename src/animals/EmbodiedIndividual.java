@@ -167,16 +167,20 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			//maybe make this a mutable value!
 			double bias = cst_mut_factor;//0.6;
 			if(generateBool(bias)){
-				double minMut = Constants.uniformDouble(-2, 2);
-				speed = (int)(speed+minMut);
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+
+				speed = (int)(speed*(plus+1)+minMut+0.5);
 				// todo speed = check()
 				if(speed<0) speed = 0;
 				if(speed>cst_speed_max) speed = cst_speed_max;
 				//break;
 			}
 			if(generateBool(bias)){
-				double minMut = Constants.uniformDouble(-2, 2);
-				maxEnergy = (int)(maxEnergy+minMut);
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+
+				maxEnergy = (int)(maxEnergy*(plus+1)+minMut+0.5);
 				if(maxEnergy<0){
 					maxEnergy = 0;
 				}else if (maxEnergy>cst_energy_max) {
@@ -184,13 +188,17 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				double minMut = Constants.uniformDouble(-2, 2);
-				kidEnergy = (int) (kidEnergy+minMut);
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+
+				kidEnergy = (int) (kidEnergy*(plus+1)+minMut+0.5);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
-				double minMut = Constants.uniformDouble(-2, 2);
-				matForKids = (int) (matForKids+minMut);
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+
+				matForKids = (int) (matForKids*(plus+1)+minMut+0.5);
 				if(matForKids<0) matForKids = 0;
 			}
 
@@ -241,7 +249,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //1% change
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 
 				int n = (int) (getNKids()*(plus+1)+minMut+0.5);
@@ -249,7 +257,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				setNKids(n);
 			}
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //1% change
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 
 				death = (int) (death*(1+plus)+minMut+0.5);
