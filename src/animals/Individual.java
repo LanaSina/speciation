@@ -19,14 +19,8 @@ public interface Individual extends GraphicalComponent {
 	public boolean parentIsLight();
 	public String stringDesc();
 	public void setID(int globalID);
-	public double getLuminosity();
 	public int[] getProperties();
 	public void setPosition(double[] position2);
-
-	public double getWarm();
-	public double getLoud();
-	public double getSmelly();
-	public double getElectric();
 	public void setEatenBy(int i);
 	public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
 						  double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,

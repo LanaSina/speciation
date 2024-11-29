@@ -19,12 +19,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	//cell
 	/** 1 = completely transparent*/
 	double cellTransparency = 1;
-	
-	//general
-	public int speed = 0;
-	//death by being eaten
 	int eaten_by = -1;//1 = true;
 
+	//general
+	public int speed = 0;
 	//int lifespan;
 	int maxEnergy;
 	//energy level transmitted to offspring
@@ -36,22 +34,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	//sensors: map of property value to action
 	public int death =  (int)(Constants.uniformDouble(0,4)-2+0.5)+20;//50
 	
-	
-	//detectable properties (0..1)
-	/** how visible*/
-	double luminosity;
-	double warm;
-	double loud;
-	double smelly;
-	double electric;
-	
+
 	//will be replaced by cell properties sensors
 	/** a tree with properties->pair(value,action)*/
 	public Tree sensors;
 
-	int nProperties = 7;//sum of above
-	int nPhysicalProperties = 5;
-	public int[] properties = new int[nProperties-1];
+	int nProperties = 6;//sum of above
+	public int[] properties = new int[nProperties];
 	int ID;
 	int parentID;
 	private int firstAncestorID;
@@ -103,21 +92,19 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[5] = matForKids;
 		
 		sensors = new Tree(0);//root is not important
-		for(int i=0; i<(nPhysicalProperties);i++){
+		for(int i=0; i<(nProperties);i++){
 			Node prop = new Node();
 			prop.data = i;
 			sensors.root.addChild(prop);
 		}
 
 		makeColor();	
-		makePhysics();
 	}
 	
 	/**
 	 * clones with mutations
 	 * @param in individual to be cloned
 	 * @param glID id of this one
-	 * @param date birth date
 	 */
 	EmbodiedIndividual(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
 					   double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
@@ -207,7 +194,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(generateBool(bias)){
 				//create or modify sensor
 				if(plus>0){
-					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);//-1
+					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> senses = props.get(prop).getChildren();
@@ -237,7 +224,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					}							
 				}else{
 					//tree nodes: root-> 3properties -> detectionValue -> action
-					int prop = (int) (Constants.uniformDouble(0, nPhysicalProperties-1)+0.5);
+					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);
 					//sensor exists for this property?
 					ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> sensors = props.get(prop).getChildren();
@@ -267,21 +254,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[4] =  death;
 		properties[5] = matForKids;
 		
-		makePhysics();
 		makeColor();
-	}
-	
-	/** calculate luminosity etc with a random formula*/
-	private void makePhysics() {
-		/* 		int red = (int) (loud*255 +0.5);
-		int green = (int) (smelly*255 +0.5);
-		int blue = (int) (warm*255 +0.5);
-		 */
-		luminosity = check(death/(double)maxEnergy,0,1);
-		warm = check(hasSensors()/(double)(nKids+0.01), 0, 1);
-		loud = check(matForKids/(double)(maxEnergy+0.01), 0, 1);
-		smelly = check(kidEnergy/(double)(death+0.01), 0, 1);
-		electric = check(nKids/(double)(speed+0.01), 0, 1);
 	}
 	
 	private double check(double val, double low, double high) {
@@ -320,7 +293,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		double effect = 0.5;
 		
 		//remove energy due to sensors
-		double se = sensors.root.getChildCount() - (nPhysicalProperties);
+		double se = sensors.root.getChildCount() - (nProperties);
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
@@ -380,7 +353,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.color = in.color;
 		this.position = in.position.clone();
 		this.maxEnergy = in.maxEnergy;
-		this.energy = kidEnergy;
+		this.energy = in.kidEnergy;
 		//this.lifespan = in.lifespan;
 		this.kidEnergy = in.kidEnergy;
 		this.speed = in.speed;
@@ -399,7 +372,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
         int size = 8;
 
 		if(!parentIsLight){
-	        Color c = color; //new Color(color.getRed()/255.0f, color.getGreen()/255.0f, color.getBlue()/255.0f, (float)(cellTransparency));
+	        Color c = color;
 	        g2d.setColor(c);
 	        if(isLight){
 	        	g2d.drawRect(x, y, size,size);
@@ -481,14 +454,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public int hasSensors(){
 		int n = 0; 
 	
-		n = (sensors.root.getChildCount()-nPhysicalProperties)/2;
+		n = (sensors.root.getChildCount()-nProperties)/2;
 		
 		return n;
 	}
-	
-	public double getLuminosity() {
-		return luminosity;
-	}
+
 
 	public int getNKids() {
 		return nKids;
@@ -535,23 +505,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		position[1] = position2[1];
 	}
 
-	public double getWarm() {
-		return warm;
-	}
-
-	public double getLoud() {
-		return loud;
-	}
-
-	public double getSmelly() {
-		return smelly;
-	}
-
-	public double getElectric() {
-		return electric;
-	}
-	
-	
 	public int getDeath() {
 		return death;
 	}

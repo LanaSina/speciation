@@ -193,7 +193,6 @@ public class Map {
 	public void updateCell(int x, int y){
 		
 		Cell c = map[x][y];
-		c.calculateValues();
 		int size = c.creatures.size();
 
 		if(size==0){
@@ -431,123 +430,82 @@ public class Map {
 	 * @author lana
 	 *
 	 */
-	private class Cell{
+	private class Cell {
 		//cell's physical properties
-		/** how easy light goes through it (0=does not get out)*/
+		/**
+		 * how easy light goes through it (0=does not get out)
+		 */
 		double transparency = 1;
-		/** how easy it is to move through (1=cannot move) */
+		/**
+		 * how easy it is to move through (1=cannot move)
+		 */
 		double density = 0;//TODO use. may also change how sound etc travels.
-		
+
 		double ntransparency = 1;
 		double ndensity = 0;//TODO use. may also change how sound etc travels.
-		
-		/** determined by animals and transparency on this cell*/
+
+		/**
+		 * determined by animals and transparency on this cell
+		 */
 		double luminosity;
 		double sound;
 		double smell;
 		double temperature;
 		double electric;
-		
-		/** all creatures on this cell*/
+
+		/**
+		 * all creatures on this cell
+		 */
 		LinkedList<Individual> creatures;
-		
-		public Cell(){
-			creatures = new LinkedList<Individual>();	
+
+		public Cell() {
+			creatures = new LinkedList<Individual>();
 		}
-		
+
 		public double getPhy(int kk) {
 			double p = 0;
 			switch (kk) {
-			case 0:{
-				p = transparency;
-				break;
-			}
-			case 1:{
-				p = density;
-				break;
-			}
-			default:
-				break;
+				case 0: {
+					p = transparency;
+					break;
+				}
+				case 1: {
+					p = density;
+					break;
+				}
+				default:
+					break;
 			}
 			return p;
 		}
 
-		/** return a property of the cell*/
+		/**
+		 * return a property of the cell
+		 */
 		public double getProp(int k) {
 			double r = 0;
 			//todo put all in an array
 			switch (k) {
-			case 0:
-				r = luminosity;
-				break;
-			case 1:
-				r = sound;
-				break;
-			case 2:
-				r = smell;
-				break;
-			case 3:
-				r = temperature;
-				break;
-			case 4:
-				r = electric;
-				break;
-			default:
-				r = 0;
-				break;
+				case 0:
+					r = luminosity;
+					break;
+				case 1:
+					r = sound;
+					break;
+				case 2:
+					r = smell;
+					break;
+				case 3:
+					r = temperature;
+					break;
+				case 4:
+					r = electric;
+					break;
+				default:
+					r = 0;
+					break;
 			}
 			return r;
-		}
-
-		/**
-		 * 
-		 * @param t transparency
-		 * @param d density
-		 */
-		private void changeProperties(double t, double d){
-
-		}
-		
-		
-		/**
-		 * reset animal dependent values to 0
-		 * and recalculate them
-		 */
-		public void calculateValues(){
-			//smell and temp could last longer in time
-			luminosity = 0;
-			sound = 0;
-			smell = 0;
-			temperature = 0;
-			electric = 0;
-			
-			//ntransparency = transparency;
-			//ndensity = density;
-			transparency = ntransparency;
-			density = ndensity;
-			
-			//make modular function for this
-			for (Iterator<Individual> iterator = creatures.iterator(); iterator.hasNext();) {
-				Individual ind = iterator.next();
-				luminosity+=ind.getLuminosity();
-				sound += ind.getLoud();
-				smell += ind.getSmelly();
-				temperature += ind.getWarm();
-				electric += ind.getElectric();
-			}
-			
-
-			luminosity = luminosity/creatures.size();
-			sound = sound/creatures.size();
-			smell = smell/creatures.size();
-			temperature = temperature/creatures.size();
-			electric = electric/creatures.size();
-			
-			luminosity = shiftMax(luminosity, transparency);
-			sound = shiftMax(sound, density);
-			smell = shiftMax(smell, 1-transparency);
-			temperature = shiftMax(temperature, 1-density);
-			electric = shiftMax(electric, density*transparency);
 		}
 	}
 	
