@@ -153,8 +153,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			double minMut = Constants.uniformDouble(-2, 2);
-			double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
+			/*double minMut = Constants.uniformDouble(-2, 2);
+			double plus = Constants.uniformDouble(-0.01, 0.01);*/
 			
 			//do this after too
 			properties[0] = speed;
@@ -165,9 +165,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			properties[5] = matForKids;
 
 			//maybe make this a mutable value!
-			double bias = 0.6;
+			double bias = cst_mut_factor;//0.6;
 			if(generateBool(bias)){
-				// double minMut = Constants.uniformDouble(-2, 2);
+				double minMut = Constants.uniformDouble(-2, 2);
 				speed = (int)(speed+minMut);
 				// todo speed = check()
 				if(speed<0) speed = 0;
@@ -175,7 +175,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				//break;
 			}
 			if(generateBool(bias)){
-				// double minMut = Constants.uniformDouble(-2, 2);
+				double minMut = Constants.uniformDouble(-2, 2);
 				maxEnergy = (int)(maxEnergy+minMut);
 				if(maxEnergy<0){
 					maxEnergy = 0;
@@ -184,19 +184,19 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				// double minMut = Constants.uniformDouble(-2, 2);
+				double minMut = Constants.uniformDouble(-2, 2);
 				kidEnergy = (int) (kidEnergy+minMut);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
-				// double minMut = Constants.uniformDouble(-2, 2);
+				double minMut = Constants.uniformDouble(-2, 2);
 				matForKids = (int) (matForKids+minMut);
 				if(matForKids<0) matForKids = 0;
 			}
 
 			if(generateBool(bias)){
 				//create or modify sensor
-				// double plus = Constants.uniformDouble(-1, 1);
+				double plus = Constants.uniformDouble(-1, 1);
 				if(plus>0){
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
 					//sensor exists for this property?
@@ -241,7 +241,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //1% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 
 				int n = (int) (getNKids()*(plus+1)+minMut+0.5);
@@ -249,7 +249,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				setNKids(n);
 			}
 			if(generateBool(bias)){
-				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
+				double plus = Constants.uniformDouble(-1, 1)*0.1; //1% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 
 				death = (int) (death*(1+plus)+minMut+0.5);
