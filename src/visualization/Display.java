@@ -1,17 +1,14 @@
 package visualization;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.Timer;
+import javax.swing.*;
 
+import communication.MyLog;
 import startup.Constants;
 
 /**
@@ -21,6 +18,7 @@ import startup.Constants;
  *
  */
 public class Display extends JFrame {
+		MyLog mlog = new MyLog("Display",true);
 
 		private static final long serialVersionUID = 1579747902278268747L;
 		
@@ -108,6 +106,8 @@ public class Display extends JFrame {
 	 *
 	 */
 	class Surface extends JPanel{
+		MyLog mlog = new MyLog("Surface in Display",true);
+
 		//size
 		int w = 1200;
 		int h = 1200;
@@ -117,6 +117,27 @@ public class Display extends JFrame {
 
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
+
+		public Surface(){
+			super();
+
+			// add button
+			JButton pause = new JButton("Pause");
+			pause.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// Insert code here
+					mlog.say("pause pressed");
+				}
+			});
+
+
+			this.add(pause);
+			pause.setVisible(true);
+			int x = this.getWidth()*2-200; // no effect??
+			pause.setLocation(new Point(x, 0));
+			this.revalidate();
+			this.repaint();
+		}
 		
 	    /**
 	     * Adds a object to be drawn on the pannel.
