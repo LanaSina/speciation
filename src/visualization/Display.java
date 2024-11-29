@@ -1,18 +1,16 @@
 package visualization;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.Timer;
+import javax.swing.*;
 
+import communication.MyLog;
 import startup.Constants;
+import startup.Starter;
 
 /**
  * Graphic panel
@@ -21,6 +19,7 @@ import startup.Constants;
  *
  */
 public class Display extends JFrame {
+		MyLog mlog = new MyLog("Display",true);
 
 		private static final long serialVersionUID = 1579747902278268747L;
 		
@@ -32,21 +31,21 @@ public class Display extends JFrame {
 		 * 
 		 * @param n name of window;
 		 */
-		public Display(String n) {
+		public Display(String n, Starter.LifeRunnable lifeRunnable) {
 			name = n;
-	        initUI();
+	        initUI(lifeRunnable);
 	        this.setVisible(true);
 	    }
 
-		public Display() {
-			name = "Open Ended Evolution";
-	        initUI();
-	        this.setVisible(true);
-	    }
-	    private void initUI() {
+//		public Display(Object lock) {
+//			name = "Open Ended Evolution";
+//	        initUI(lock);
+//	        this.setVisible(true);
+//	    }
+	    private void initUI(Starter.LifeRunnable lifeRunnable) {
 	    	
 	        setTitle(name);
-	        s = new Surface();
+	        s = new Surface(lifeRunnable);
 	        add(s);
 	        int width = s.getWidth();
 	        int length = s.getLength();
@@ -108,15 +107,43 @@ public class Display extends JFrame {
 	 *
 	 */
 	class Surface extends JPanel{
+		MyLog mlog = new MyLog("Surface in Display",true);
+
 		//size
 		int w = 1200;
 		int h = 1200;
         //grid step size
         int step = Constants.GridStep;
         boolean pause = false;
+		boolean pauseLife = false;
 
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
+
+		public Surface(Starter.LifeRunnable lifeRunnable){
+			super();
+
+			// add button
+			JButton pauseButton = new JButton("Pause");
+			pauseButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					// Insert code here
+					pauseLife = !pauseLife;
+					mlog.say("pause is " + pauseLife);
+					pauseButton.setText(pauseLife?"Resume":"Pause");
+					lifeRunnable.running = !pauseLife;
+
+				}
+			});
+
+
+			this.add(pauseButton);
+			pauseButton.setVisible(true);
+			int x = this.getWidth()*2-200; // no effect??
+			pauseButton.setLocation(new Point(x, 0));
+			this.revalidate();
+			this.repaint();
+		}
 		
 	    /**
 	     * Adds a object to be drawn on the pannel.
