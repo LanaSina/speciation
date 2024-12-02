@@ -166,9 +166,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 			//maybe make this a mutable value!
 			double bias = cst_mut_factor;//0.6;
+			int range = 5;//2
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
 
 				speed = (int)(speed*(plus+1)+minMut+0.5);
 				// todo speed = check()
@@ -177,8 +178,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				//break;
 			}
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
 
 				maxEnergy = (int)(maxEnergy*(plus+1)+minMut+0.5);
 				if(maxEnergy<0){
@@ -188,20 +189,34 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				}
 			}
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
 
 				kidEnergy = (int) (kidEnergy*(plus+1)+minMut+0.5);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
 			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
 
 				matForKids = (int) (matForKids*(plus+1)+minMut+0.5);
 				if(matForKids<0) matForKids = 0;
 			}
+			if(generateBool(bias)){
+				double plus = 0;// Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
 
+				int n = (int) (getNKids()*(plus+1)+minMut+0.5);
+				if(n<0) n=0;
+				setNKids(n);
+			}
+			if(generateBool(bias)){
+				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
+				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
+
+				death = (int) (death*(1+plus)+minMut+0.5);
+				if(death<0) death = 0;
+			}
 			if(generateBool(bias)){
 				//create or modify sensor
 				double add = Constants.uniformDouble(-1, 1);
@@ -221,7 +236,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 							Node sensor = senses.get(s);	
 							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
 
-							double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
+							double plus = 0;// Constants.uniformDouble(-1, 1)*0.1; //10% change
 							double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 							int value = (int) max(0, (sensor.data *(plus+1)+minMut+0.5));
 							sensor.data = value;
@@ -251,21 +266,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					
 				}
 			}
-			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
 
-				int n = (int) (getNKids()*(plus+1)+minMut+0.5);
-				if(n<0) n=0;
-				setNKids(n);
-			}
-			if(generateBool(bias)){
-				double plus = Constants.uniformDouble(-1, 1)*0.1; //10% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
-
-				death = (int) (death*(1+plus)+minMut+0.5);
-				if(death<0) death = 0;
-			}
 		}
 
 		properties[0] = speed;
