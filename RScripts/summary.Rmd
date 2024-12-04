@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "trees/2024_11_29_12_00"   
+folder = "2024_12_02_12_38"  #"trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -110,7 +110,7 @@ Do PCA over time!
 ```{r}
 t = 0
 max_t = max(world$created)
-step_size = 500
+step_size = 5000
 pc1 = c()
 pc2 = c()
 pc_t <- data.frame(Ints=integer(), Doubles=double(), Doubles=double())
@@ -134,7 +134,7 @@ while (t < max_t) {
 
 
 ```{r}
-t=53000
+t=30000
 part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
 pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
            center = TRUE,
