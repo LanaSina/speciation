@@ -107,7 +107,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 * @param glID id of this one
 	 */
 	EmbodiedIndividual(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
-					   double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
+					   double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max,
+					   int cst_mut_range
 	){
 		copy(in);
 		if(in.isLight) parentIsLight = true;
@@ -165,8 +166,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			properties[5] = matForKids;
 
 			//maybe make this a mutable value!
-			double bias = cst_mut_factor;//0.6;
-			int range = 5;//2
+			double bias = cst_mut_factor;
+			int range = cst_mut_range;
 			if(generateBool(bias)){
 				double plus = 0;//Constants.uniformDouble(-1, 1)*0.1; //10% change
 				double minMut = Constants.uniformDouble(-range, range); // direct intervention for small values*/
@@ -308,30 +309,33 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	
 	public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
 						  double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,
-						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor, double cst_step_cost
+						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor, double cst_step_cost,
+						  int cst_mut_range
 	){
 		life= life+1;
 		cellTransparency = transparency;
-		double effect = 0.5;
-		
+
 		//remove energy due to sensors
 		double se = sensors.root.getChildCount() - (nProperties);
 		se = se/2;
-		//mlog.say("se "+se);
+
 		if(!isLight){
-			energy = energy -
-					abs(Math.pow(se,1.2)*cst_sensor_cost)//*0.1
-					- abs(cst_step_cost);///*maxEnergy);
+
 			if(life >= death){
 				energy = -1;
-			}
-			
-			if(energy>(maxEnergy)){
-				energy = maxEnergy;
+			} else {
+				energy = energy -
+						abs(Math.pow(se,1.2)*cst_sensor_cost)//*0.1
+						- abs(cst_step_cost);///*maxEnergy);
+
+				energy = energy - speed*cst_speed_cost;
 			}
 		} else {
 			//free energy into light
 			energy = energy + cst_free_energy;
+			if(energy>(maxEnergy)){
+				energy = maxEnergy;
+			}
 		}
 		
 		if(energy>0 && energy>=matForKids){
@@ -340,7 +344,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(isLight){
 				while(energy-kidEnergy>0){//matForKids
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
-							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
+							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_mut_range);
 					babies.add(baby);
 					energy = energy-kidEnergy;
 					n++;
@@ -348,7 +352,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			}else{
 				while( (n<getNKids())){//
 					EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
-							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
+							cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_mut_range);
 					babies.add(baby);
 					energy = energy-kidEnergy;//*(1-transparency*effect);
 					n++;

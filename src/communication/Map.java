@@ -46,6 +46,7 @@ public class Map {
 	int cst_max_number_actions;
 	double cst_energy_cost_factor;
 	double cst_step_cost;
+	int cst_mut_range;
 	
 	//for updates
 	//for new ones
@@ -84,6 +85,7 @@ public class Map {
 		cst_max_number_actions = Integer.parseInt(properties.getProperty("max_number_actions"));
 		cst_energy_cost_factor = Double.parseDouble(properties.getProperty("energy_cost_factor"));
 		cst_step_cost = Double.parseDouble(properties.getProperty("step_cost"));
+		cst_mut_range = Integer.parseInt(properties.getProperty("mut_range"));
 
 
 		size = mapSize;		
@@ -207,98 +209,105 @@ public class Map {
 
 			Individual creature = c.creatures.get(i);
 
-			//todo add random death
+			boolean alive = true;
+			// random death: 1/1000
+			if (!creature.isLight() && Constants.uniformDouble()<0.001){
+				alive = false;
+			} else {
+				alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
+						cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
+						cst_sensor_cost, cst_free_energy, cst_energy_cost_factor, cst_step_cost, cst_mut_range
+				);
+			}
 
-            boolean alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
-					cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
-					cst_sensor_cost, cst_free_energy, cst_energy_cost_factor, cst_step_cost
-			);
+			if(!alive){
+				remove.add(creature);
+				continue;
+			}
+
             double[] position = creature.getPosition();
 
-            if(!alive){
-            	remove.add(creature);
-            } else{
-            	double np[] = new double[2];
-	            boolean moved = false;
-				double speed = creature.getSpeed();
+			double np[] = new double[2];
+			boolean moved = false;
+			double speed = creature.getSpeed();
 
-            	if(!creature.isLight()){
-	            	//move
-	        		for(int j=0;j<2;j++){
-	        			if(generateBool()){
-	        				np[j]= position[j]+(speed*cst_speed_factor);
-	        			}else{
-	        				np[j] = position[j]-(speed*cst_speed_factor);
-	        			}
-	        			if(np[j]<0) np[j]=0;
-	        			if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
-	        			if(np[j] != position[j]){
-	        				moved = true;
-	        			}
-	        		}
-            	}
-            	
-        		Tree sensors = creature.getSensors();
-        		
-        		//interactions between creatures
-                Node s = sensors.root;
-                //iterate on properties
-                ArrayList<Node> sChildren = s.getChildren();
-                for(int k=0; k<sChildren.size();k++){
-                	//this is the property
-                	Node prop = sChildren.get(k);
-                	//these are the value-action pairs
-                	ArrayList<Node> pChildren = prop.getChildren();
-                	
-                	for(int l=0; l<pChildren.size();l++){
-                		int value = pChildren.get(l).data;
-                		//actions
-        				ArrayList<Node> actions = pChildren.get(l).getChildren();
-        				for (Iterator<Node> iterator = actions.iterator(); iterator.hasNext();) {
-							Node node = (Node) iterator.next();
-							//action
-							int act = node.data;
-							
-							//interactions with other creatures
-							if(act<2){
-								//iterate creatures on this cell
-		                		for(int m=0; m<c.creatures.size();m++){
-		                			double p = 1*3/(double)c.creatures.size();
-		                			if(Constants.uniformDouble()>p){
-		                				continue;
-		                			}
+			if(!creature.isLight()){
+				//move
+				for(int j=0;j<2;j++){
+					if(generateBool()){
+						np[j]= position[j]+(speed*cst_speed_factor);
+					}else{
+						np[j] = position[j]-(speed*cst_speed_factor);
+					}
+					if(np[j]<0) np[j]=0;
+					if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
+					if(np[j] != position[j]){
+						moved = true;
+					}
+				}
+			}
 
-		                			Individual cr2 = c.creatures.get(m);
-		                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
-		                				continue;
-		                			}
-		                			//creature can't interact on itself
-		                			if(m==i){
-		                				continue;
-		                			}
+			Tree sensors = creature.getSensors();
 
-									double ind_prop = cr2.getProperties()[k];
-		                			
-									if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
-										tryEat(creature, cr2);
-									}
-		                		}
+			//interactions between creatures
+			Node s = sensors.root;
+			//iterate on properties
+			ArrayList<Node> sChildren = s.getChildren();
+			for(int k=0; k<sChildren.size();k++){
+				//this is the property
+				Node prop = sChildren.get(k);
+				//these are the value-action pairs
+				ArrayList<Node> pChildren = prop.getChildren();
+
+				for(int l=0; l<pChildren.size();l++){
+					int value = pChildren.get(l).data;
+					//actions
+					ArrayList<Node> actions = pChildren.get(l).getChildren();
+					for (Iterator<Node> iterator = actions.iterator(); iterator.hasNext();) {
+						Node node = (Node) iterator.next();
+						//action
+						int act = node.data;
+
+						//interactions with other creatures
+						if(act<2){
+							//iterate creatures on this cell
+							for(int m=0; m<c.creatures.size();m++){
+								double p = 1*3/(double)c.creatures.size();
+								if(Constants.uniformDouble()>p){
+									continue;
+								}
+
+								Individual cr2 = c.creatures.get(m);
+								if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
+									continue;
+								}
+								//creature can't interact on itself
+								if(m==i){
+									continue;
+								}
+
+								double ind_prop = cr2.getProperties()[k];
+
+								if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
+									tryEat(creature, cr2);
+								}
 							}
 						}
-                	}
-                }
-        		
-        		if(moved){
-        			newPositions.add(np[0]);
-        			newPositions.add(np[1]);
-        			moving.add(creature);
-        			//costs energy
-        			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
-        				creature.setEnergy(energy);
-        			}
-        		}
-            }    
+					}
+				}
+			}
+
+			if(moved){
+				newPositions.add(np[0]);
+				newPositions.add(np[1]);
+				moving.add(creature);
+				//costs energy
+				//moved to inside creature
+				/*if(!creature.isLight()){
+					double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
+					creature.setEnergy(energy);
+				}*/
+			}
         }
 	}
 

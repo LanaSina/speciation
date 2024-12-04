@@ -21,7 +21,7 @@ Read data
 
 ```{r}
 
-folder = "2024_12_02_12_38"  #"trees/2024_11_29_12_00"   
+folder = "2024_12_04_19_06"  #"trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -35,6 +35,16 @@ plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, ma
 rglwidget()
 ```
 
+```{r}
+# a subset
+sub_world = subset(world, created >90000 & created < 110000 & maxEnergy>50)
+
+colors = rgb(sub_world$speed/max(sub_world$speed), sub_world$maxEnergy/max(sub_world$maxEnergy), sub_world$kidEnergy/max(sub_world$kidEnergy))
+
+close3d()
+plot3d(x= sub_world$created, y=sub_world$pgmDeath, z = sub_world$maxEnergy, col = colors, main = folder)
+rglwidget()
+```
 
 
 ```{r}
@@ -53,29 +63,20 @@ world = whole_world[the_sample,]
 ```
 
 
-
-3D plots
-
 ```{r}
-colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
+# par(mfrow=c(2,3))
+plot(x = world$created, y=world$speed, main = folder)
+plot(x = world$created, y=world$lifeSpan, main = folder)
+plot(x = world$created, y=world$sensors, main = folder)
+plot(x = world$created, y=world$kidEnergy, main = folder)
+plot(x = world$created, y=world$maxEnergy, main = folder)
+# plot(x = world$created, y=world$hunger, main = folder)
+plot(x = world$created, y=world$nkids, main = folder)
+plot(x = world$created, y=world$pgmDeath, main = folder)
 
-close3d()
-plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
-rglwidget()
-# close3d()
+#plot(x = world$created, y=world$matForKids, main = folder)
 
 ```
-
-
-logs
-
-```{r}
-close3d()
-plot3d(x=world$created, y=log(world$pgmDeath), z = log(world$maxEnergy), col = colors, main = folder)
-rglwidget()
-
-```
-
 
 PCA tree
 
@@ -105,12 +106,18 @@ plot(pc$x[,3])
 
 ```
 
+```{r}
+close3d()
+plot3d(x= world$created, y=pc$x[,2], z = pc$x[,1], col = colors, main = folder)
+rglwidget()
+```
+
 Do PCA over time!
 
 ```{r}
 t = 0
 max_t = max(world$created)
-step_size = 5000
+step_size = 1000
 pc1 = c()
 pc2 = c()
 pc_t <- data.frame(Ints=integer(), Doubles=double(), Doubles=double())
@@ -134,7 +141,7 @@ while (t < max_t) {
 
 
 ```{r}
-t=30000
+t = 4000
 part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
 pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
            center = TRUE,
@@ -146,6 +153,45 @@ plot(projected[,1])
 plot(projected[,2])
 plot(projected[,3])
 
+```
+```{r}
+plot(pc$x[,1])
+th = -0.5
+abline(h=-th)
+# compare 2 species (clustering should be cleaner)
+s1_pc = subset(part_world, pc$x[,1]>=th)
+s2_pc = subset(part_world, pc$x[,1]<th)
+
+```
+
+
+```{r}
+
+for (cid in c(4:8, 10:12)){
+  lim = c( min(c(s1_pc[,cid], s2_pc[,cid])), max(c(s1_pc[,cid],s2_pc[,cid])))
+  plot(s1_pc[,cid], col = "red", ylim = lim, main = colnames(s1_pc[cid]))
+  points(s2_pc[,cid], col = "blue")
+}
+
+```
+
+
+```{r}
+# maybe look at the parents
+p_s1 = subset(world, ID %in% s1_pc$parent)
+p_s2 = subset(world, ID %in% s2_pc$parent)
+
+```
+
+
+```{r}
+for (cid in c(4:8, 10:12)){
+  lim = c( min(c(s1_pc[,cid], s2_pc[,cid])), max(c(s1_pc[,cid],s2_pc[,cid])))
+  plot(s1_pc[,cid], col = "red", ylim = lim, main = colnames(s1_pc[cid]))
+  points(s2_pc[,cid], col = "blue")
+  points(p_s1[,cid], col = "pink")
+  points(p_s2[,cid], col = "cyan")
+}
 ```
 
 
@@ -162,11 +208,6 @@ plot(pc_t$created, pc_t$pc2)
 
 ```
 
-```{r}
-close3d()
-plot3d(x=pc_t$created, y = pc_t$pc1, z = pc_t$pc2, col = colors, main = folder)
-rglwidget()
-```
 
 
 
@@ -178,11 +219,7 @@ rglwidget()
 
 
 
-```{r}
-close3d()
-plot3d(x= world$created, y=pc$x[,2], z = pc$x[,1], col = colors, main = folder)
-rglwidget()
-```
+
 
 
 ```{r}
@@ -253,20 +290,6 @@ scatterplot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, color = c
 ```
 
 
-```{r}
-# par(mfrow=c(2,3))
-plot(x = world$created, y=world$speed, main = folder)
-plot(x = world$created, y=world$lifeSpan, main = folder)
-plot(x = world$created, y=world$sensors, main = folder)
-plot(x = world$created, y=world$kidEnergy, main = folder)
-plot(x = world$created, y=world$maxEnergy, main = folder)
-# plot(x = world$created, y=world$hunger, main = folder)
-plot(x = world$created, y=world$nkids, main = folder)
-plot(x = world$created, y=world$pgmDeath, main = folder)
-
-#plot(x = world$created, y=world$matForKids, main = folder)
-
-```
 
 Number of agents
 
@@ -288,6 +311,13 @@ colnames(n_agents_t) = c("t", "n")
 plot(n_agents_t, type = "l", main="Number of agents")
 
 ```
+```{r}
+plot(x = world$created, y=world$maxEnergy, main = folder)
+points(n_agents_t$t, n_agents_t$n/10, type = "l", col="blue")
+
+```
+
+
 
 
 ```{r}
@@ -317,6 +347,16 @@ sub_interactions = interactions
 max_t = max(sub_interactions$t)
 print(max_t)
 ```
+
+```{r}
+hist(interactions$pred_maxEnergy)
+hist(interactions$prey_maxEnergy)
+
+big_preys = subset(interactions, interactions$prey_maxEnergy>10)
+hist(big_preys$prey_maxEnergy)
+
+```
+
 
 ```{r}
 hist(sub_interactions$successful)
