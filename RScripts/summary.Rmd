@@ -5,7 +5,7 @@ date: "2024-10-13"
 output: html_document
 ---
 
-# OEE
+# OEE data analysis
 
 ## setup
 
@@ -14,22 +14,37 @@ library(scatterplot3d)
 options(rgl.useNULL = TRUE)
 library(rgl)
 
+# replace with your base folder
 base_folder = "../../new_data/"
 ```
 
-Read data
+
+## Read agents data
 
 ```{r}
-
-folder = "trees/2024_11_29_12_00"   
+folder = "2024_12_04_19_31"  #"trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
+```
+
+## Visualization
+
+```{r}
+# plot tree
+
+# # display data as is, or extract a subset
+# world = subset(world, created >90000 & created < 110000 & maxEnergy>50)
+
+# # random subset
+# sample_vector=c(1:nrow(whole_world))
+# # sample elements from the vector (in this example 30 elements sampled without replacement)
+# the_sample = sample(sample_vector, 80000, replace=FALSE)
+# # the vector of randomly selected elements is then used to select rows from the dataframe
+# world = whole_world[the_sample,]
 
 world = whole_world
-
 colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
-
 close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
 rglwidget()
@@ -37,80 +52,85 @@ rglwidget()
 
 
 
+
 ```{r}
-# folder = "2024_11_06_11_56" 
-fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
+# plot each variable separately
+# par(mfrow=c(2,3))
+plot(x = world$created, y=world$speed, main = folder)
+plot(x = world$created, y=world$lifeSpan, main = folder)
+plot(x = world$created, y=world$sensors, main = folder)
+plot(x = world$created, y=world$kidEnergy, main = folder)
+plot(x = world$created, y=world$maxEnergy, main = folder)
+# plot(x = world$created, y=world$hunger, main = folder)
+plot(x = world$created, y=world$nkids, main = folder)
+plot(x = world$created, y=world$pgmDeath, main = folder)
+#plot(x = world$created, y=world$matForKids, main = folder)
+```
 
-whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 
-world = whole_world
+```{r}
+#  Plot number of agents
+t = 0
+max_t = max(world$created)
+step_size = 100
+n_agents_t <- data.frame(Ints=integer(), Ints=integer())
+colnames(n_agents_t) = c("t", "n")
 
-sample_vector=c(1:nrow(whole_world))
-# sample elements from the vector (in this example 30 elements sampled without replacement)
-the_sample = sample(sample_vector, 80000, replace=FALSE)
-# the vector of randomly selected elements is then used to select rows from the dataframe
-world = whole_world[the_sample,]
+while (t < max_t) {
+  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
+  n_agents_t = rbind(n_agents_t, c(t, length(part_world$created)))
+  t = t + step_size
+} 
+
+colnames(n_agents_t) = c("t", "n")
+
+plot(n_agents_t, type = "l", main="Number of agents")
+
+```
+```{r}
+plot(x = world$created, y=world$maxEnergy, main = folder)
+points(n_agents_t$t, n_agents_t$n/10, type = "l", col="blue")
+
 ```
 
 
 
-3D plots
+## PCA
 
 ```{r}
-colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
+# Apply PCA to whole tree, display clusters
+# pca should be on independent vars?
 
-close3d()
-plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
-rglwidget()
-# close3d()
-
-```
-
-
-logs
-
-```{r}
-close3d()
-plot3d(x=world$created, y=log(world$pgmDeath), z = log(world$maxEnergy), col = colors, main = folder)
-rglwidget()
-
-```
-
-
-PCA tree
-
-```{r}
-# pca should be on independedn vars?
-
-pc <- prcomp(world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
+pc <- prcomp(world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "sensors", "matForKids")], #"sensors", 
              center = TRUE,
             scale. = TRUE)
 
 library(ggfortify)
+summary(pc)
 autoplot(pc)
-
 ```
 
 ```{r}
-pc <- prcomp(world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
-             center = TRUE,
-            scale. = TRUE)
-
-summary(pc)
-
+# Plot principal components
 plot(pc$x[,1])
 plot(pc$x[,2])
 plot(pc$x[,3])
-
-
 ```
 
-Do PCA over time!
+```{r}
+# Plot PC as tree
+close3d()
+plot3d(x= world$created, y=pc$x[,2], z = pc$x[,1], col = colors, main = folder)
+rglwidget()
+```
+
+
 
 ```{r}
+# PCA over time!
 t = 0
 max_t = max(world$created)
-step_size = 500
+step_size = 1000
 pc1 = c()
 pc2 = c()
 pc_t <- data.frame(Ints=integer(), Doubles=double(), Doubles=double())
@@ -134,7 +154,8 @@ while (t < max_t) {
 
 
 ```{r}
-t=53000
+# PCA on whole tree according to one time slice's projection
+t = 4000
 part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
 pc <- prcomp(part_world[c("pgmDeath","maxEnergy", "speed", "kidEnergy", "nkids", "matForKids")], #"sensors", 
            center = TRUE,
@@ -148,40 +169,43 @@ plot(projected[,3])
 
 ```
 
+## Basic clustering
 
 ```{r}
-close3d()
-plot3d(x=world$created, y = projected[,1], z = projected[,2], col = colors, main = folder)
-rglwidget()
+plot(pc$x[,1])
+th = -0.5
+abline(h=-th)
+# compare 2 species (clustering should be cleaner)
+s1_pc = subset(part_world, pc$x[,1]>=th)
+s2_pc = subset(part_world, pc$x[,1]<th)
+
+```
+
+```{r}
+
+for (cid in c(4:8, 10:12)){
+  lim = c( min(c(s1_pc[,cid], s2_pc[,cid])), max(c(s1_pc[,cid],s2_pc[,cid])))
+  plot(s1_pc[,cid], col = "red", ylim = lim, main = colnames(s1_pc[cid]))
+  points(s2_pc[,cid], col = "blue")
+}
+
 ```
 
 
-```{r}
-plot(pc_t$created, pc_t$pc1)
-plot(pc_t$created, pc_t$pc2)
-
-```
+## Analysis of predation data (Deprecated)
 
 ```{r}
-close3d()
-plot3d(x=pc_t$created, y = pc_t$pc1, z = pc_t$pc2, col = colors, main = folder)
-rglwidget()
-```
 
+# folder = "2024_11_07_19_38" 
+fileName = paste(base_folder, folder,"predation.csv",sep="/")
 
+interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE, row.names=NULL)
 
-```{r}
-close3d()
-plot3d(x=pc$x[,1], y = pc$x[,2], z = pc$x[,3], col = colors, main = folder)
-rglwidget()
-```
-
-
-
-```{r}
-close3d()
-plot3d(x= world$created, y=pc$x[,2], z = pc$x[,1], col = colors, main = folder)
-rglwidget()
+l = length(interactions$t) # step in sim and in this are not ok
+interactions$int_id = c(1:l)
+sub_interactions = interactions
+max_t = max(sub_interactions$t)
+print(max_t)
 ```
 
 
@@ -199,124 +223,14 @@ hist(late$deathCause, breaks = c(-4,-3,-2,-1,0))
 
 
 ```{r}
+hist(interactions$pred_maxEnergy)
+hist(interactions$prey_maxEnergy)
 
-close3d()
-plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
-rglwidget()
-```
-
-
-```{r}
-# colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
-close3d()
-
-a = log(world$pgmDeath)
-b = log(world$maxEnergy)
-
-plot3d(x= world$created, y=a, z =b , main = folder)
-
-rglwidget()
-```
-
-```{r}
-# colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
-close3d()
-
-plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder, ylim = c(150,250), zlim = c(35,80))
-rglwidget()
-```
-
-
-```{r}
-colors = rgb(world$smelly/max(world$smelly), world$loud/max(world$loud), world$warm/max(world$warm))
-
-plot3d(x= world$created, y=world$warm, z = world$matForKids, col = colors, main = folder)
-rglwidget()
+big_preys = subset(interactions, interactions$prey_maxEnergy>10)
+hist(big_preys$prey_maxEnergy)
 
 ```
 
-
-3D plots
-
-```{r}
-
-plot3d(x= world$created, y=world$maxEnergy, z = world$speed, col = colors, main = folder)
-rglwidget()
-
-```
-
-2D plots
-
-```{r}
-colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$nkids/max(world$nkids))
-scatterplot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, color = colors, main = folder)
-```
-
-
-```{r}
-# par(mfrow=c(2,3))
-plot(x = world$created, y=world$speed, main = folder)
-plot(x = world$created, y=world$lifeSpan, main = folder)
-plot(x = world$created, y=world$sensors, main = folder)
-plot(x = world$created, y=world$kidEnergy, main = folder)
-plot(x = world$created, y=world$maxEnergy, main = folder)
-# plot(x = world$created, y=world$hunger, main = folder)
-plot(x = world$created, y=world$nkids, main = folder)
-plot(x = world$created, y=world$pgmDeath, main = folder)
-
-#plot(x = world$created, y=world$matForKids, main = folder)
-
-```
-
-Number of agents
-
-```{r}
-t = 0
-max_t = max(world$created)
-step_size = 100
-n_agents_t <- data.frame(Ints=integer(), Ints=integer())
-colnames(n_agents_t) = c("t", "n")
-
-while (t < max_t) {
-  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
-  n_agents_t = rbind(n_agents_t, c(t, length(part_world$created)))
-  t = t + step_size
-} 
-
-colnames(n_agents_t) = c("t", "n")
-
-plot(n_agents_t, type = "l", main="Number of agents")
-
-```
-
-
-```{r}
-plot(x = world$created, y=log(world$maxEnergy), main = folder)
-plot(x = world$created, y=log(world$kidEnergy), main = folder)
-plot(x = world$created, y=log(world$nkids), main = folder)
-plot(x = world$created, y=log(world$pgmDeath), main = folder)
-
-```
-
-
-
-
-------
-Read predation data
-
-```{r}
-
-# folder = "2024_11_07_19_38" 
-fileName = paste(base_folder, folder,"predation.csv",sep="/")
-
-interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE, row.names=NULL)
-
-l = length(interactions$t) # step in sim and in this are not ok
-interactions$int_id = c(1:l)
-sub_interactions = interactions
-max_t = max(sub_interactions$t)
-print(max_t)
-```
 
 ```{r}
 hist(sub_interactions$successful)
@@ -345,6 +259,7 @@ hist(success_eat$prey_maxEnergy)
 hist(success_eat$prey_nkids)
 
 ```
+
 
 ```{r}
 sub_success_eat = subset(success_eat, success_eat$prey_maxEnergy>6)
@@ -426,14 +341,6 @@ plot(significant_interactions$pred_id, significant_interactions$prey_speed)
 ```
 
 
-
-We want to know who eats who
-
-
-
-
------
-
 ```{r}
 # subset
 late_interactions = subset(interactions, t>45000 & t<45500)
@@ -449,47 +356,5 @@ plot(late_interactions$g_prey, late_interactions$b_prey, col = colors_prey)
 
 # plot preys as function of predators
 plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
-
-```
-
-
-----
-
-compare canonical with current
-
-```{r}
-# canonical is "2024_11_27_14_09" 
-folder = "2024_11_27_14_41" 
-fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
-
-whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
-
-world = whole_world
-```
-
-```{r}
-# canonical_world = world
-plot(x = canonical_world$created, y=canonical_world$speed, main = "canonical")
-points(x = world$created, y=world$speed, pch=20, col = "red")
-
-plot(x = canonical_world$created, y=canonical_world$lifeSpan, main = "canonical")
-points(x = world$created, y=world$lifeSpan, pch=20, col = "red")
-
-plot(x = canonical_world$created, y=canonical_world$sensors, main = "canonical")
-points(x = world$created, y=world$sensors, pch=20, col = "red")
-
-plot(x = canonical_world$created, y=canonical_world$kidEnergy,main = "canonical")
-points(x = world$created, y=world$kidEnergy, pch=20, col = "red")
-
-plot(x = canonical_world$created, y=canonical_world$maxEnergy, main = "canonical")
-plot(x = world$created, y=world$maxEnergy, main = folder)
-
-plot(x = canonical_world$created, y=canonical_world$nkids, main = "canonical")
-plot(x = world$created, y=world$nkids, main = folder)
-
-plot(x = canonical_world$created, y=canonical_world$pgmDeath, main = "canonical")
-plot(x = world$created, y=world$pgmDeath, main = folder)
-
-
 
 ```
