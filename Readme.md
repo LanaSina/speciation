@@ -10,11 +10,14 @@ Recommended software:
 
 ## Running the simulation
 
-In the `startup/Constants.java` fle, modify the following values as appropriate:
+In the `startup/Constants.java` file, modify the following values as appropriate:
 
-Folder where data file will be recorded
+- Folder where data file will be recorded
+
 ``public static String DataPath = "../new_data";``
-Whether to record data or not
+
+- Whether to record data or not
+
 ``public static boolean Save = true;
 public static boolean SavePredation = true;``
 
