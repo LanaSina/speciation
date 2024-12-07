@@ -288,7 +288,7 @@ public class Map {
 
 								double ind_prop = cr2.getProperties()[k];
 
-								if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
+								if( (value >= ind_prop - 2) && (value <= ind_prop + 2) ){
 									tryEat(creature, cr2);
 								}
 							}
