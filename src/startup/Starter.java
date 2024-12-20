@@ -27,6 +27,7 @@ import java.util.Properties;
  *
  */
 public class Starter {
+	static String dataFolderName;
 
 	/**
 	 * @param args
@@ -39,7 +40,7 @@ public class Starter {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
 		Date date = new Date();
 		String strDate = dateFormat.format(date);
-		String dataFolderName = Constants.DataPath + "/" + strDate + "/";
+		dataFolderName = Constants.DataPath + "/" + strDate + "/";
 
 		//first create directory
 		File theDir = new File(dataFolderName);
@@ -150,7 +151,15 @@ public class Starter {
 			}
 			
 			mlog.say("dies");
-			
+		}
+
+		public String save(){
+			running = false;
+			String fileName =  map.saveSate(dataFolderName, Constants.SnapshotFileName);
+			String savedAt = dataFolderName + "/" + fileName;
+			running = true;
+
+			return savedAt;
 		}
 
 		

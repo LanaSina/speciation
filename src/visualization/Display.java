@@ -123,11 +123,10 @@ public class Display extends JFrame {
 		public Surface(Starter.LifeRunnable lifeRunnable){
 			super();
 
-			// add button
+			// add pause button
 			JButton pauseButton = new JButton("Pause");
 			pauseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					// Insert code here
 					pauseLife = !pauseLife;
 					mlog.say("pause is " + pauseLife);
 					pauseButton.setText(pauseLife?"Resume":"Pause");
@@ -135,12 +134,30 @@ public class Display extends JFrame {
 
 				}
 			});
-
-
 			this.add(pauseButton);
 			pauseButton.setVisible(true);
 			int x = this.getWidth()*2-200; // no effect??
 			pauseButton.setLocation(new Point(x, 0));
+
+			// add save button
+			JButton saveButton = new JButton("Save");
+			saveButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					//pause
+//					pauseLife = true;
+//					lifeRunnable.running = !pauseLife;
+
+					saveButton.setText("Saving...");
+					//save
+					String savedAt = lifeRunnable.save();
+					mlog.say("Saved at " + savedAt);
+				}
+			});
+			this.add(saveButton);
+			saveButton.setVisible(true);
+			x = this.getWidth()*2+200; // no effect??
+			saveButton.setLocation(new Point(x, 0));
+
 			this.revalidate();
 			this.repaint();
 		}

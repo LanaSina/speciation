@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -319,13 +321,13 @@ public class Map {
 				if(Constants.uniformDouble()<0.01){
 					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-							/*
-								String header_predation = "t, pred_id, prey_id," +
-								"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
-								"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids," +
-								"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
-								"prey_pgmDeath, prey_matForKids\n";
-							 */
+					/*
+						String header_predation = "t, pred_id, prey_id," +
+						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
+						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids," +
+						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
+						"prey_pgmDeath, prey_matForKids\n";
+					 */
 					String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
 					try {
 						predationWriter.append(str);
@@ -423,7 +425,48 @@ public class Map {
 		globalID++;
 		return globalID;
 	}
-	
+
+	public String saveSate(String dataFolderName, String fileName) {
+		//snapshot time
+		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
+		Date date = new Date();
+		String strDate = dateFormat.format(date);
+		String filePath = fileName + "_" + strDate + ".csv";
+
+		//open file
+		FileBuilder fb = new FileBuilder(dataFolderName, filePath);
+		FileWriter stateWriter = fb.getFileWriter();
+		fb = null;
+
+		//csv file header
+		/*
+			"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		 */
+		String str = "x,y,ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		try {
+			stateWriter.append(str);
+			stateWriter.flush();
+
+			for(int x=0; x<map.length;x++) {
+				for (int y = 0; y < map[0].length; y++) {
+					Cell c = map[x][y];
+					int size = c.creatures.size();
+
+					for (int id = 0; id<size; id++){
+						Individual creature = c.creatures.get(id);
+						str = x + "," + y + "," + creature.stringDesc() +"\n";
+						stateWriter.append(str);
+						stateWriter.flush();
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return filePath;
+	}
+
 	/**
 	 * a cell on the map
 	 * should have own class file.
@@ -542,4 +585,6 @@ public class Map {
 		
 		return b;
 	}
+
+
 }

@@ -31,6 +31,7 @@ public class Constants {
 	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = true;
 	public static boolean SavePredation = true; // header and data do not match
+	public static String SnapshotFileName = "snapshot";
 
 
 	/**
