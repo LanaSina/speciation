@@ -11,6 +11,7 @@ import visualization.Display;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Scanner;
 
 /**
  * @author lana
@@ -33,7 +35,6 @@ public class Starter {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 		MyLog mlog = new MyLog("starter",true);
 
 		//get current date
@@ -71,17 +72,7 @@ public class Starter {
 		}
 		mlog.say("properties copied to " + dataFolderName);
 
-
-		// read configuration file
-		Properties properties = new Properties();
-		FileInputStream propsFile = null;
-		try {
-			propsFile = new FileInputStream("src/config.properties");
-			properties.load(propsFile);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
+		Properties properties = loadProperties("src/config.properties");
 		String dname = properties.getProperty("sim_name");
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 
@@ -109,7 +100,20 @@ public class Starter {
 		life.setMap(map);
 		new Thread(life).start();
 	}	
-	
+
+	public static Properties loadProperties(String path){
+		// read configuration file
+		Properties properties = new Properties();
+		FileInputStream propsFile = null;
+		try {
+			propsFile = new FileInputStream(path);
+			properties.load(propsFile);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return(properties);
+	}
 	
 	public static class LifeRunnable implements Runnable{
 
@@ -156,7 +160,7 @@ public class Starter {
 		public String save(){
 			running = false;
 			String fileName =  map.saveSate(dataFolderName, Constants.SnapshotFileName);
-			String savedAt = dataFolderName + "/" + fileName;
+			String savedAt = dataFolderName + fileName;
 			running = true;
 
 			return savedAt;
@@ -175,6 +179,75 @@ public class Starter {
 		
 		public void kill(){
 			run = false;
+		}
+
+		public void load(File directory) {
+			// read properties
+			String target = directory.getAbsolutePath()+"/config.properties";
+			//copy them
+			Path copyTo = Paths.get(dataFolderName+"config.properties");
+			try {
+				Files.copy(Paths.get(target), copyTo, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			mlog.say("properties copied to " + dataFolderName);
+
+			Properties properties = loadProperties(target);
+
+			//worldmap
+			String dname = properties.getProperty("sim_name");
+			int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
+			Display d = new Display(dname, this);
+			int lightLimit = 30;//30
+			int of = 10;
+
+			Map map = new Map(cst_grid_max,d, dataFolderName);
+
+			// read creatures
+			target = directory.getAbsolutePath()+"/"+Constants.SummaryFileName;
+
+			// read line by line
+			Scanner sc = null;
+			try {
+				sc = new Scanner(new File(target));
+				// header
+				// String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+				sc.nextLine();
+				sc.useDelimiter(",");   //sets the delimiter pattern
+				while (sc.hasNext()){
+					int id = sc.nextInt();
+
+					EmbodiedIndividual individual = new EmbodiedIndividual(id);
+					individual.setParentID(sc.nextInt());
+					individual.setBirthDate(sc.nextInt());
+					// lifeSpan
+					sc.nextInt();
+					individual.setSpeed(sc.nextInt());
+					individual.setMaxEnergy(sc.nextInt());
+					individual.setKidEnergy(sc.nextInt());
+					individual.setSensors(); //uh oh
+
+				}
+				sc.close();  //closes the scanner
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
+		//initialize map (do it from file!!)
+			for(int i=0; i<lightLimit; i++){
+				for(int j=0; j<lightLimit; j++){
+					int x = i+of;
+					int y = j+of;
+
+					int id = map.incrementGlobalID();
+					Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
+					map.addIndividual(x, y, l);
+					d.addComponent(l);
+				}
+			}
+
+			this.setMap(map);
 		}
 	}
 

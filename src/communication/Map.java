@@ -431,7 +431,7 @@ public class Map {
 		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
 		Date date = new Date();
 		String strDate = dateFormat.format(date);
-		String filePath = fileName + "_" + strDate + ".csv";
+		String filePath = fileName + "_" + strDate;
 
 		//open file
 		FileBuilder fb = new FileBuilder(dataFolderName, filePath);

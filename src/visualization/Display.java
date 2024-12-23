@@ -3,6 +3,7 @@ package visualization;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,20 +144,37 @@ public class Display extends JFrame {
 			JButton saveButton = new JButton("Save");
 			saveButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					//pause
-//					pauseLife = true;
-//					lifeRunnable.running = !pauseLife;
-
 					saveButton.setText("Saving...");
 					//save
 					String savedAt = lifeRunnable.save();
 					mlog.say("Saved at " + savedAt);
+					saveButton.setText("Save");
 				}
 			});
 			this.add(saveButton);
 			saveButton.setVisible(true);
 			x = this.getWidth()*2+200; // no effect??
 			saveButton.setLocation(new Point(x, 0));
+
+			// add load button
+			JButton loadButton = new JButton("Load file");
+			loadButton.addActionListener(new ActionListener() {
+				 public void actionPerformed(ActionEvent e) {
+					 JFileChooser fileChooser = new JFileChooser();
+					 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					 fileChooser.showSaveDialog(null);
+
+					 System.out.println(fileChooser.getCurrentDirectory());
+					 File directory = fileChooser.getCurrentDirectory();
+					 lifeRunnable.load(directory);
+					 //openButton.getProperties().put("FILE_LOCATION", file.getAbsolutePath());
+				 }
+			});
+
+			this.add(loadButton);
+			loadButton.setVisible(true);
+			x = this.getWidth()*2+200;
+			loadButton.setLocation(new Point(x, 0));
 
 			this.revalidate();
 			this.repaint();

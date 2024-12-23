@@ -57,8 +57,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public Color borderColor = Color.white;
 	//for eternal light cells
 	private boolean isLight = false;
-	
-	
+
 	/**
 	 * creates "light" at specified postion
 	 * @param x
@@ -100,7 +99,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 		makeColor();	
 	}
-	
+
+	/**
+	 * Load from file
+	 */
+	public EmbodiedIndividual(int myID){
+		ID = myID;
+	}
+
 	/**
 	 * clones with mutations
 	 * @param in individual to be cloned
@@ -553,6 +559,51 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 	public void setCellTransparency(double cellTransparency) {
 		this.cellTransparency = cellTransparency;
+	}
+
+	public void setParentID(int parentID) {
+		this.parentID = parentID;
+	}
+
+	public void setMaxEnergy(int maxEnergy) {
+		this.maxEnergy = maxEnergy;
+	}
+
+	public void setKidEnergy(int kidEnergy) {
+		this.kidEnergy = kidEnergy;
+	}
+
+	public int getMatForKids() {
+		return matForKids;
+	}
+
+	public void setMatForKids(int matForKids) {
+		this.matForKids = matForKids;
+	}
+
+	public int getnProperties() {
+		return nProperties;
+	}
+
+	public void setnProperties(int nProperties) {
+		this.nProperties = nProperties;
+		this.properties = new int[nProperties];
+	}
+
+	public int getFirstAncestorID() {
+		return firstAncestorID;
+	}
+
+	public void setFirstAncestorID(int firstAncestorID) {
+		this.firstAncestorID = firstAncestorID;
+	}
+
+	public int getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(int birthDate) {
+		this.birthDate = birthDate;
 	}
 
 }
