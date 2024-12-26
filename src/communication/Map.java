@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -449,6 +453,16 @@ public class Map {
 			}
 		}
 
+		// move config file (todo: path in constants)
+		Path src = Paths.get("src/config.properties");
+		Path target = Paths.get(dataFolderName+"/config.properties");
+		try {
+			Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		mlog.say("properties copied to " + dataFolderName);
+
 		String filePath = strDate + "/" + Constants.SnapshotFileName;
 		saveCreatures(dataFolderName, filePath);
 		// save sensors
@@ -516,11 +530,9 @@ public class Map {
 						ArrayList<Node> props = sensors.root.getChildren();
 						for (Iterator<Node> propIt = props.iterator(); propIt.hasNext();){
 							Node prop = propIt.next();
-							// sensor ID
-							str = str + creature.getID() + "," + prop.data;
 							for (Iterator<Node> senseIt = prop.getChildren().iterator(); senseIt.hasNext();){
 								Node val = senseIt.next();
-								str = str + "," + val.data + "\n";
+								str = str + creature.getID() + "," + prop.data + "," + val.data + "\n";
 							}
 						}
 

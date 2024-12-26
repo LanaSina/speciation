@@ -153,18 +153,14 @@ public class Starter {
 						e.printStackTrace();
 					}
 				}
-				
-
 			}
-			
 			mlog.say("dies");
 		}
 
+
 		public String save(){
-			running = false;
 			String fileName =  map.saveSate(dataFolderName);
 			String savedAt = dataFolderName + fileName;
-			running = true;
 
 			return savedAt;
 		}
@@ -208,7 +204,7 @@ public class Starter {
 			Map map = new Map(cst_grid_max,d, dataFolderName);
 
 			// read creatures
-			target = directory.getAbsolutePath()+"/"+Constants.SummaryFileName;
+			target = directory.getAbsolutePath()+"/"+Constants.SnapshotFileName+".csv";
 			// save all creatures by id
 			HashMap<Integer, EmbodiedIndividual> individualMap = new HashMap<>();
 			// read line by line
@@ -216,10 +212,14 @@ public class Starter {
 			try {
 				sc = new Scanner(new File(target));
 				// header
-				// String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+				// x,y,ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids
 				sc.nextLine();
 				sc.useDelimiter(",");   //sets the delimiter pattern
 				while (sc.hasNext()){
+					//x and y
+					int x = sc.nextInt();
+					int y = sc.nextInt();
+					// id
 					int id = sc.nextInt();
 					EmbodiedIndividual individual = new EmbodiedIndividual(id);
 					individualMap.put(id, individual);
@@ -227,9 +227,18 @@ public class Starter {
 					individual.setBirthDate(sc.nextInt());
 					// lifeSpan
 					sc.nextInt();
+					//
 					individual.setSpeed(sc.nextInt());
 					individual.setMaxEnergy(sc.nextInt());
 					individual.setKidEnergy(sc.nextInt());
+					// number or sensors
+					sc.nextInt();
+					individual.setFirstAncestorID(sc.nextInt());
+					individual.setNKids(sc.nextInt());
+					individual.setDeath(sc.nextInt());
+					individual.setMatForKids(sc.nextInt());
+					map.addIndividual(x, y, individual);
+					d.addComponent(individual);
 				}
 				sc.close();  //closes the scanner
 			} catch (FileNotFoundException e) {
@@ -238,7 +247,7 @@ public class Starter {
 
 			// set sensors
 			// read creatures
-			target = directory.getAbsolutePath()+"/"+Constants.SensorsFileName;
+			target = directory.getAbsolutePath()+"/"+Constants.SensorsFileName+".csv";
 			// read line by line
 			try {
 				sc = new Scanner(new File(target));

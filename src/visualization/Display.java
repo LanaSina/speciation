@@ -118,21 +118,22 @@ public class Display extends JFrame {
         boolean pause = false;
 		boolean pauseLife = false;
 
+		// buttons
+		JButton pauseButton;
+		Starter.LifeRunnable lifeRunnable;
+
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
 
-		public Surface(Starter.LifeRunnable lifeRunnable){
+		public Surface(Starter.LifeRunnable myLifeRunnable){
 			super();
+			this.lifeRunnable = myLifeRunnable;
 
 			// add pause button
-			JButton pauseButton = new JButton("Pause");
+			pauseButton = new JButton("Pause");
 			pauseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					pauseLife = !pauseLife;
-					mlog.say("pause is " + pauseLife);
-					pauseButton.setText(pauseLife?"Resume":"Pause");
-					lifeRunnable.running = !pauseLife;
-
+					pauseProcedure(!pauseLife);
 				}
 			});
 			this.add(pauseButton);
@@ -144,6 +145,7 @@ public class Display extends JFrame {
 			JButton saveButton = new JButton("Save");
 			saveButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					pauseProcedure(true);
 					saveButton.setText("Saving...");
 					//save
 					String savedAt = lifeRunnable.save();
@@ -160,7 +162,12 @@ public class Display extends JFrame {
 			JButton loadButton = new JButton("Load file");
 			loadButton.addActionListener(new ActionListener() {
 				 public void actionPerformed(ActionEvent e) {
+					 pauseProcedure(true);
+					 File workingDirectory = new File(System.getProperty("user.dir"));
+					 UIManager.put("FileChooser.saveButtonText","Load");
+
 					 JFileChooser fileChooser = new JFileChooser();
+					 fileChooser.setCurrentDirectory(workingDirectory);
 					 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 					 fileChooser.showSaveDialog(null);
 
@@ -179,6 +186,14 @@ public class Display extends JFrame {
 			this.revalidate();
 			this.repaint();
 		}
+
+		private void pauseProcedure(boolean b){
+			pauseLife = b;
+			mlog.say("pause is " + pauseLife);
+			pauseButton.setText(pauseLife?"Resume":"Pause");
+			lifeRunnable.running = !pauseLife;
+		}
+
 		
 	    /**
 	     * Adds a object to be drawn on the pannel.
