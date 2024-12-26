@@ -1,6 +1,7 @@
 package communication;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -426,21 +427,46 @@ public class Map {
 		return globalID;
 	}
 
-	public String saveSate(String dataFolderName, String fileName) {
+	public String saveSate(String dataFolderName) {
 		//snapshot time
 		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
 		Date date = new Date();
 		String strDate = dateFormat.format(date);
-		String filePath = fileName + "_" + strDate;
 
-		//open file
+		File theDir = new File(dataFolderName+"/"+strDate);
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+			mlog.say("creating directory: " + dataFolderName);
+			boolean result = false;
+			try{
+				theDir.mkdir();
+				result = true;
+			}
+			catch(SecurityException se){
+			}
+			if(result) {
+				System.out.println("DIR created");
+			}
+		}
+
+		String filePath = strDate + "/" + Constants.SnapshotFileName;
+		saveCreatures(dataFolderName, filePath);
+		// save sensors
+		filePath = strDate + "/" + Constants.SensorsFileName;
+		saveSensors(dataFolderName, filePath);
+
+		return filePath;
+	}
+
+	void saveCreatures(String dataFolderName, String filePath){
+		//open file for creatures
 		FileBuilder fb = new FileBuilder(dataFolderName, filePath);
 		FileWriter stateWriter = fb.getFileWriter();
 		fb = null;
 
 		//csv file header
 		/*
-			"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 		 */
 		String str = "x,y,ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 		try {
@@ -463,8 +489,49 @@ public class Map {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
 
-		return filePath;
+	void saveSensors(String dataFolderName, String filePath){
+		//open file for creatures
+		FileBuilder fb = new FileBuilder(dataFolderName, filePath);
+		FileWriter stateWriter = fb.getFileWriter();
+		fb = null;
+
+		//csv file header
+		String str = "creatureID,sensorId,sensorValue"+"\n";
+		try {
+			stateWriter.append(str);
+			stateWriter.flush();
+
+			for(int x=0; x<map.length;x++) {
+				for (int y = 0; y < map[0].length; y++) {
+					Cell c = map[x][y];
+					int size = c.creatures.size();
+
+					for (int id = 0; id<size; id++){
+						Individual creature = c.creatures.get(id);
+						str = "";
+
+						Tree sensors = creature.getSensors();
+						ArrayList<Node> props = sensors.root.getChildren();
+						for (Iterator<Node> propIt = props.iterator(); propIt.hasNext();){
+							Node prop = propIt.next();
+							// sensor ID
+							str = str + creature.getID() + "," + prop.data;
+							for (Iterator<Node> senseIt = prop.getChildren().iterator(); senseIt.hasNext();){
+								Node val = senseIt.next();
+								str = str + "," + val.data + "\n";
+							}
+						}
+
+						stateWriter.append(str);
+						stateWriter.flush();
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

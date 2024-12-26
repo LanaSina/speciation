@@ -5,6 +5,8 @@ package startup;
 
 import animals.EmbodiedIndividual;
 import animals.Individual;
+import animals.Node;
+import animals.Tree;
 import communication.Map;
 import communication.MyLog;
 import visualization.Display;
@@ -20,6 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -159,7 +162,7 @@ public class Starter {
 
 		public String save(){
 			running = false;
-			String fileName =  map.saveSate(dataFolderName, Constants.SnapshotFileName);
+			String fileName =  map.saveSate(dataFolderName);
 			String savedAt = dataFolderName + fileName;
 			running = true;
 
@@ -206,7 +209,8 @@ public class Starter {
 
 			// read creatures
 			target = directory.getAbsolutePath()+"/"+Constants.SummaryFileName;
-
+			// save all creatures by id
+			HashMap<Integer, EmbodiedIndividual> individualMap = new HashMap<>();
 			// read line by line
 			Scanner sc = null;
 			try {
@@ -217,8 +221,8 @@ public class Starter {
 				sc.useDelimiter(",");   //sets the delimiter pattern
 				while (sc.hasNext()){
 					int id = sc.nextInt();
-
 					EmbodiedIndividual individual = new EmbodiedIndividual(id);
+					individualMap.put(id, individual);
 					individual.setParentID(sc.nextInt());
 					individual.setBirthDate(sc.nextInt());
 					// lifeSpan
@@ -226,26 +230,67 @@ public class Starter {
 					individual.setSpeed(sc.nextInt());
 					individual.setMaxEnergy(sc.nextInt());
 					individual.setKidEnergy(sc.nextInt());
-					individual.setSensors(); //uh oh
-
 				}
 				sc.close();  //closes the scanner
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
 			}
 
-		//initialize map (do it from file!!)
-			for(int i=0; i<lightLimit; i++){
-				for(int j=0; j<lightLimit; j++){
-					int x = i+of;
-					int y = j+of;
+			// set sensors
+			// read creatures
+			target = directory.getAbsolutePath()+"/"+Constants.SensorsFileName;
+			// read line by line
+			try {
+				sc = new Scanner(new File(target));
+				//csv file header
+				//String str = "creatureID,sensorId,sensorValue"+"\n";
+				sc.nextLine();
+				sc.useDelimiter(",");   //sets the delimiter pattern
+				int creatureId = -1;
+				int sensorId = -1;
+				Node prop = null;
+				EmbodiedIndividual individual = null;
+				Tree sensors = null;
+				while (sc.hasNext()) {
+					int newCreatureId = sc.nextInt();
+					if(newCreatureId != creatureId) {
+						newCreatureId = creatureId;
+						individual = individualMap.get(creatureId);
+						sensors = new Tree(0);
+						sensorId = -1;
+					}
 
-					int id = map.incrementGlobalID();
-					Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
-					map.addIndividual(x, y, l);
-					d.addComponent(l);
+					int newSensorId = sc.nextInt();
+					if(sensorId != newSensorId){
+						sensorId = newSensorId;
+						sensors.root.addChild(prop);
+						prop = new Node();
+						prop.data = sensorId;
+					}
+
+					Node sens = new Node();
+					sens.data = sc.nextInt();
+					prop.addChild(sens);
+
+					individual.setSensors(sensors);
 				}
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
 			}
+
+
+//		//initialize map (do it from file!!)
+//			for(int i=0; i<lightLimit; i++){
+//				for(int j=0; j<lightLimit; j++){
+//					int x = i+of;
+//					int y = j+of;
+//
+//					int id = map.incrementGlobalID();
+//					Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
+//					map.addIndividual(x, y, l);
+//					d.addComponent(l);
+//				}
+//			}
 
 			this.setMap(map);
 		}

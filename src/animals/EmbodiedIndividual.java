@@ -606,4 +606,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		this.birthDate = birthDate;
 	}
 
+	public void setSensors() {
+
+	}
 }

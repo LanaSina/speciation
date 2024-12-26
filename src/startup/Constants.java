@@ -32,6 +32,7 @@ public class Constants {
 	public static boolean Save = true;
 	public static boolean SavePredation = true; // header and data do not match
 	public static String SnapshotFileName = "snapshot";
+	public static String SensorsFileName = "sensors";
 
 
 	/**
