@@ -246,46 +246,49 @@ public class Map {
         		Tree sensors = creature.getSensors();
         		
         		//interactions between creatures
-                Node s = sensors.root;
                 //iterate on properties
-                HashMap<Integer, ArrayList<Node>> sChildren = s.getChildren();
+                HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
 				for (Iterator<Integer> propIt = sChildren.keySet().iterator(); propIt.hasNext();){
                 	//this is the property
 					int k = propIt.next();
 					// sensor values
-                	ArrayList<Node> propValues = sChildren.get(k);
-                	for (Iterator<Node> valuesIt = propValues.iterator(); valuesIt.hasNext();){
-						Node valueNode = valuesIt.next();
-                		int value = valueNode.data;
-                		//actions
-        				HashMap<Integer, ArrayList<Node>> actions = valueNode.getChildren();
-        				for (Iterator<Integer> actionsIt = actions.keySet().iterator(); actionsIt.hasNext();) {
-							//action
-							int act = actionsIt.next();
-							//interactions with other creatures
-							if(act<2){
-								//iterate creatures on this cell
-		                		for(int m=0; m<c.creatures.size();m++){
-		                			double p = 1*3/(double)c.creatures.size();
-		                			if(Constants.uniformDouble()>p){
-		                				continue;
-		                			}
+                	Node propValues = sChildren.get(k);
+                	for (Iterator<ArrayList<Node>> valuesIt = propValues.getChildren().values().iterator(); valuesIt.hasNext();){
+						ArrayList<Node> valuesNode = valuesIt.next();
+						for (Iterator<Node> valuesNodeIt = valuesNode.iterator(); valuesNodeIt.hasNext();) {
+							Node valueNode = valuesNodeIt.next();
+							int value = valueNode.data;
 
-		                			Individual cr2 = c.creatures.get(m);
-		                			if(remove.contains(c.creatures.get(m)) | (cr2.isLight())){
-		                				continue;
-		                			}
-		                			//creature can't interact on itself
-		                			if(m==i){
-		                				continue;
-		                			}
+							//actions
+							HashMap<Integer, ArrayList<Node>> actions = valueNode.getChildren();
+							for (Iterator<Integer> actionsIt = actions.keySet().iterator(); actionsIt.hasNext(); ) {
+								//action
+								int act = actionsIt.next();
+								//interactions with other creatures
+								if (act < 2) {
+									//iterate creatures on this cell
+									for (int m = 0; m < c.creatures.size(); m++) {
+										double p = 1 * 3 / (double) c.creatures.size();
+										if (Constants.uniformDouble() > p) {
+											continue;
+										}
 
-									double ind_prop = cr2.getProperties()[k];
-		                			
-									if( (value >= ind_prop - 5) && (value <= ind_prop + 5) ){
-										tryEat(creature, cr2);
+										Individual cr2 = c.creatures.get(m);
+										if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
+											continue;
+										}
+										//creature can't interact on itself
+										if (m == i) {
+											continue;
+										}
+
+										double ind_prop = cr2.getProperties()[k];
+
+										if ((value >= ind_prop - 5) && (value <= ind_prop + 5)) {
+											tryEat(creature, cr2);
+										}
 									}
-		                		}
+								}
 							}
 						}
                 	}
@@ -551,16 +554,18 @@ public class Map {
 						str = "";
 						//tree nodes: root-> n properties -> detectionValue -> action
 						Tree sensors = creature.getSensors();
-						HashMap<Integer, ArrayList<Node>> sensorProps = sensors.root.getChildren();
+						HashMap<Integer, Node> sensorProps = sensors.properties;
 						for (Iterator<Integer> propIt = sensorProps.keySet().iterator(); propIt.hasNext();){
 							Integer prop = propIt.next();
-							ArrayList<Node> detectionValues = sensorProps.get(prop);
-							for (Iterator<Node> senseIt = detectionValues.iterator(); senseIt.hasNext();){
-								Node val = senseIt.next();
-								for (Iterator<Integer> actIt = val.getChildren().keySet().iterator(); actIt.hasNext();) {
-									Integer act = actIt.next();
+							Node detectionValuesNode = sensorProps.get(prop);
+							HashMap<Integer, ArrayList<Node>> detectionValues = detectionValuesNode.getChildren();
+							for (Iterator<Integer> senseIt = detectionValues.keySet().iterator(); senseIt.hasNext();){
+								int sensedValue = senseIt.next();
+								ArrayList<Node> values = detectionValues.get(sensedValue);
+								for (Iterator<Node> actIt = values.iterator(); actIt.hasNext();) {
+									Node act = actIt.next();
 									// "creatureID,property,sensorValue,action"+"\n";
-									str = str + creature.getID() + "," + prop + "," + val.data + "," + act + "\n";
+									str = str + creature.getID() + "," + prop + "," + sensedValue + "," + act + "\n";
 								}
 							}
 						}
