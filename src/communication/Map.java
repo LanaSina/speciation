@@ -124,7 +124,7 @@ public class Map {
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
 				+ death + ","+ matForKids ;
 			 */
-			String str = "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+			String str = "ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 			try {
 				summaryWriter.append(str);
 				summaryWriter.flush();
@@ -145,11 +145,11 @@ public class Map {
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
 				+ death + ","+ matForKids ;
 			 */
-			String header_predation = "t, pred_id," +
+			String header_predation = "t, pred_id," + "pred_isLight," +
 					"pred_parent, pred_created, pred_lifeSpan," +
 					"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
 					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids," +
-					"prey_id,"+
+					"prey_id,"+ "prey_isLight," +
 					"prey_parent, prey_created, prey_lifeSpan," +
 					"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
 					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids" +
@@ -327,9 +327,10 @@ public class Map {
 					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
 					/*
-						String header_predation = "t, pred_id, prey_id," +
+						String header_predation = "t, pred_id, pred_is_light," +
 						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
 						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids," +
+						 prey_id + prey_islight +
 						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
 						"prey_pgmDeath, prey_matForKids\n";
 					 */
@@ -370,7 +371,7 @@ public class Map {
 				if(Constants.uniformDouble()<0.01) {
 					if (!creature.isLight() & !creature.parentIsLight()) {
 						//write down info
-						// "ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
+						// "ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor\n";
 						String str = creature.stringDesc() + "\n";
 						try {
 							summaryWriter.append(str);
@@ -455,13 +456,13 @@ public class Map {
 
 		// move config file (todo: path in constants)
 		Path src = Paths.get("src/config.properties");
-		Path target = Paths.get(dataFolderName+"/config.properties");
+		Path target = Paths.get(dataFolderName+"/"+strDate+"/config.properties");
 		try {
 			Files.copy(src, target, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		mlog.say("properties copied to " + dataFolderName);
+		mlog.say("properties copied to " + dataFolderName+"/"+strDate);
 
 		String filePath = strDate + "/" + Constants.SnapshotFileName;
 		saveCreatures(dataFolderName, filePath);
@@ -482,7 +483,8 @@ public class Map {
 		/*
 		"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 		 */
-		String str = "x,y,ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		String str = "x,y,ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		// String debugstr = "";
 		try {
 			stateWriter.append(str);
 			stateWriter.flush();
@@ -492,17 +494,30 @@ public class Map {
 					Cell c = map[x][y];
 					int size = c.creatures.size();
 
+					if(size==0){
+						continue;
+					}
+					// mlog.say("snapshot " + x + " " + y + " " + size);
+					//debugstr = debugstr + size + " ";
+
+
 					for (int id = 0; id<size; id++){
-						Individual creature = c.creatures.get(id);
-						str = x + "," + y + "," + creature.stringDesc() +"\n";
-						stateWriter.append(str);
-						stateWriter.flush();
+						try {
+							Individual creature = c.creatures.get(id);
+							String astr = x + "," + y + "," + creature.stringDesc() + "\n";
+							stateWriter.append(astr);
+							stateWriter.flush();
+						} catch (IndexOutOfBoundsException e){
+							e.printStackTrace();
+						}
 					}
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		//mlog.say(debugstr);
 	}
 
 	void saveSensors(String dataFolderName, String filePath){
@@ -513,6 +528,7 @@ public class Map {
 
 		//csv file header
 		String str = "creatureID,sensorId,sensorValue"+"\n";
+		//String debugstr = "";
 		try {
 			stateWriter.append(str);
 			stateWriter.flush();
@@ -522,10 +538,20 @@ public class Map {
 					Cell c = map[x][y];
 					int size = c.creatures.size();
 
-					for (int id = 0; id<size; id++){
-						Individual creature = c.creatures.get(id);
-						str = "";
+					if(size==0){
+						continue;
+					}
 
+					//mlog.say("sensors " + x + " " + y + " " + size);
+					// debugstr = debugstr + size + " ";
+
+					for (int id = 0; id<size; id++){
+						EmbodiedIndividual creature = (EmbodiedIndividual) c.creatures.get(id);
+						if (creature.hasSensors()==0){
+							continue;
+						}
+
+						str = "";
 						Tree sensors = creature.getSensors();
 						ArrayList<Node> props = sensors.root.getChildren();
 						for (Iterator<Node> propIt = props.iterator(); propIt.hasNext();){
@@ -535,7 +561,6 @@ public class Map {
 								str = str + creature.getID() + "," + prop.data + "," + val.data + "\n";
 							}
 						}
-
 						stateWriter.append(str);
 						stateWriter.flush();
 					}
@@ -544,6 +569,8 @@ public class Map {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		// mlog.say(debugstr);
 	}
 
 	/**

@@ -148,8 +148,8 @@ public class Display extends JFrame {
 					pauseProcedure(true);
 					saveButton.setText("Saving...");
 					//save
-					String savedAt = lifeRunnable.save();
-					mlog.say("Saved at " + savedAt);
+					lifeRunnable.save();
+					// this should actually be delayed...
 					saveButton.setText("Save");
 				}
 			});

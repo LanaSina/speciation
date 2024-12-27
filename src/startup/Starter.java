@@ -123,6 +123,7 @@ public class Starter {
 		MyLog mlog = new MyLog("lifeRunnable",true);
 		boolean run = true;
 		public boolean running = true;
+		boolean doSave = false;
 
 		//map
 		Map map = null;
@@ -153,16 +154,25 @@ public class Starter {
 						e.printStackTrace();
 					}
 				}
+
+				if(doSave){
+					String fileName =  map.saveSate(dataFolderName);
+					String savedAt = dataFolderName + fileName;
+					mlog.say("Saved at " + savedAt);
+					doSave = false;
+				}
 			}
 			mlog.say("dies");
 		}
 
 
-		public String save(){
-			String fileName =  map.saveSate(dataFolderName);
+		public void save(){
+			doSave = true;
+			// only save after proper updates
+			/*String fileName =  map.saveSate(dataFolderName);
 			String savedAt = dataFolderName + fileName;
 
-			return savedAt;
+			return savedAt;*/
 		}
 
 		
@@ -209,34 +219,53 @@ public class Starter {
 			HashMap<Integer, EmbodiedIndividual> individualMap = new HashMap<>();
 			// read line by line
 			Scanner sc = null;
+			String[] lineArray;
+			String line = null;
 			try {
 				sc = new Scanner(new File(target));
 				// header
-				// x,y,ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids
+				// x,y,ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids
 				sc.nextLine();
-				sc.useDelimiter(",");   //sets the delimiter pattern
-				while (sc.hasNext()){
+				// sc.useDelimiter(",");   //sets the delimiter pattern
+				while(sc.hasNextLine()){
+					line = sc.nextLine();
+					lineArray = line.split(",");
+					int pos = 0;
 					//x and y
-					int x = sc.nextInt();
-					int y = sc.nextInt();
+					int x =  Integer.parseInt(lineArray[pos]);
+					pos++;
+					int y = Integer.parseInt(lineArray[pos]);
+					pos++;
 					// id
-					int id = sc.nextInt();
+					int id = Integer.parseInt(lineArray[pos]);
+					pos++;
 					EmbodiedIndividual individual = new EmbodiedIndividual(id);
 					individualMap.put(id, individual);
-					individual.setParentID(sc.nextInt());
-					individual.setBirthDate(sc.nextInt());
+					//is light
+					individual.setIsLight(true);
+					pos++;
+					individual.setParentID(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setBirthDate(Integer.parseInt(lineArray[pos]));
+					pos++;
 					// lifeSpan
-					sc.nextInt();
+					pos++;
 					//
-					individual.setSpeed(sc.nextInt());
-					individual.setMaxEnergy(sc.nextInt());
-					individual.setKidEnergy(sc.nextInt());
+					individual.setSpeed(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setMaxEnergy(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setKidEnergy(Integer.parseInt(lineArray[pos]));
+					pos++;
 					// number or sensors
-					sc.nextInt();
-					individual.setFirstAncestorID(sc.nextInt());
-					individual.setNKids(sc.nextInt());
-					individual.setDeath(sc.nextInt());
-					individual.setMatForKids(sc.nextInt());
+					pos++;
+					individual.setFirstAncestorID(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setNKids(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setDeath(Integer.parseInt(lineArray[pos]));
+					pos++;
+					individual.setMatForKids(Integer.parseInt(lineArray[pos]));
 					map.addIndividual(x, y, individual);
 					d.addComponent(individual);
 				}
@@ -252,33 +281,44 @@ public class Starter {
 			try {
 				sc = new Scanner(new File(target));
 				//csv file header
-				//String str = "creatureID,sensorId,sensorValue"+"\n";
-				sc.nextLine();
-				sc.useDelimiter(",");   //sets the delimiter pattern
 				int creatureId = -1;
 				int sensorId = -1;
 				Node prop = null;
 				EmbodiedIndividual individual = null;
 				Tree sensors = null;
-				while (sc.hasNext()) {
-					int newCreatureId = sc.nextInt();
+				//String str = "creatureID,sensorId,sensorValue"+"\n";
+				sc.nextLine();
+				line = null;
+				while(sc.hasNextLine()){
+					line = sc.nextLine();
+					lineArray = line.split(",");
+					int pos = 0;
+
+					int newCreatureId = Integer.parseInt(lineArray[pos]);
+					pos++;
 					if(newCreatureId != creatureId) {
-						newCreatureId = creatureId;
+						creatureId = newCreatureId;
 						individual = individualMap.get(creatureId);
+						if(individual==null){
+							mlog.say("error -");
+						}
 						sensors = new Tree(0);
 						sensorId = -1;
 					}
 
-					int newSensorId = sc.nextInt();
+					int newSensorId = Integer.parseInt(lineArray[pos]);
+					pos++;
 					if(sensorId != newSensorId){
 						sensorId = newSensorId;
-						sensors.root.addChild(prop);
+						if(prop!=null) {
+							sensors.root.addChild(prop);
+						}
 						prop = new Node();
 						prop.data = sensorId;
 					}
 
 					Node sens = new Node();
-					sens.data = sc.nextInt();
+					sens.data = Integer.parseInt(lineArray[pos]);
 					prop.addChild(sens);
 
 					individual.setSensors(sensors);

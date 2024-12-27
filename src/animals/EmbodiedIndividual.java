@@ -505,7 +505,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 */
 	public String stringDesc() {
 		
-		String description =  ID +","+parentID+","+birthDate+","+life+","
+		String description =  ID +","+ isLight + "," + parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
 				+ death + ","+ matForKids ;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
@@ -608,5 +608,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 	public void setSensors() {
 
+	}
+
+	public void setIsLight(boolean b) {
+		isLight = b;
 	}
 }
