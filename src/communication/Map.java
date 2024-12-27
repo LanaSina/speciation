@@ -249,44 +249,40 @@ public class Map {
                 //iterate on properties
                 HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
 				for (Iterator<Integer> propIt = sChildren.keySet().iterator(); propIt.hasNext();){
-                	//this is the property
+                	// property
 					int k = propIt.next();
-					// sensor values
+					// sensed values
                 	Node propValues = sChildren.get(k);
-                	for (Iterator<ArrayList<Node>> valuesIt = propValues.getChildren().values().iterator(); valuesIt.hasNext();){
-						ArrayList<Node> valuesNode = valuesIt.next();
+                	for (Iterator<Integer> valuesIt = propValues.getChildren().keySet().iterator(); valuesIt.hasNext();){
+						int valueSensed = valuesIt.next();
+						ArrayList<Node> valuesNode = propValues.getChildren().get(valueSensed);
 						for (Iterator<Node> valuesNodeIt = valuesNode.iterator(); valuesNodeIt.hasNext();) {
 							Node valueNode = valuesNodeIt.next();
-							int value = valueNode.data;
+							int action = valueNode.data;
+							//actions always just one
 
-							//actions
-							HashMap<Integer, ArrayList<Node>> actions = valueNode.getChildren();
-							for (Iterator<Integer> actionsIt = actions.keySet().iterator(); actionsIt.hasNext(); ) {
-								//action
-								int act = actionsIt.next();
-								//interactions with other creatures
-								if (act < 2) {
-									//iterate creatures on this cell
-									for (int m = 0; m < c.creatures.size(); m++) {
-										double p = 1 * 3 / (double) c.creatures.size();
-										if (Constants.uniformDouble() > p) {
-											continue;
-										}
+							//interactions with other creatures
+							if (action < 2) {
+								//iterate creatures on this cell
+								for (int m = 0; m < c.creatures.size(); m++) {
+									double p = 1 * 3 / (double) c.creatures.size();
+									if (Constants.uniformDouble() > p) {
+										continue;
+									}
 
-										Individual cr2 = c.creatures.get(m);
-										if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
-											continue;
-										}
-										//creature can't interact on itself
-										if (m == i) {
-											continue;
-										}
+									Individual cr2 = c.creatures.get(m);
+									if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
+										continue;
+									}
+									//creature can't interact on itself
+									if (m == i) {
+										continue;
+									}
 
-										double ind_prop = cr2.getProperties()[k];
+									double ind_prop = cr2.getProperties()[k];
 
-										if ((value >= ind_prop - 5) && (value <= ind_prop + 5)) {
-											tryEat(creature, cr2);
-										}
+									if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
+										tryEat(creature, cr2);
 									}
 								}
 							}

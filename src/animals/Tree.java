@@ -24,6 +24,7 @@ public class Tree {
 	    //root.data = 0;
 		for(int i=0; i<(nProperties);i++){
 			Node sensedValues = new Node();
+			sensedValues.data = i;
 			properties.put(i, sensedValues);
 			// ArrayList<Node> values = new ArrayList<>();
 			//root.getChildren().put(i, values);

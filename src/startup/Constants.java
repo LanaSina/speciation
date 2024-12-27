@@ -23,7 +23,7 @@ public class Constants {
 	public static final int GridMax = 50;
 	public static final int GridStep = 20;
 	
-	public static final int ActionTypes = 10;
+	public static final int ActionTypes = 2;//10
 
 	/** folder where data file will be recorded*/
 	public static String DataPath = "../new_data";

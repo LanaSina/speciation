@@ -27,15 +27,6 @@ public class Node {
 			children.put(id, values);
 		}
 
-		// actually because of sensor cost this is not necessary...
-//		boolean doAdd = true;
-//		for (Iterator<Node> actionsIt = values.iterator(); actionsIt.hasNext();){
-//			Node child = actionsIt.next();
-//			if (child.data == value){
-//				doAdd = false;
-//			}
-//		}
-
 		Node child = new Node();
 		child.data = value;
 
