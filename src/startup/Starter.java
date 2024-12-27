@@ -34,6 +34,7 @@ import java.util.Scanner;
 public class Starter {
 	static String dataFolderName;
 
+
 	/**
 	 * @param args
 	 */
@@ -169,10 +170,6 @@ public class Starter {
 		public void save(){
 			doSave = true;
 			// only save after proper updates
-			/*String fileName =  map.saveSate(dataFolderName);
-			String savedAt = dataFolderName + fileName;
-
-			return savedAt;*/
 		}
 
 		
@@ -204,14 +201,13 @@ public class Starter {
 
 			Properties properties = loadProperties(target);
 
+			// kill previous display
+			map.kill();
 			//worldmap
 			String dname = properties.getProperty("sim_name");
 			int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 			Display d = new Display(dname, this);
-			int lightLimit = 30;//30
-			int of = 10;
-
-			Map map = new Map(cst_grid_max,d, dataFolderName);
+			map = new Map(cst_grid_max,d,dataFolderName);
 
 			// read creatures
 			target = directory.getAbsolutePath()+"/"+Constants.SnapshotFileName+".csv";
@@ -221,6 +217,7 @@ public class Starter {
 			Scanner sc = null;
 			String[] lineArray;
 			String line = null;
+			int maxId = -1;
 			try {
 				sc = new Scanner(new File(target));
 				// header
@@ -230,42 +227,15 @@ public class Starter {
 				while(sc.hasNextLine()){
 					line = sc.nextLine();
 					lineArray = line.split(",");
-					int pos = 0;
 					//x and y
-					int x =  Integer.parseInt(lineArray[pos]);
-					pos++;
-					int y = Integer.parseInt(lineArray[pos]);
-					pos++;
-					// id
-					int id = Integer.parseInt(lineArray[pos]);
-					pos++;
-					EmbodiedIndividual individual = new EmbodiedIndividual(id);
+					int x =  Integer.parseInt(lineArray[0]);
+					int y = Integer.parseInt(lineArray[1]);
+					int id = Integer.parseInt(lineArray[2]);
+					if (id>maxId){
+						maxId = id;
+					}
+					EmbodiedIndividual individual = new EmbodiedIndividual(id, line);
 					individualMap.put(id, individual);
-					//is light
-					individual.setIsLight(true);
-					pos++;
-					individual.setParentID(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setBirthDate(Integer.parseInt(lineArray[pos]));
-					pos++;
-					// lifeSpan
-					pos++;
-					//
-					individual.setSpeed(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setMaxEnergy(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setKidEnergy(Integer.parseInt(lineArray[pos]));
-					pos++;
-					// number or sensors
-					pos++;
-					individual.setFirstAncestorID(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setNKids(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setDeath(Integer.parseInt(lineArray[pos]));
-					pos++;
-					individual.setMatForKids(Integer.parseInt(lineArray[pos]));
 					map.addIndividual(x, y, individual);
 					d.addComponent(individual);
 				}
@@ -273,6 +243,8 @@ public class Starter {
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
 			}
+
+			map.setGlobalId(maxId+1);
 
 			// set sensors
 			// read creatures
@@ -325,23 +297,7 @@ public class Starter {
 				}
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
-			}
-
-
-//		//initialize map (do it from file!!)
-//			for(int i=0; i<lightLimit; i++){
-//				for(int j=0; j<lightLimit; j++){
-//					int x = i+of;
-//					int y = j+of;
-//
-//					int id = map.incrementGlobalID();
-//					Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
-//					map.addIndividual(x, y, l);
-//					d.addComponent(l);
-//				}
-//			}
-
-			this.setMap(map);
+			}//*/
 		}
 	}
 

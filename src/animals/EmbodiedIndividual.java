@@ -100,11 +100,46 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		makeColor();	
 	}
 
-	/**
-	 * Load from file
-	 */
-	public EmbodiedIndividual(int myID){
-		ID = myID;
+	public EmbodiedIndividual(int myId, String line) {
+		String[] lineArray = line.split(",");
+		ID = myId;
+
+		sensors = new Tree(0);//root is not important
+		for(int i=0; i<(nProperties);i++){
+			Node prop = new Node();
+			prop.data = i;
+			sensors.root.addChild(prop);
+		}
+
+		//x, y, id
+		int pos = 3;
+		position[0] = Double.parseDouble(lineArray[pos]);
+		position[1] = Double.parseDouble(lineArray[pos+1]);
+		pos = pos + 2;
+		isLight = Boolean.parseBoolean(lineArray[pos]);
+		pos++;
+		parentID = Integer.parseInt(lineArray[pos]);
+		pos++;
+		birthDate = Integer.parseInt(lineArray[pos]);
+		pos++;
+		// lifeSpan
+		pos++;
+		//
+		speed = Integer.parseInt(lineArray[pos]);
+		pos++;
+		maxEnergy = Integer.parseInt(lineArray[pos]);
+		pos++;
+		kidEnergy = Integer.parseInt(lineArray[pos]);
+		pos++;
+		// number or sensors
+		pos++;
+		firstAncestorID = Integer.parseInt(lineArray[pos]);
+		pos++;
+		nKids = Integer.parseInt(lineArray[pos]);
+		pos++;
+		death = Integer.parseInt(lineArray[pos]);
+		pos++;
+		matForKids = Integer.parseInt(lineArray[pos]);
 	}
 
 	/**
@@ -505,7 +540,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 */
 	public String stringDesc() {
 		
-		String description =  ID +","+ isLight + "," + parentID+","+birthDate+","+life+","
+		String description =  ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
 				+ death + ","+ matForKids ;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
@@ -613,4 +648,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public void setIsLight(boolean b) {
 		isLight = b;
 	}
+
+
 }

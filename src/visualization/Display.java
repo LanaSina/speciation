@@ -174,7 +174,7 @@ public class Display extends JFrame {
 					 System.out.println(fileChooser.getCurrentDirectory());
 					 File directory = fileChooser.getCurrentDirectory();
 					 lifeRunnable.load(directory);
-					 //openButton.getProperties().put("FILE_LOCATION", file.getAbsolutePath());
+					 pauseProcedure(false);
 				 }
 			});
 
