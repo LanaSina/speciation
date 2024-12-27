@@ -254,11 +254,11 @@ public class Starter {
 				sc = new Scanner(new File(target));
 				//csv file header
 				int creatureId = -1;
-				int sensorId = -1;
+				// int sensorId = -1;
 				Node prop = null;
 				EmbodiedIndividual individual = null;
-				Tree sensors = null;
-				//String str = "creatureID,sensorId,sensorValue"+"\n";
+				// Tree sensors = null;
+				//String str = "creatureID,sensorId,sensorValue,action"+"\n";
 				sc.nextLine();
 				line = null;
 				while(sc.hasNextLine()){
@@ -274,26 +274,17 @@ public class Starter {
 						if(individual==null){
 							mlog.say("error -");
 						}
-						sensors = new Tree(0);
-						sensorId = -1;
+						// sensors = new Tree(0);
+						// sensorId = -1;
 					}
 
-					int newSensorId = Integer.parseInt(lineArray[pos]);
+					int property = Integer.parseInt(lineArray[pos]);
 					pos++;
-					if(sensorId != newSensorId){
-						sensorId = newSensorId;
-						if(prop!=null) {
-							sensors.root.addChild(prop);
-						}
-						prop = new Node();
-						prop.data = sensorId;
-					}
-
-					Node sens = new Node();
-					sens.data = Integer.parseInt(lineArray[pos]);
-					prop.addChild(sens);
-
-					individual.setSensors(sensors);
+					int value = Integer.parseInt(lineArray[pos]);
+					pos++;
+					int action = Integer.parseInt(lineArray[pos]);
+					Tree sensors = individual.getSensors();
+					sensors.addSensor(property, value, action);
 				}
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);

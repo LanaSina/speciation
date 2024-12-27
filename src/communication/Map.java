@@ -124,7 +124,8 @@ public class Map {
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
 				+ death + ","+ matForKids ;
 			 */
-			String str = "ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+			String str = "ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy," +
+					"kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids,energy"+"\n";
 			try {
 				summaryWriter.append(str);
 				summaryWriter.flush();
@@ -148,11 +149,11 @@ public class Map {
 			String header_predation = "t, pred_id, pred_pos_x, pred_pos_y, pred_isLight," +
 					"pred_parent, pred_created, pred_lifeSpan," +
 					"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
-					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids," +
+					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids, pred_energy" +
 					"prey_id, prey_pos_x, prey_pos_y, prey_isLight," +
 					"prey_parent, prey_created, prey_lifeSpan," +
 					"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
-					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids" +
+					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids, prey_energy" +
 					"\n";
 
 
@@ -247,22 +248,20 @@ public class Map {
         		//interactions between creatures
                 Node s = sensors.root;
                 //iterate on properties
-                ArrayList<Node> sChildren = s.getChildren();
-                for(int k=0; k<sChildren.size();k++){
+                HashMap<Integer, ArrayList<Node>> sChildren = s.getChildren();
+				for (Iterator<Integer> propIt = sChildren.keySet().iterator(); propIt.hasNext();){
                 	//this is the property
-                	Node prop = sChildren.get(k);
-                	//these are the value-action pairs
-                	ArrayList<Node> pChildren = prop.getChildren();
-                	
-                	for(int l=0; l<pChildren.size();l++){
-                		int value = pChildren.get(l).data;
+					int k = propIt.next();
+					// sensor values
+                	ArrayList<Node> propValues = sChildren.get(k);
+                	for (Iterator<Node> valuesIt = propValues.iterator(); valuesIt.hasNext();){
+						Node valueNode = valuesIt.next();
+                		int value = valueNode.data;
                 		//actions
-        				ArrayList<Node> actions = pChildren.get(l).getChildren();
-        				for (Iterator<Node> iterator = actions.iterator(); iterator.hasNext();) {
-							Node node = (Node) iterator.next();
+        				HashMap<Integer, ArrayList<Node>> actions = valueNode.getChildren();
+        				for (Iterator<Integer> actionsIt = actions.keySet().iterator(); actionsIt.hasNext();) {
 							//action
-							int act = node.data;
-							
+							int act = actionsIt.next();
 							//interactions with other creatures
 							if(act<2){
 								//iterate creatures on this cell
@@ -329,10 +328,10 @@ public class Map {
 					/*
 						String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
 						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
-						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids," +
+						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids,energy " +
 						 prey_id +  pos[0], pos[1] +prey_islight +
 						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
-						"prey_pgmDeath, prey_matForKids\n";
+						"prey_pgmDeath, prey_matForKids, energy\n";
 					 */
 					String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
 					try {
@@ -483,7 +482,8 @@ public class Map {
 		/*
 		"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
 		 */
-		String str = "x,y,ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+		String str = "x,y,ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy," +
+				"sensors,ancestor,nkids,pgmDeath,matForKids,energy"+"\n";
 		// String debugstr = "";
 		try {
 			stateWriter.append(str);
@@ -527,7 +527,7 @@ public class Map {
 		fb = null;
 
 		//csv file header
-		String str = "creatureID,sensorId,sensorValue"+"\n";
+		String str = "creatureID,sensorId,sensorValue,action"+"\n";
 		//String debugstr = "";
 		try {
 			stateWriter.append(str);
@@ -542,9 +542,6 @@ public class Map {
 						continue;
 					}
 
-					//mlog.say("sensors " + x + " " + y + " " + size);
-					// debugstr = debugstr + size + " ";
-
 					for (int id = 0; id<size; id++){
 						EmbodiedIndividual creature = (EmbodiedIndividual) c.creatures.get(id);
 						if (creature.hasSensors()==0){
@@ -552,13 +549,19 @@ public class Map {
 						}
 
 						str = "";
+						//tree nodes: root-> n properties -> detectionValue -> action
 						Tree sensors = creature.getSensors();
-						ArrayList<Node> props = sensors.root.getChildren();
-						for (Iterator<Node> propIt = props.iterator(); propIt.hasNext();){
-							Node prop = propIt.next();
-							for (Iterator<Node> senseIt = prop.getChildren().iterator(); senseIt.hasNext();){
+						HashMap<Integer, ArrayList<Node>> sensorProps = sensors.root.getChildren();
+						for (Iterator<Integer> propIt = sensorProps.keySet().iterator(); propIt.hasNext();){
+							Integer prop = propIt.next();
+							ArrayList<Node> detectionValues = sensorProps.get(prop);
+							for (Iterator<Node> senseIt = detectionValues.iterator(); senseIt.hasNext();){
 								Node val = senseIt.next();
-								str = str + creature.getID() + "," + prop.data + "," + val.data + "\n";
+								for (Iterator<Integer> actIt = val.getChildren().keySet().iterator(); actIt.hasNext();) {
+									Integer act = actIt.next();
+									// "creatureID,property,sensorValue,action"+"\n";
+									str = str + creature.getID() + "," + prop + "," + val.data + "," + act + "\n";
+								}
 							}
 						}
 						stateWriter.append(str);

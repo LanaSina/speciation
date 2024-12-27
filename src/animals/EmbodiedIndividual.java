@@ -90,26 +90,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[4] =  death;
 		properties[5] = matForKids;
 		
-		sensors = new Tree(0);//root is not important
-		for(int i=0; i<(nProperties);i++){
-			Node prop = new Node();
-			prop.data = i;
-			sensors.root.addChild(prop);
-		}
-
-		makeColor();	
+		sensors = new Tree(nProperties);//root is not important
+		makeColor();
 	}
 
 	public EmbodiedIndividual(int myId, String line) {
 		String[] lineArray = line.split(",");
 		ID = myId;
-
-		sensors = new Tree(0);//root is not important
-		for(int i=0; i<(nProperties);i++){
-			Node prop = new Node();
-			prop.data = i;
-			sensors.root.addChild(prop);
-		}
 
 		//x, y, id
 		int pos = 3;
@@ -140,6 +127,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		death = Integer.parseInt(lineArray[pos]);
 		pos++;
 		matForKids = Integer.parseInt(lineArray[pos]);
+		pos++;
+		energy = Double.parseDouble(lineArray[pos]);
+
+		sensors = new Tree(nProperties);
+		makeColor();
 	}
 
 	/**
@@ -240,45 +232,39 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				// double plus = Constants.uniformDouble(-1, 1);
 				if(plus>0){
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
-					//sensor exists for this property?
-					ArrayList<Node> props = sensors.root.getChildren();
-					ArrayList<Node> senses = props.get(prop).getChildren();
-					//modify
+
+					//modify the detection value
 					if(generateBool()){
-						//tree nodes: root-> 3properties -> detectionValue -> action
-						//          0          id              value            id
-						boolean hasSensors = !senses.isEmpty();
-						if(hasSensors){
-							//get random sensor
-							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
-							Node sensor = senses.get(s);	
-							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
-							int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
-							sensor.data = value;
-						}
+						//tree nodes: root-> properties -> detectionValue -> action
+						ArrayList<Node> sensedValues = sensors.root.getChildren().get(prop);
+						//get random sensor
+						int s = (int) (Constants.uniformDouble(0, sensedValues.size()-1)+0.5);
+						Node sensor = sensedValues.remove(s);
+						int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
+						sensor.data = value;
+						sensedValues.add(value, sensor);
 					} else {
-						//create sensor. 
-						Node value = new Node();
-						
-						value.data = (int) Constants.uniformDouble(0, cst_energy_max);
-						Node action = new Node();
-						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
-						value.addChild(action);
-						
-						sensors.root.getChildren().get(prop).addChild(value);
+						//create sensor.
+						// root -> property being sensed -> value being sensed -> action
+						// root -> [prop id, array]
+						int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
+						int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
+						sensors.addSensor(prop, sensor_value, action);
 					}							
 				}else{
 					//tree nodes: root-> 3properties -> detectionValue -> action
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);
 					//sensor exists for this property?
-					ArrayList<Node> props = sensors.root.getChildren();
+					/*ArrayList<Node> props = sensors.root.getChildren();
 					ArrayList<Node> sensors = props.get(prop).getChildren();
 					boolean hasSensors = !sensors.isEmpty();
 					if(hasSensors){
 						int sens = (int) (Constants.uniformDouble(0, sensors.size()-1)+0.5);
 						props.get(prop).removeChild(sens);
-					}
-					
+					}*/
+
+					// int sens = (int) (Constants.uniformDouble(0, sensors.size()-1)+0.5);
+					sensors.root.removeRandomChild(prop);
 				}
 			}
 			if(generateBool(bias)){
@@ -543,7 +529,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		String description =  ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids ;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
+				+ death + ","+ matForKids + "," + energy;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
 		return description;
 	}
 	

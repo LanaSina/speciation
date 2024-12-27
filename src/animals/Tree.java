@@ -18,39 +18,48 @@ public class Tree {
 	//tree nodes: root-> 3properties -> detectionValue -> action
 	//          0          id              value            id
 	
-	public Tree(Integer rootData) {
+	public Tree(int nProperties) {
 	    root = new Node();
-	    root.data = rootData;
-	   // root.children = new ArrayList<Node>();
+	    root.data = 0;
+		for(int i=0; i<(nProperties);i++){
+			ArrayList<Node> values = new ArrayList<>();
+			root.getChildren().put(i, values);
+		}
 	}
 	
 	public Tree copy(){
-		Tree copied = new Tree(this.root.data);		
-		copied.root = copyNode(this.root, 0);
+		int nProperties = root.getChildren().keySet().size();
+		Tree copied = new Tree(nProperties);
+		copied.root = root.copy();
+
+		//copied.root = copyNode(this.root, 0);
 		return copied;
 	}
-	
-	//let's allow only 3rd level
-	/**recursive copy*/
-	private Node copyNode(Node original, int depth){
-		if (depth>3){
-			mlog.say("error depth "+depth);
-		}
-		Node copied = new Node();
-		copied.data = original.data;
-		ArrayList<Node> orChildren = original.getChildren();
-		for(int i = 0; i<orChildren.size();i++){
-			Node orChild = orChildren.get(i);
-			Node child = copyNode(orChildren.get(i),depth+1);
-			child.data = orChild.data;
-			
-			copied.addChild(child);
-		}
-		return copied;
+
+	// root -> property being sensed -> value being sensed -> action
+	public void addSensor(int property, int property_val, int action){
+		Node act = new Node();
+		act.data = action;
+		root.getChildren().get(property).add(property_val, act);
 	}
 	
-//	public int getChildCount(){
-//		return childCount;
+//	//let's allow only 3rd level
+//	/**recursive copy*/
+//	private Node copyNode(Node original, int depth){
+//		if (depth>3){
+//			mlog.say("error depth "+depth);
+//		}
+//		Node copied = new Node();
+//		copied.data = original.data;
+//		ArrayList<Node> orChildren = original.getChildren();
+//		for(int i = 0; i<orChildren.size();i++){
+//			Node orChild = orChildren.get(i);
+//			Node child = copyNode(orChildren.get(i),depth+1);
+//			child.data = orChild.data;
+//
+//			copied.addChild(child);
+//		}
+//		return copied;
 //	}
 }
 
