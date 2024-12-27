@@ -22,7 +22,7 @@ base_folder = "../../new_data/"
 ## Read agents data
 
 ```{r}
-folder = "2024_12_04_19_31"  #"trees/2024_11_29_12_00"   
+folder = "2024_12_28_07_21"  #"trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -50,7 +50,20 @@ plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, ma
 rglwidget()
 ```
 
+```{r}
+old_world = whole_world
+```
 
+```{r}
+
+close3d()
+plot3d(x= whole_world$created, y=whole_world$pgmDeath, z = whole_world$maxEnergy,
+       col = "red", main = folder, xlim = c(0, max(whole_world$created)))
+points3d(x= old_world$created, y=old_world$pgmDeath, z = old_world$maxEnergy,
+       col = "black")
+rglwidget()
+
+```
 
 
 ```{r}
@@ -358,3 +371,27 @@ plot(late_interactions$g_prey, late_interactions$b_prey, col = colors_prey)
 plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
 
 ```
+
+
+Debug saved data
+
+```{r}
+folder = "2024_12_28_06_57/28_06_57"   
+fileName = paste(base_folder, folder,"sensors.csv",sep="/")
+sensors <- read.csv(fileName, header=TRUE)
+
+fileName = paste(base_folder, folder,"snapshot.csv",sep="/")
+snapshot <- read.csv(fileName, header=TRUE)
+```
+
+```{r}
+plot(snapshot$x, snapshot$y)
+```
+
+
+```{r}
+not_light = subset(snapshot, snapshot$isLight == "false")
+plot(not_light$pos_x, not_light$pos_y)
+
+```
+
