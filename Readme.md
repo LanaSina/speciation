@@ -22,3 +22,7 @@ In the `startup/Constants.java` file, modify the following values as appropriate
 public static boolean SavePredation = true;``
 
 Build and execute with `startup/Starter.java` as `main` file.
+
+## Graphics
+
+direct children of Light creatures are not displayed.

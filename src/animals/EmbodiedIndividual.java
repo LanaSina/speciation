@@ -129,6 +129,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		matForKids = Integer.parseInt(lineArray[pos]);
 		pos++;
 		energy = Double.parseDouble(lineArray[pos]);
+		pos++;
+		parentIsLight = Boolean.parseBoolean(lineArray[pos]);
 
 		sensors = new Tree(nProperties);
 		makeColor();
@@ -530,7 +532,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		String description =  ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids + "," + energy;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
+				+ death + ","+ matForKids + "," + energy + "," + parentIsLight;
 		return description;
 	}
 	

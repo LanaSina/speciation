@@ -38,11 +38,6 @@ public class Display extends JFrame {
 	        this.setVisible(true);
 	    }
 
-//		public Display(Object lock) {
-//			name = "Open Ended Evolution";
-//	        initUI(lock);
-//	        this.setVisible(true);
-//	    }
 	    private void initUI(Starter.LifeRunnable lifeRunnable) {
 	    	
 	        setTitle(name);

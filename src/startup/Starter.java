@@ -245,7 +245,6 @@ public class Starter {
 			}
 
 			map.setGlobalId(maxId+1);
-
 			// set sensors
 			// read creatures
 			target = directory.getAbsolutePath()+"/"+Constants.SensorsFileName+".csv";
@@ -288,7 +287,7 @@ public class Starter {
 				}
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
-			}//*/
+			}
 		}
 	}
 
