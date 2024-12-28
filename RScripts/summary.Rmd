@@ -22,10 +22,11 @@ base_folder = "../../new_data/"
 ## Read agents data
 
 ```{r}
-folder = "2024_12_28_07_21"  #"trees/2024_11_29_12_00"   
+folder = "2024_12_29_06_16"  #"trees/2024_11_29_12_00"   
 fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
+world = whole_world
 ```
 
 ## Visualization
@@ -43,7 +44,6 @@ whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 # # the vector of randomly selected elements is then used to select rows from the dataframe
 # world = whole_world[the_sample,]
 
-world = whole_world
 colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
 close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)

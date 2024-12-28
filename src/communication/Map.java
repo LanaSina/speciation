@@ -256,35 +256,29 @@ public class Map {
                 	Node propValues = sChildren.get(k);
                 	for (Iterator<Integer> valuesIt = propValues.getChildren().keySet().iterator(); valuesIt.hasNext();){
 						int valueSensed = valuesIt.next();
-						ArrayList<Node> valuesNode = propValues.getChildren().get(valueSensed);
-						for (Iterator<Node> valuesNodeIt = valuesNode.iterator(); valuesNodeIt.hasNext();) {
-							Node valueNode = valuesNodeIt.next();
-							int action = valueNode.data;
-							//actions always just one
+						int action = propValues.getChildren().get(valueSensed);
+						//interactions with other creatures
+						if (action < 2) {
+							//iterate creatures on this cell
+							for (int m = 0; m < c.creatures.size(); m++) {
+								double p = 1 * 3 / (double) c.creatures.size();
+								if (Constants.uniformDouble() > p) {
+									continue;
+								}
 
-							//interactions with other creatures
-							if (action < 2) {
-								//iterate creatures on this cell
-								for (int m = 0; m < c.creatures.size(); m++) {
-									double p = 1 * 3 / (double) c.creatures.size();
-									if (Constants.uniformDouble() > p) {
-										continue;
-									}
+								Individual cr2 = c.creatures.get(m);
+								if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
+									continue;
+								}
+								//creature can't interact on itself
+								if (m == i) {
+									continue;
+								}
 
-									Individual cr2 = c.creatures.get(m);
-									if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
-										continue;
-									}
-									//creature can't interact on itself
-									if (m == i) {
-										continue;
-									}
+								double ind_prop = cr2.getProperties()[k];
 
-									double ind_prop = cr2.getProperties()[k];
-
-									if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
-										tryEat(creature, cr2);
-									}
+								if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
+									tryEat(creature, cr2);
 								}
 							}
 						}
@@ -506,14 +500,14 @@ public class Map {
 					//debugstr = debugstr + size + " ";
 
 					for (int id = 0; id<size; id++){
-						try {
+						// try {
 							Individual creature = c.creatures.get(id);
 							String astr = x + "," + y + "," + creature.stringDesc() + "\n";
 							stateWriter.append(astr);
 							stateWriter.flush();
-						} catch (IndexOutOfBoundsException e){
-							e.printStackTrace();
-						}
+//						} catch (IndexOutOfBoundsException e){
+//							e.printStackTrace();
+//						}
 					}
 				}
 			}
@@ -557,15 +551,12 @@ public class Map {
 						for (Iterator<Integer> propIt = sensorProps.keySet().iterator(); propIt.hasNext();){
 							int prop = propIt.next();
 							Node detectionValuesNode = sensorProps.get(prop);
-							HashMap<Integer, ArrayList<Node>> detectionValues = detectionValuesNode.getChildren();
+							HashMap<Integer, Integer> detectionValues = detectionValuesNode.getChildren();
 							for (Iterator<Integer> senseIt = detectionValues.keySet().iterator(); senseIt.hasNext();){
 								int sensedValue = senseIt.next();
-								ArrayList<Node> values = detectionValues.get(sensedValue);
-								for (Iterator<Node> actIt = values.iterator(); actIt.hasNext();) {
-									Node act = actIt.next();
-									// "creatureID,property,sensorValue,action"+"\n";
-									str = str + creature.getID() + "," + prop + "," + sensedValue + "," + act.data + "\n";
-								}
+								int action =  detectionValues.get(sensedValue);
+								// "creatureID,property,sensorValue,action"+"\n";
+								str = str + creature.getID() + "," + prop + "," + sensedValue + "," + action + "\n";
 							}
 						}
 						stateWriter.append(str);

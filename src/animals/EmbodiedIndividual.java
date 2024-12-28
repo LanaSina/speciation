@@ -243,12 +243,12 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 						if (sensedValues.getChildCount()>0) {
 							//get random sensor
 							int[] actionPair = sensors.removeRandomSensor(prop);
-							if(actionPair[0]>-1) {
+							// if(actionPair[0]>-1) {
 								// new sensed value
 								int value = (int) max(0, (actionPair[0] + Constants.uniformDouble(-3, 3)));
 								// same action
 								sensedValues.addChild(value, actionPair[1]);
-							}
+							// }
 						} else {
 							// create sensor.
 							// property being sensed -> value being sensed -> action
@@ -265,9 +265,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 						sensors.addSensor(prop, sensor_value, action);
 					}							
 				}else{
-					if(sensors.getActionsCount()>0) {
+					int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);
+					if(sensors.properties.get(prop).getChildCount()>0) {
 						//tree nodes: properties -> detectionValue -> action
-						int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);
 						int[] values = sensors.removeRandomChild(prop);
 					}
 				}
@@ -335,7 +335,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		double effect = 0.5;
 		
 		//remove energy due to sensors
-		double se = sensors.getActionsCount();
+		double se = sensors.getChildCount();
 		se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
@@ -494,11 +494,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 	
 	public int hasSensors(){
-		int n = 0; 
-	
-		n = sensors.getActionsCount();
-		
-		return n;
+		return sensors.getChildCount();
 	}
 
 
