@@ -57,9 +57,12 @@ public class Tree {
 		properties.get(property).addChild(property_val, action);
 	}
 
-	public void removeRandomChild(int prop) {
+	/*
+	may be -1
+	 */
+	public int[] removeRandomChild(int prop) {
 		Node node = properties.get(prop);
-		node.removeRandomChild();
+		return node.removeRandomChild();
 	}
 
 	public int getActionsCount() {
@@ -69,6 +72,11 @@ public class Tree {
 			n = n + node.getChildCount();
 		}
 		return n;
+	}
+
+	public int[] removeRandomSensor(int propertyId) {
+		Node sensedValues = properties.get(propertyId);
+		return sensedValues.removeRandomChild();
 	}
 }
 

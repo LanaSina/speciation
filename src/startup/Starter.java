@@ -279,8 +279,6 @@ public class Starter {
 						if(individual==null){
 							mlog.say("error -");
 						}
-						// sensors = new Tree(0);
-						// sensorId = -1;
 					}
 
 					int property = Integer.parseInt(lineArray[pos]);

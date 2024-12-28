@@ -236,28 +236,28 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				if(plus>0){
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
 
-					//modify the detection value if sensor exists
+					// modify the detection value if sensor exists
 					if(generateBool()){
-						//tree nodes: properties -> detectionValue -> action
+						// tree nodes: properties -> detectionValue -> action
 						Node sensedValues = sensors.properties.get(prop);
 						if (sensedValues.getChildCount()>0) {
 							//get random sensor
-							int s = (int) (Constants.uniformDouble(0, sensedValues.getChildren().keySet().size() - 1) + 0.5);
-							ArrayList<Node> pairs = sensedValues.getChildren().remove(s);
-							// for now there is always only 1 action pair
-							Node sensor = pairs.get(0);
-							int value = (int) max(0, (sensor.data + Constants.uniformDouble(-3, 3)));
-							sensor.data = value;
-							sensedValues.getChildren().put(value, pairs);
+							int[] actionPair = sensors.removeRandomSensor(prop);
+							if(actionPair[0]>-1) {
+								// new sensed value
+								int value = (int) max(0, (actionPair[0] + Constants.uniformDouble(-3, 3)));
+								// same action
+								sensedValues.addChild(value, actionPair[1]);
+							}
 						} else {
-							//create sensor.
+							// create sensor.
 							// property being sensed -> value being sensed -> action
 							int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
 							int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 							sensors.addSensor(prop, sensor_value, action);
 						}
 					} else {
-						//create sensor.
+						// create sensor.
 						// root -> property being sensed -> value being sensed -> action
 						// root -> [prop id, array]
 						int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
@@ -265,9 +265,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 						sensors.addSensor(prop, sensor_value, action);
 					}							
 				}else{
-					//tree nodes: properties -> detectionValue -> action
-					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);
-					sensors.removeRandomChild(prop);
+					if(sensors.getActionsCount()>0) {
+						//tree nodes: properties -> detectionValue -> action
+						int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);
+						int[] values = sensors.removeRandomChild(prop);
+					}
 				}
 			}
 			if(generateBool(bias)){

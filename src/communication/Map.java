@@ -92,7 +92,6 @@ public class Map {
 		cst_energy_cost_factor = Double.parseDouble(properties.getProperty("energy_cost_factor"));
 		cst_step_cost = Double.parseDouble(properties.getProperty("step_cost"));
 
-
 		size = mapSize;		
 		//create map
 		map = new Cell[size][size];
@@ -156,7 +155,6 @@ public class Map {
 					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids, prey_energy, prey_parentIsLight" +
 					"\n";
 
-
 			try {
 				predationWriter.append(header_predation);
 				predationWriter.flush();
@@ -165,6 +163,9 @@ public class Map {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void setupLogFiles(){
 
 	}
 	
