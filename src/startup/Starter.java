@@ -220,6 +220,12 @@ public class Starter {
 			int maxId = -1;
 			try {
 				sc = new Scanner(new File(target));
+				// time header
+				sc.nextLine();
+				// time value
+				line = sc.nextLine();
+				int time = Integer.parseInt(line);
+				map.setTime(time);
 				// header
 				// x,y,ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids
 				sc.nextLine();

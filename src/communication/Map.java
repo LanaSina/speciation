@@ -477,14 +477,19 @@ public class Map {
 		FileWriter stateWriter = fb.getFileWriter();
 		fb = null;
 
-		//csv file header
-		/*
-		"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
-		 */
-		String str = "x,y,ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy," +
-				"sensors,ancestor,nkids,pgmDeath,matForKids,energy,parentIsLight"+"\n";
-		// String debugstr = "";
+
 		try {
+			// save time
+			String str = "time\n"+ time + "\n";
+					stateWriter.append(str);
+			stateWriter.flush();
+			//csv file header
+			/*
+			"ID,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids"+"\n";
+			 */
+			str = "x,y,ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy," +
+					"sensors,ancestor,nkids,pgmDeath,matForKids,energy,parentIsLight"+"\n";
+
 			stateWriter.append(str);
 			stateWriter.flush();
 
@@ -498,7 +503,6 @@ public class Map {
 					}
 					// mlog.say("snapshot " + x + " " + y + " " + size);
 					//debugstr = debugstr + size + " ";
-
 
 					for (int id = 0; id<size; id++){
 						try {
@@ -577,6 +581,10 @@ public class Map {
 
 	public void setGlobalId(int i) {
 		globalID = i;
+	}
+
+	public void setTime(int t) {
+		time = t;
 	}
 
 	/**
