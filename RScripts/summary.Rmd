@@ -22,8 +22,8 @@ base_folder = "../../new_data/"
 ## Read agents data
 
 ```{r}
-folder = "2024_12_29_06_16"  #"trees/2024_11_29_12_00"   
-fileName = paste(base_folder, folder,"SummaryIndividuals.csv",sep="/")
+folder = "2024_12_29_13_02" #"trees/best-2024_11_05_20_37"
+fileName = paste(base_folder, folder,"SummaryIndividuals_0.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world

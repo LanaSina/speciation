@@ -190,7 +190,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 			double minMut = Constants.uniformDouble(-2, 2);
 			//double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
-			double plus = Constants.uniformDouble(-0.3, 0.3);
+			double plus = Constants.uniformDouble(-0.01, 0.01);
 
 
 			//do this after too
@@ -251,13 +251,14 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 								// same action
 								sensedValues.addChild(value, actionPair[1]);
 							// }
-						} else {
-							// create sensor.
-							// property being sensed -> value being sensed -> action
-							int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
-							int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
-							sensors.addSensor(prop, sensor_value, action);
 						}
+//						else {
+//							// create sensor.
+//							// property being sensed -> value being sensed -> action
+//							int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
+//							int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
+//							sensors.addSensor(prop, sensor_value, action);
+//						}
 					} else {
 						// create sensor.
 						// root -> property being sensed -> value being sensed -> action
