@@ -120,7 +120,6 @@ public class Starter {
 	}
 	
 	public static class LifeRunnable implements Runnable{
-
 		MyLog mlog = new MyLog("lifeRunnable",true);
 		boolean run = true;
 		public boolean running = true;
@@ -140,6 +139,7 @@ public class Starter {
 		public void run() {
 			
 			while(run){
+				// is false after PauseProcedure
 				if(running) {
 					update();
 
@@ -162,6 +162,7 @@ public class Starter {
 					mlog.say("Saved at " + savedAt);
 					doSave = false;
 				}
+
 			}
 			mlog.say("dies");
 		}
@@ -276,9 +277,6 @@ public class Starter {
 					if(newCreatureId != creatureId) {
 						creatureId = newCreatureId;
 						individual = individualMap.get(creatureId);
-						if(individual==null){
-							mlog.say("error -");
-						}
 					}
 
 					int property = Integer.parseInt(lineArray[pos]);

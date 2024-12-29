@@ -20,80 +20,82 @@ import startup.Starter;
  *
  */
 public class Display extends JFrame {
-		MyLog mlog = new MyLog("Display",true);
+	MyLog mlog = new MyLog("Display",true);
 
-		private static final long serialVersionUID = 1579747902278268747L;
-		
-		//surface to be drawn on
-		Surface s; 
-		String name;
-		
-		/**
-		 * 
-		 * @param n name of window;
-		 */
-		public Display(String n, Starter.LifeRunnable lifeRunnable) {
-			name = n;
-	        initUI(lifeRunnable);
-	        this.setVisible(true);
-	    }
+	private static final long serialVersionUID = 1579747902278268747L;
 
-	    private void initUI(Starter.LifeRunnable lifeRunnable) {
-	    	
-	        setTitle(name);
-	        s = new Surface(lifeRunnable);
-	        add(s);
-	        int width = s.getWidth();
-	        int length = s.getLength();
-	        setSize(width,length);
-	        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        setLocationRelativeTo(null);
-	        
-	        //refresh
-	        int delay = Constants.refresh_rate; //milliseconds
+	//surface to be drawn on
+	Surface s;
+	String name;
 
-	        ActionListener taskPerformer = new ActionListener() {
-	          public void actionPerformed(ActionEvent evt) {
-	        	Thread t = new Thread(new Runnable() {
-					public void run() {
-			        	  s.repaint();
-					}
-				});
-	        	t.start();
-	          }
-	        };
+	/**
+	 *
+	 * @param n name of window;
+	 */
+	public Display(String n, Starter.LifeRunnable lifeRunnable) {
+		name = n;
+		initUI(lifeRunnable);
+		this.setVisible(true);
+	}
 
-	        new Timer(delay, taskPerformer).start();
-	    }
-	    
-	    /**
-	     * Add a object to be drawn on the pannel.
-	     * @param c the object implementing the component interface
-	     */
-	    public void addComponent(GraphicalComponent c){
-	    	s.addComponent(c);
-	    }
-	    
-	   /* public void removeComponent(GraphicalComponent c) {
-			s.removeComponent(c);
-		}*/
-	    
-	    //hem ?
-	    public JPanel getSurface(){
-	    	return s;
-	    }
+	private void initUI(Starter.LifeRunnable lifeRunnable) {
 
-		public void removeComponent(GraphicalComponent c) {
-			//int i = s.components.indexOf(c);
-			//s.components.remove(i);
-			s.removeComponent(c);
-		}
-	    
-	    /**
-	     * Add an object to be controlled by keyboard actions.
-	     * @param p the object to be controlled
-	     * @param string a unique name
-	     */
+		setTitle(name);
+		s = new Surface(lifeRunnable);
+		add(s);
+		int width = s.getWidth();
+		int length = s.getLength();
+		setSize(width,length);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+
+		//refresh
+		int delay = Constants.refresh_rate; //milliseconds
+
+		ActionListener taskPerformer = new ActionListener() {
+		  public void actionPerformed(ActionEvent evt) {
+			Thread t = new Thread(new Runnable() {
+				public void run() {
+					  s.repaint();
+				}
+			});
+			t.start();
+		  }
+		};
+
+		new Timer(delay, taskPerformer).start();
+	}
+
+	/**
+	 * Add a object to be drawn on the pannel.
+	 * @param c the object implementing the component interface
+	 */
+	public void addComponent(GraphicalComponent c){
+		s.addComponent(c);
+	}
+
+   /* public void removeComponent(GraphicalComponent c) {
+		s.removeComponent(c);
+	}*/
+
+	//hem ?
+	public JPanel getSurface(){
+		return s;
+	}
+
+	public void removeComponent(GraphicalComponent c) {
+		//int i = s.components.indexOf(c);
+		//s.components.remove(i);
+		s.removeComponent(c);
+	}
+
+	public void pauseProcedure(boolean b){
+		s.pauseProcedure(b);
+	}
+
+	public void saveProcedure() {
+		s.saveProcedure();
+	}
 }
 	
 
@@ -115,6 +117,7 @@ public class Display extends JFrame {
 
 		// buttons
 		JButton pauseButton;
+		JButton saveButton;
 		Starter.LifeRunnable lifeRunnable;
 
 		//list of things to draw
@@ -140,12 +143,7 @@ public class Display extends JFrame {
 			JButton saveButton = new JButton("Save");
 			saveButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					pauseProcedure(true);
-					saveButton.setText("Saving...");
-					//save
-					lifeRunnable.save();
-					// this should actually be delayed...
-					saveButton.setText("Save");
+					saveProcedure();
 				}
 			});
 			this.add(saveButton);
@@ -182,13 +180,21 @@ public class Display extends JFrame {
 			this.repaint();
 		}
 
-		private void pauseProcedure(boolean b){
+		public void pauseProcedure(boolean b){
 			pauseLife = b;
 			mlog.say("pause is " + pauseLife);
 			pauseButton.setText(pauseLife?"Resume":"Pause");
 			lifeRunnable.running = !pauseLife;
 		}
 
+		public void saveProcedure(){
+			pauseProcedure(true);
+			saveButton.setText("Saving...");
+			//save
+			lifeRunnable.save();
+			// this should actually be delayed...
+			saveButton.setText("Save");
+		}
 		
 	    /**
 	     * Adds a object to be drawn on the pannel.
@@ -249,7 +255,6 @@ public class Display extends JFrame {
 
 	    @Override
 	    public void paintComponent(Graphics g) {
-
 	        super.paintComponent(g);
 	        init(g);
 	        

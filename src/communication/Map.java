@@ -36,6 +36,7 @@ public class Map {
 	FileWriter predationWriter;
 	/** simulation time*/
 	int time = 0;
+	String dataFolderName = null;
 
 	// global contstants
 	double cst_mut_factor;
@@ -63,8 +64,9 @@ public class Map {
 	LinkedList<Individual> moving;
 	LinkedList<Double> newPositions;
 	
-	public Map(int mapSize, Display d, String dataFolderName){
+	public Map(int mapSize, Display d, String myDataFolderName){
 		this.d  = d;
+		this.dataFolderName = myDataFolderName;
 
 		// read configuration file
 		Properties properties = new Properties();
@@ -111,12 +113,12 @@ public class Map {
 		
 		//writing data
 		if(Constants.Save) {
-			setupLogFiles(dataFolderName);
+			setupLogFiles();
 		}
 	}
 
 
-	private void setupLogFiles(String dataFolderName){
+	private void setupLogFiles(){
 		// individuals info
 		FileBuilder fb = new FileBuilder(dataFolderName, Constants.SummaryFileName + "_" + time);
 		summaryWriter = fb.getFileWriter();
@@ -356,6 +358,14 @@ public class Map {
 		if (time%1000==0){
 			mlog.say("step " + time);
 		}
+
+		if(time%10000 == 0){
+			mlog.say("backup all logs");
+			d.pauseProcedure(true);
+			setupLogFiles();
+			d.saveProcedure();
+			d.pauseProcedure(false);
+		}
 		
 		//update dead
 		for(int i=0; i<remove.size();i++){
@@ -500,14 +510,10 @@ public class Map {
 					//debugstr = debugstr + size + " ";
 
 					for (int id = 0; id<size; id++){
-						// try {
-							Individual creature = c.creatures.get(id);
-							String astr = x + "," + y + "," + creature.stringDesc() + "\n";
-							stateWriter.append(astr);
-							stateWriter.flush();
-//						} catch (IndexOutOfBoundsException e){
-//							e.printStackTrace();
-//						}
+						Individual creature = c.creatures.get(id);
+						String astr = x + "," + y + "," + creature.stringDesc() + "\n";
+						stateWriter.append(astr);
+						stateWriter.flush();
 					}
 				}
 			}
@@ -567,8 +573,6 @@ public class Map {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		// mlog.say(debugstr);
 	}
 
 	public void setGlobalId(int i) {
@@ -595,9 +599,6 @@ public class Map {
 		 * how easy it is to move through (1=cannot move)
 		 */
 		double density = 0;//TODO use. may also change how sound etc travels.
-
-		double ntransparency = 1;
-		double ndensity = 0;//TODO use. may also change how sound etc travels.
 
 		/**
 		 * determined by animals and transparency on this cell
