@@ -22,8 +22,8 @@ base_folder = "../../new_data/"
 ## Read agents data
 
 ```{r}
-folder = "2024_12_29_13_28" #"trees/best-2024_11_05_20_37"
-fileName = paste(base_folder, folder,"SummaryIndividuals_0.csv",sep="/")
+folder = "2024_12_29_17_15" #"trees/best-2024_11_05_20_37"
+fileName = paste(base_folder, folder,"SummaryIndividuals_75000.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world
@@ -38,15 +38,16 @@ world = whole_world
 # world = subset(world, created >90000 & created < 110000 & maxEnergy>50)
 
 # # random subset
-# sample_vector=c(1:nrow(whole_world))
-# # sample elements from the vector (in this example 30 elements sampled without replacement)
-# the_sample = sample(sample_vector, 80000, replace=FALSE)
-# # the vector of randomly selected elements is then used to select rows from the dataframe
-# world = whole_world[the_sample,]
+sample_vector=c(1:nrow(whole_world))
+# sample elements from the vector (in this example 30 elements sampled without replacement)
+the_sample = sample(sample_vector, 50000, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+world = whole_world[the_sample,]
 
 colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
 close3d()
-plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, col = colors, main = folder)
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, 
+      col = colors, main = folder) # xlim=c(0,max(world$created)), 
 rglwidget()
 ```
 
@@ -57,10 +58,11 @@ old_world = whole_world
 ```{r}
 
 close3d()
-plot3d(x= whole_world$created, y=whole_world$pgmDeath, z = whole_world$maxEnergy,
-       col = "red", main = folder, xlim = c(0, max(whole_world$created)))
-points3d(x= old_world$created, y=old_world$pgmDeath, z = old_world$maxEnergy,
+plot3d(x= old_world$created, y=old_world$pgmDeath, z = old_world$maxEnergy,
        col = "black")
+points3d(x= whole_world$created, y=whole_world$pgmDeath, z = whole_world$maxEnergy,
+       col = "red", main = folder, xlim = c(0, max(whole_world$created)))
+
 rglwidget()
 
 ```
@@ -141,7 +143,7 @@ rglwidget()
 
 ```{r}
 # PCA over time!
-t = 0
+t = min(world$created)
 max_t = max(world$created)
 step_size = 1000
 pc1 = c()

@@ -318,7 +318,7 @@ public class Map {
 			// only save successful predation
 			if(Constants.Save){
 				// reduce file size
-				if(Constants.uniformDouble()<0.01){
+				if(Constants.uniformDouble()<1){ //0.01
 					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
 					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
 					/*
@@ -355,11 +355,11 @@ public class Map {
 
 	public void updateMoved(){
 		time++;
-		if (time%100==0){
+		if (time%1000==0){
 			mlog.say("step " + time);
 		}
 
-		if(time%500 == 0){
+		if(Constants.Save && (time%5000 == 0)){
 			mlog.say("backup all logs");
 			d.pauseProcedure(true);
 			d.screenshot();
@@ -372,7 +372,7 @@ public class Map {
 		for(int i=0; i<remove.size();i++){
 			Individual creature = remove.get(i);
 			if(Constants.Save) {
-				if(Constants.uniformDouble()<0.01) {
+				if(Constants.uniformDouble()<1) { //0.01
 					if (!creature.isLight() & !creature.parentIsLight()) {
 						//write down info
 						// "ID,pred_pos_x, pred_pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor, parentIsLight\n";
