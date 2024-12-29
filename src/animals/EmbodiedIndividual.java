@@ -336,7 +336,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		//remove energy due to sensors
 		double se = sensors.getChildCount();
-		se = se/2;
+		// se = se/2;
 		//mlog.say("se "+se);
 		if(!isLight){
 			energy = energy -
