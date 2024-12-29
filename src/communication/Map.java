@@ -355,13 +355,14 @@ public class Map {
 
 	public void updateMoved(){
 		time++;
-		if (time%1000==0){
+		if (time%100==0){
 			mlog.say("step " + time);
 		}
 
-		if(time%10000 == 0){
+		if(time%500 == 0){
 			mlog.say("backup all logs");
 			d.pauseProcedure(true);
+			d.screenshot();
 			setupLogFiles();
 			d.saveProcedure();
 			d.pauseProcedure(false);

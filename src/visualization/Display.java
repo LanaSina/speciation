@@ -3,10 +3,15 @@ package visualization;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import communication.MyLog;
@@ -32,16 +37,16 @@ public class Display extends JFrame {
 	 *
 	 * @param n name of window;
 	 */
-	public Display(String n, Starter.LifeRunnable lifeRunnable) {
+	public Display(String n, Starter.LifeRunnable lifeRunnable, String dataFolder) {
 		name = n;
-		initUI(lifeRunnable);
+		initUI(lifeRunnable, dataFolder);
 		this.setVisible(true);
 	}
 
-	private void initUI(Starter.LifeRunnable lifeRunnable) {
+	private void initUI(Starter.LifeRunnable lifeRunnable, String dataFolder) {
 
 		setTitle(name);
-		s = new Surface(lifeRunnable);
+		s = new Surface(lifeRunnable, dataFolder);
 		add(s);
 		int width = s.getWidth();
 		int length = s.getLength();
@@ -96,6 +101,10 @@ public class Display extends JFrame {
 	public void saveProcedure() {
 		s.saveProcedure();
 	}
+
+	public void screenshot() {
+		s.screenshot();
+	}
 }
 	
 
@@ -119,13 +128,15 @@ public class Display extends JFrame {
 		JButton pauseButton;
 		JButton saveButton;
 		Starter.LifeRunnable lifeRunnable;
+		String dataFolder = null;
 
 		//list of things to draw
 		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
 
-		public Surface(Starter.LifeRunnable myLifeRunnable){
+		public Surface(Starter.LifeRunnable myLifeRunnable, String myDataFolder){
 			super();
 			this.lifeRunnable = myLifeRunnable;
+			this.dataFolder = myDataFolder;
 
 			// add pause button
 			pauseButton = new JButton("Pause");
@@ -140,7 +151,7 @@ public class Display extends JFrame {
 			pauseButton.setLocation(new Point(x, 0));
 
 			// add save button
-			JButton saveButton = new JButton("Save");
+			saveButton = new JButton("Save");
 			saveButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					saveProcedure();
@@ -176,6 +187,21 @@ public class Display extends JFrame {
 			x = this.getWidth()*2+200;
 			loadButton.setLocation(new Point(x, 0));
 
+			// add screenshot button
+			JButton shotButton = new JButton("Screenshot");
+			shotButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					pauseProcedure(true);
+					screenshot();
+					pauseProcedure(false);
+				}
+			});
+
+			this.add(shotButton);
+			shotButton.setVisible(true);
+			x = this.getWidth()*2+200;
+			shotButton.setLocation(new Point(x, 0));
+
 			this.revalidate();
 			this.repaint();
 		}
@@ -194,6 +220,24 @@ public class Display extends JFrame {
 			lifeRunnable.save();
 			// this should actually be delayed...
 			saveButton.setText("Save");
+		}
+
+		public void screenshot(){
+			//get current date
+			DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+			Date date = new Date();
+			String strDate = dateFormat.format(date);
+
+			String snapshotLocation = dataFolder + "/screenshot_" + strDate + ".jpg";
+			mlog.say("Saving screenshot at " + snapshotLocation);
+			BufferedImage bufImage = new BufferedImage(getSize().width, getSize().height,BufferedImage.TYPE_INT_RGB);
+			paint(bufImage.createGraphics());
+			File imageFile = new File("."+File.separator+snapshotLocation);
+			try{
+				imageFile.createNewFile();
+				ImageIO.write(bufImage, "jpeg", imageFile);
+			}catch(Exception ex){
+			}
 		}
 		
 	    /**

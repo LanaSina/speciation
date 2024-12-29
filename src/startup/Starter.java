@@ -81,7 +81,7 @@ public class Starter {
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 
 		LifeRunnable life = new LifeRunnable();
-		Display d = new Display(dname, life);
+		Display d = new Display(dname, life, dataFolderName);
 		int lightLimit = 30;//30
 		int of = 10;
 
@@ -207,7 +207,7 @@ public class Starter {
 			//worldmap
 			String dname = properties.getProperty("sim_name");
 			int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
-			Display d = new Display(dname, this);
+			Display d = new Display(dname, this, dataFolderName);
 			map = new Map(cst_grid_max,d,dataFolderName);
 
 			// read creatures
