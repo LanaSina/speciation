@@ -189,8 +189,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		if(generateBool()){
 
 			double minMut = Constants.uniformDouble(-2, 2);
-			double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
-			
+			//double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
+			double plus = Constants.uniformDouble(-0.3, 0.3);
+
+
 			//do this after too
 			properties[0] = speed;
 			properties[1] = maxEnergy;

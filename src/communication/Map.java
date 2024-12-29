@@ -111,62 +111,62 @@ public class Map {
 		
 		//writing data
 		if(Constants.Save) {
-			// individuals info
-			FileBuilder fb = new FileBuilder(dataFolderName, Constants.SummaryFileName);
-			summaryWriter = fb.getFileWriter();
-			fb = null;
-
-			//csv file header
-			/*
-			String description =  ID +","+parentID+","+birthDate+","+life+","
-				+ speed+","+maxEnergy+","+ getKidEnergy()+","
-				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids ;
-			 */
-			String str = "ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy," +
-					"kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids,energy,parentIsLight"+"\n";
-			try {
-				summaryWriter.append(str);
-				summaryWriter.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		if(Constants.SavePredation) {
-			// predation info
-			FileBuilder fb_predation = new FileBuilder(dataFolderName, "predation");
-			predationWriter = fb_predation.getFileWriter();
-			fb_predation = null;
-
-			/*
-			String description =  ID +","+parentID+","+birthDate+","+life+","
-				+ speed+","+maxEnergy+","+ getKidEnergy()+","
-				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids ;
-			 */
-			String header_predation = "t, pred_id, pred_pos_x, pred_pos_y, pred_isLight," +
-					"pred_parent, pred_created, pred_lifeSpan," +
-					"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
-					"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids, pred_energy, pred_parentIsLight" +
-					"prey_id, prey_pos_x, prey_pos_y, prey_isLight," +
-					"prey_parent, prey_created, prey_lifeSpan," +
-					"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
-					"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids, prey_energy, prey_parentIsLight" +
-					"\n";
-
-			try {
-				predationWriter.append(header_predation);
-				predationWriter.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			setupLogFiles(dataFolderName);
 		}
 	}
 
-	private void setupLogFiles(){
 
+	private void setupLogFiles(String dataFolderName){
+		// individuals info
+		FileBuilder fb = new FileBuilder(dataFolderName, Constants.SummaryFileName + "_" + time);
+		summaryWriter = fb.getFileWriter();
+		fb = null;
+
+		//csv file header
+			/*
+			String description =  ID +","+parentID+","+birthDate+","+life+","
+				+ speed+","+maxEnergy+","+ getKidEnergy()+","
+				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
+				+ death + ","+ matForKids ;
+			 */
+		String str = "ID,pos_x,pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy," +
+				"kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids,energy,parentIsLight"+"\n";
+		try {
+			summaryWriter.append(str);
+			summaryWriter.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// predation info
+		FileBuilder fb_predation = new FileBuilder(dataFolderName, Constants.PredationFileName+ "_" + time);
+		predationWriter = fb_predation.getFileWriter();
+		fb_predation = null;
+
+			/*
+			String description =  ID +","+parentID+","+birthDate+","+life+","
+				+ speed+","+maxEnergy+","+ getKidEnergy()+","
+				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
+				+ death + ","+ matForKids ;
+			 */
+		String header_predation = "t, pred_id, pred_pos_x, pred_pos_y, pred_isLight," +
+				"pred_parent, pred_created, pred_lifeSpan," +
+				"pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
+				"pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids, pred_energy, pred_parentIsLight" +
+				"prey_id, prey_pos_x, prey_pos_y, prey_isLight," +
+				"prey_parent, prey_created, prey_lifeSpan," +
+				"prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
+				"prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids, prey_energy, prey_parentIsLight" +
+				"\n";
+
+		try {
+			predationWriter.append(header_predation);
+			predationWriter.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void addIndividual(int x, int y, Individual i){
@@ -314,7 +314,7 @@ public class Map {
 				predator.setBorderColor(Color.black);
 			}
 			// only save successful predation
-			if(Constants.SavePredation){
+			if(Constants.Save){
 				// reduce file size
 				if(Constants.uniformDouble()<0.01){
 					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
