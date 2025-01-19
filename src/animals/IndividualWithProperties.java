@@ -10,7 +10,7 @@ import static java.lang.Math.*;
 
 public abstract class IndividualWithProperties implements GraphicalComponent, Individual {
 
-    MyLog mlog;
+    MyLog mlog = createMyLog();
 
     //cell
     /**
@@ -586,5 +586,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         isLight = b;
     }
 
+    protected abstract MyLog createMyLog();
 
 }
