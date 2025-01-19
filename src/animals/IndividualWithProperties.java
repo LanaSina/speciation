@@ -341,7 +341,16 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         color = new Color(red, green, blue);
     }
 
-
+    /**
+     * Copies the fields of the specified individual into this one, except for this individual's energy, which is set to
+     * the value of the specified individual's kidEnergy.
+     * </br>
+     * This process is analogous to genome replication in nature, where the parent (the specified individual) passes its
+     * genes to its offspring (this individual). However, this method does not simulate mutations. These happen after
+     * this method is called.
+     *
+     * @param in the individual to copy
+     */
     protected void copy(IndividualWithProperties in) {
         this.color = in.color;
         this.position = in.position.clone();
