@@ -43,7 +43,7 @@ public class MyLog {
 		}
 	}
 	
-	/**Å@name of the logger. Avoid changing in runtime to prevent confusion.*/
+	/** @name of the logger. Avoid changing in runtime to prevent confusion.*/
 	public void setName(String string) {
 		name = string;
 	}
