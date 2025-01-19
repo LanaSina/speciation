@@ -50,7 +50,6 @@ public class EmbodiedIndividual extends IndividualWithProperties {
      * @param cst_step_cost          a constant
      * @return true if this individual still has energy after the update, false otherwise
      */
-    @Override
     public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
                           double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,
                           double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor, double cst_step_cost
