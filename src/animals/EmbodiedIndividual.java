@@ -185,9 +185,11 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 			if(position[k]<0) position[k]=0;
 			if(position[k]>=cst_grid_max-1) position[k] = cst_grid_max-2;
 		}
-		
+
+		// 50% chance to mutate
 		if(generateBool()){
 
+			// mutation parameters
 			double minMut = Constants.uniformDouble(-2, 2);
 			//double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
 			double plus = Constants.uniformDouble(-0.01, 0.01);
@@ -203,6 +205,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 
 			//maybe make this a mutable value!
 			double bias = 0.6;
+			// mutate speed
 			if(generateBool(bias)){
 				// double minMut = Constants.uniformDouble(-2, 2);
 				speed = (int)(speed+minMut);
@@ -211,6 +214,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				if(speed>cst_speed_max) speed = cst_speed_max;
 				//break;
 			}
+			// mutate maxEnergy
 			if(generateBool(bias)){
 				// double minMut = Constants.uniformDouble(-2, 2);
 				maxEnergy = (int)(maxEnergy+minMut);
@@ -220,11 +224,13 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					maxEnergy = cst_energy_max;
 				}
 			}
+			// mutate kidEnergy
 			if(generateBool(bias)){
 				// double minMut = Constants.uniformDouble(-2, 2);
 				kidEnergy = (int) (kidEnergy+minMut);
 				if(kidEnergy<0) kidEnergy = 0;
 			}
+			// mutate matForKids
 			if(generateBool(bias)){
 				// double minMut = Constants.uniformDouble(-2, 2);
 				matForKids = (int) (matForKids+minMut);
@@ -275,6 +281,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 					}
 				}
 			}
+
+			// mutate nKids
 			if(generateBool(bias)){
 				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
@@ -283,6 +291,8 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				if(n<0) n=0;
 				setNKids(n);
 			}
+
+			// mutate death
 			if(generateBool(bias)){
 				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
 				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
@@ -328,7 +338,25 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 
 
-	
+	/**
+	 * Updates this individual's age and energy, and makes him/her reproduce if possible.
+	 *
+	 * @param babies                 the list where this individual's babies are added
+	 * @param date                   the current time
+	 * @param transparency           the cell's transparency
+	 * @param cst_mut_factor         a constant
+	 * @param cst_speed_max          a constant
+	 * @param cst_light_birth_dst    a constant
+	 * @param cst_birth_dst          a constant
+	 * @param cst_grid_max           a constant
+	 * @param cst_energy_max         a constant
+	 * @param cst_speed_cost         a constant
+	 * @param cst_sensor_cost        a constant
+	 * @param cst_free_energy        a constant
+	 * @param cst_energy_cost_factor a constant
+	 * @param cst_step_cost          a constant
+	 * @return true if this individual still has energy after the update, false otherwise
+	 */
 	public boolean update(LinkedList<Individual> babies, int date, double transparency, double cst_mut_factor, int cst_speed_max,
 						  double cst_light_birth_dst, double cst_birth_dst, int cst_grid_max, int cst_energy_max, double cst_speed_cost,
 						  double cst_sensor_cost, int cst_free_energy, double cst_energy_cost_factor, double cst_step_cost
