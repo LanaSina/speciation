@@ -195,11 +195,23 @@ public class Map {
 		removeIndividual(i);
 		addIndividual(x2,y2,i);		
 	}
-	
+
 	/**
-	 * 
-	 * @param x coordinate
-	 * @param y coordinate
+	 * Updates the creatures present on the cell specified by the coordinates.
+	 * Creatures may make babies, move, interact with other creatures present on the cell.
+	 * They can lose or gain energy.
+	 * If their energy reaches 0 or less, they die.
+	 * </br>
+	 * Creatures can only interact with one another if they are on the same cell.
+	 * The more creatures there are on the cell, the more likely two given creatures are to interact with each other.
+	 * (If the number of creatures on the cell is sufficiently low, then no interactions will even occur.)
+	 * </br>
+	 * Interactions are limited to predation.
+	 * If a creature detects another creature with at least one similar characteristic (e.g., size), it may attempt to
+	 * eat it.
+	 *
+	 * @param x the abscissa of the cell to update
+	 * @param y the ordinate of the cell to update
 	 */
 	public void updateCell(int x, int y){
 		
