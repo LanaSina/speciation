@@ -24,7 +24,7 @@ public class EmbodiedIndividual extends IndividualWithProperties {
      * @param in   individual to be cloned
      * @param glID id of this one
      */
-    EmbodiedIndividual(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+    EmbodiedIndividual(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
                        double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
     ) {
         super(in, glID, date, cst_mut_factor, cst_speed_max, cst_light_birth_dst, birth_dst, cst_grid_max, cst_energy_max);

@@ -145,7 +145,7 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
      * @param in   individual to be cloned
      * @param glID id of this one
      */
-    IndividualWithProperties(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+    IndividualWithProperties(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
                              double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
     ) {
         copy(in);
