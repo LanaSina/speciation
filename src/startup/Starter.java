@@ -261,12 +261,10 @@ public class Starter {
 				//csv file header
 				int creatureId = -1;
 				// int sensorId = -1;
-				Node prop = null;
 				EmbodiedIndividual individual = null;
 				// Tree sensors = null;
 				//String str = "creatureID,sensorId,sensorValue,action"+"\n";
 				sc.nextLine();
-				line = null;
 				while(sc.hasNextLine()){
 					line = sc.nextLine();
 					lineArray = line.split(",");

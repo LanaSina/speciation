@@ -371,7 +371,7 @@ public class Map {
 			mlog.say("step " + time);
 		}
 
-		if(time%500 == 0){
+		if(time%50000 == 0){
 			mlog.say("backup all logs");
 			d.pauseProcedure(true);
 			d.screenshot();
