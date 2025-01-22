@@ -57,8 +57,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public Color borderColor = Color.white;
 	//for eternal light cells
 	private boolean isLight = false;
-	
-	
+
 	/**
 	 * creates "light" at specified postion
 	 * @param x
@@ -91,16 +90,52 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		properties[4] =  death;
 		properties[5] = matForKids;
 		
-		sensors = new Tree(0);//root is not important
-		for(int i=0; i<(nProperties);i++){
-			Node prop = new Node();
-			prop.data = i;
-			sensors.root.addChild(prop);
-		}
-
-		makeColor();	
+		sensors = new Tree(nProperties);//root is not important
+		makeColor();
 	}
-	
+
+	public EmbodiedIndividual(int myId, String line) {
+		String[] lineArray = line.split(",");
+		ID = myId;
+
+		//x, y, id
+		int pos = 3;
+		position[0] = Double.parseDouble(lineArray[pos]);
+		position[1] = Double.parseDouble(lineArray[pos+1]);
+		pos = pos + 2;
+		isLight = Boolean.parseBoolean(lineArray[pos]);
+		pos++;
+		parentID = Integer.parseInt(lineArray[pos]);
+		pos++;
+		birthDate = Integer.parseInt(lineArray[pos]);
+		pos++;
+		// lifeSpan
+		pos++;
+		//
+		speed = Integer.parseInt(lineArray[pos]);
+		pos++;
+		maxEnergy = Integer.parseInt(lineArray[pos]);
+		pos++;
+		kidEnergy = Integer.parseInt(lineArray[pos]);
+		pos++;
+		// number or sensors
+		pos++;
+		firstAncestorID = Integer.parseInt(lineArray[pos]);
+		pos++;
+		nKids = Integer.parseInt(lineArray[pos]);
+		pos++;
+		death = Integer.parseInt(lineArray[pos]);
+		pos++;
+		matForKids = Integer.parseInt(lineArray[pos]);
+		pos++;
+		energy = Double.parseDouble(lineArray[pos]);
+		pos++;
+		parentIsLight = Boolean.parseBoolean(lineArray[pos]);
+
+		sensors = new Tree(nProperties);
+		makeColor();
+	}
+
 	/**
 	 * clones with mutations
 	 * @param in individual to be cloned
@@ -154,9 +189,6 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		
 		if(generateBool()){
 
-			/*double minMut = Constants.uniformDouble(-2, 2);
-			double plus = Constants.uniformDouble(-0.01, 0.01);*/
-			
 			//do this after too
 			properties[0] = speed;
 			properties[1] = maxEnergy;
@@ -219,52 +251,48 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 				if(death<0) death = 0;
 			}
 			if(generateBool(bias)){
+			//if(true){
 				//create or modify sensor
 				double add = Constants.uniformDouble(-1, 1);
 				if(add>0){
 					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);//-1
-					//sensor exists for this property?
-					ArrayList<Node> props = sensors.root.getChildren();
-					ArrayList<Node> senses = props.get(prop).getChildren();
-					//modify
-					if(generateBool()){
-						//tree nodes: root-> 3properties -> detectionValue -> action
-						//          0          id              value            id
-						boolean hasSensors = !senses.isEmpty();
-						if(hasSensors){
-							//get random sensor
-							int s = (int) (Constants.uniformDouble(0, senses.size()-1)+0.5);
-							Node sensor = senses.get(s);	
-							// int value = (int) (sensor.data *Constants.uniformDouble(-Constants.MutFactor, Constants.MutFactor));
 
-							double plus = 0;// Constants.uniformDouble(-1, 1)*0.1; //10% change
-							double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
-							int value = (int) max(0, (sensor.data *(plus+1)+minMut+0.5));
-							sensor.data = value;
+					// modify the detection value if sensor exists
+					if(generateBool()){
+						// tree nodes: properties -> detectionValue -> action
+						Node sensedValues = sensors.properties.get(prop);
+						if (sensedValues.getChildCount()>0) {
+							//get random sensor
+
+							int[] actionPair = sensors.removeRandomSensor(prop);
+							// if(actionPair[0]>-1) {
+								// new sensed value
+								int value = (int) max(0, (actionPair[0] + Constants.uniformDouble(-3, 3)));
+								// same action
+								sensedValues.addChild(value, actionPair[1]);
+							// }
 						}
+//						else {
+//							// create sensor.
+//							// property being sensed -> value being sensed -> action
+//							int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
+//							int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
+//							sensors.addSensor(prop, sensor_value, action);
+//						}
 					} else {
-						//create sensor. 
-						Node value = new Node();
-						
-						value.data = (int) Constants.uniformDouble(0, cst_energy_max);
-						Node action = new Node();
-						action.data = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
-						value.addChild(action);
-						
-						sensors.root.getChildren().get(prop).addChild(value);
+						// create sensor.
+						// root -> property being sensed -> value being sensed -> action
+						// root -> [prop id, array]
+						int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
+						int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
+						sensors.addSensor(prop, sensor_value, action);
 					}							
 				}else{
-					//tree nodes: root-> 3properties -> detectionValue -> action
-					int prop = (int) (Constants.uniformDouble(0, nProperties-1)+0.5);
-					//sensor exists for this property?
-					ArrayList<Node> props = sensors.root.getChildren();
-					ArrayList<Node> sensors = props.get(prop).getChildren();
-					boolean hasSensors = !sensors.isEmpty();
-					if(hasSensors){
-						int sens = (int) (Constants.uniformDouble(0, sensors.size()-1)+0.5);
-						props.get(prop).removeChild(sens);
+					int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);
+					if(sensors.properties.get(prop).getChildCount()>0) {
+						//tree nodes: properties -> detectionValue -> action
+						int[] values = sensors.removeRandomChild(prop);
 					}
-					
 				}
 			}
 
@@ -316,9 +344,9 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 		cellTransparency = transparency;
 
 		//remove energy due to sensors
-		double se = sensors.root.getChildCount() - (nProperties);
-		se = se/2;
-
+		double se = sensors.getChildCount();
+		// se = se/2;
+		//mlog.say("se "+se);
 		if(!isLight){
 
 			if(life >= death){
@@ -478,11 +506,7 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	}
 	
 	public int hasSensors(){
-		int n = 0; 
-	
-		n = (sensors.root.getChildCount()-nProperties)/2;
-		
-		return n;
+		return sensors.getChildCount();
 	}
 
 
@@ -515,10 +539,10 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	 */
 	public String stringDesc() {
 		
-		String description =  ID +","+parentID+","+birthDate+","+life+","
+		String description =  ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID+","+birthDate+","+life+","
 				+ speed+","+maxEnergy+","+ getKidEnergy()+","
 				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids ;//+ ","+ luminosity + ","+ warm + ","+ loud +","+ smelly + ","+ electric + "," + eaten_by + "\n";
+				+ death + ","+ matForKids + "," + energy + "," + parentIsLight;
 		return description;
 	}
 	
@@ -570,5 +594,59 @@ public class EmbodiedIndividual implements GraphicalComponent, Individual{
 	public void setCellTransparency(double cellTransparency) {
 		this.cellTransparency = cellTransparency;
 	}
+
+	public void setParentID(int parentID) {
+		this.parentID = parentID;
+	}
+
+	public void setMaxEnergy(int maxEnergy) {
+		this.maxEnergy = maxEnergy;
+	}
+
+	public void setKidEnergy(int kidEnergy) {
+		this.kidEnergy = kidEnergy;
+	}
+
+	public int getMatForKids() {
+		return matForKids;
+	}
+
+	public void setMatForKids(int matForKids) {
+		this.matForKids = matForKids;
+	}
+
+	public int getnProperties() {
+		return nProperties;
+	}
+
+	public void setnProperties(int nProperties) {
+		this.nProperties = nProperties;
+		this.properties = new int[nProperties];
+	}
+
+	public int getFirstAncestorID() {
+		return firstAncestorID;
+	}
+
+	public void setFirstAncestorID(int firstAncestorID) {
+		this.firstAncestorID = firstAncestorID;
+	}
+
+	public int getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(int birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	public void setSensors() {
+
+	}
+
+	public void setIsLight(boolean b) {
+		isLight = b;
+	}
+
 
 }
