@@ -34,7 +34,7 @@ import java.util.Scanner;
 public class Starter {
 	static String dataFolderName;
 
-
+todo if converting to int, no need for +0.5
 	/**
 	 * @param args
 	 */
