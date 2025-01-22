@@ -23,14 +23,16 @@ public class Constants {
 	public static final int GridMax = 50;
 	public static final int GridStep = 20;
 	
-	public static final int ActionTypes = 10;
+	public static final int ActionTypes = 10;// todo reduce to 2
 
 	/** folder where data file will be recorded*/
 	public static String DataPath = "../new_data";
 	/** files*/
 	public static final String SummaryFileName = "SummaryIndividuals";
 	public static boolean Save = true;
-	public static boolean SavePredation = true; // header and data do not match
+	public static String SnapshotFileName = "snapshot";
+	public static String SensorsFileName = "sensors";
+	public static String PredationFileName = "predation";
 
 
 	/**
