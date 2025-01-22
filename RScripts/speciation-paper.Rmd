@@ -85,8 +85,43 @@ plot(n_agents_t, type = "l", main="Number of agents")
 
 ```
 
+Compare number of agents and used energy
+
+```{r}
+t = 0
+max_t = max(world$created)
+step_size = 100
+energy_sum <- data.frame(Ints=integer(), Ints=integer())
+colnames(energy_sum) = c("t", "e")
+
+while (t < max_t) {
+  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
+  energy_sum = rbind(energy_sum, c(t, sum(part_world$maxEnergy)))
+  t = t + step_size
+} 
+
+colnames(energy_sum) = c("t", "e")
+
+plot(energy_sum, type = "l", main="Stored energy")
+points(n_agents_t$t, n_agents_t$n*100, type = "l", col="blue")
+
+
+```
+
+
 ```{r}
 plot(x = world$created, y=world$maxEnergy, main = folder)
 points(n_agents_t$t, n_agents_t$n/10, type = "l", col="blue")
 
 ```
+
+Try to find N the census; then show clusters at >2N
+```{r}
+# The census between 40000 and 50000 is on average?
+part_world = subset(n_agents_t, t>=40000 & t<50000)
+census = mean(part_world$n) # ~100 agents... so little!
+
+# clusters 1 and 2 are separated by at least 50000 steps.
+```
+
+
