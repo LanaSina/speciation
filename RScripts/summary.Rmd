@@ -19,15 +19,16 @@ base_folder = "../../new_data/"
 ```
 
 
-## Read agents data
+## Read agents data for small data
 
 ```{r}
-folder = "2024_12_29_17_15" #"trees/best-2024_11_05_20_37"
-fileName = paste(base_folder, folder,"SummaryIndividuals_75000.csv",sep="/")
+folder = "2025_01_22_11_35" #"trees/best-2024_11_05_20_37"
+fileName = paste(base_folder, folder,"SummaryIndividuals_0.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world
 ```
+
 
 ## Visualization
 
@@ -40,7 +41,7 @@ world = whole_world
 # # random subset
 sample_vector=c(1:nrow(whole_world))
 # sample elements from the vector (in this example 30 elements sampled without replacement)
-the_sample = sample(sample_vector, 50000, replace=FALSE)
+the_sample = sample(sample_vector, 5000, replace=FALSE)
 # the vector of randomly selected elements is then used to select rows from the dataframe
 world = whole_world[the_sample,]
 
@@ -102,6 +103,7 @@ colnames(n_agents_t) = c("t", "n")
 plot(n_agents_t, type = "l", main="Number of agents")
 
 ```
+
 ```{r}
 plot(x = world$created, y=world$maxEnergy, main = folder)
 points(n_agents_t$t, n_agents_t$n/10, type = "l", col="blue")
@@ -396,3 +398,4 @@ not_light = subset(snapshot, snapshot$isLight == "false")
 plot(not_light$pos_x, not_light$pos_y)
 
 ```
+
