@@ -448,6 +448,19 @@ public class Map {
 		return globalID;
 	}
 
+	/**
+	 * Saves the current state of the map.
+	 * </br>
+	 * Creates a new directory of format <code>dd_HH_mm</code> and puts in it :
+	 * <ul>
+	 *     <li>a copy of the config.properties file</li>
+	 *     <li>a snapshot.csv file (which contains information about the creatures)</li>
+	 *     <li>a sensors.csv file</li>
+	 * </ul>
+	 *
+	 * @param dataFolderName the directory of the current simulation
+	 * @return the path to the sensors file
+	 */
 	public String saveSate(String dataFolderName) {
 		//snapshot time
 		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
