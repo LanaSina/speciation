@@ -46,6 +46,7 @@ public class RealMap extends Map {
 	 * @param x the abscissa of the cell to update
 	 * @param y the ordinate of the cell to update
 	 */
+	@Override
 	public void updateCell(int x, int y){
 		
 		Cell c = map[x][y];
@@ -224,6 +225,7 @@ public class RealMap extends Map {
 		return 0;// TODO
 	}
 
+	@Override
 	protected MyLog createMyLog() {
 		return new MyLog("map", true);
 	}
