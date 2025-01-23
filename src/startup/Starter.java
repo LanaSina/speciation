@@ -9,6 +9,7 @@ import animals.Node;
 import animals.Tree;
 import communication.Map;
 import communication.MyLog;
+import communication.RealMap;
 import visualization.Display;
 
 import java.io.File;
@@ -86,7 +87,7 @@ public class Starter {
 		int of = 10;
 
 		//worldmap		
-		Map map = new Map(cst_grid_max,d, dataFolderName);
+		Map map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 		
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){
@@ -208,7 +209,7 @@ public class Starter {
 			String dname = properties.getProperty("sim_name");
 			int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 			Display d = new Display(dname, this, dataFolderName);
-			map = new Map(cst_grid_max,d,dataFolderName);
+			map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 
 			// read creatures
 			target = directory.getAbsolutePath()+"/"+Constants.SnapshotFileName+".csv";

@@ -1,6 +1,5 @@
 package communication;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -12,8 +11,6 @@ import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import animals.*;
 import startup.Constants;
@@ -21,8 +18,9 @@ import visualization.Display;
 
 import static java.lang.Math.abs;
 
-public class Map {
-	MyLog mlog = new MyLog("map", true);
+public abstract class Map {
+	MyLog mlog = createMyLog();
+
 	/**graphic panel*/
 	Display d;
 	/** 2D map is made of cells, in each cell there are creatures;*/
@@ -34,9 +32,13 @@ public class Map {
 	/** data recording*/
 	FileWriter summaryWriter;
 	FileWriter predationWriter;
+	String summaryFileName;
+	String predationFileName;
+	String snapshotFileName;
+	String sensorsFileName;
 	/** simulation time*/
 	int time = 0;
-	String dataFolderName = null;
+	String dataFolderName;
 
 	// global contstants
 	double cst_mut_factor;
@@ -63,14 +65,24 @@ public class Map {
 	//for moved ones
 	LinkedList<Individual> moving;
 	LinkedList<Double> newPositions;
-	
-	public Map(int mapSize, Display d, String myDataFolderName){
-		this.d  = d;
+
+	public Map(int mapSize,
+			   Display d,
+			   String myDataFolderName,
+			   String summaryFileName,
+			   String predationFileName,
+			   String snapshotFileName,
+			   String sensorsFileName) {
+		this.d = d;
 		this.dataFolderName = myDataFolderName;
+		this.summaryFileName = summaryFileName;
+		this.predationFileName = predationFileName;
+		this.snapshotFileName = snapshotFileName;
+		this.sensorsFileName = sensorsFileName;
 
 		// read configuration file
 		Properties properties = new Properties();
-		FileInputStream propsFile = null;
+		FileInputStream propsFile;
 		try {
 			propsFile = new FileInputStream("src/config.properties");
 			properties.load(propsFile);
@@ -118,9 +130,9 @@ public class Map {
 	}
 
 
-	private void setupLogFiles(){
+	protected void setupLogFiles(){
 		// individuals info
-		FileBuilder fb = new FileBuilder(dataFolderName, Constants.SummaryFileName + "_" + time);
+		FileBuilder fb = new FileBuilder(dataFolderName, summaryFileName + "_" + time);
 		summaryWriter = fb.getFileWriter();
 		fb = null;
 
@@ -142,7 +154,7 @@ public class Map {
 		}
 
 		// predation info
-		FileBuilder fb_predation = new FileBuilder(dataFolderName, Constants.PredationFileName+ "_" + time);
+		FileBuilder fb_predation = new FileBuilder(dataFolderName, predationFileName+ "_" + time);
 		predationWriter = fb_predation.getFileWriter();
 		fb_predation = null;
 
@@ -197,173 +209,12 @@ public class Map {
 	}
 
 	/**
-	 * Updates the creatures present on the cell specified by the coordinates.
-	 * Creatures may make babies, move, interact with other creatures present on the cell.
-	 * They can lose or gain energy.
-	 * If their energy reaches 0 or less, they die.
-	 * </br>
-	 * Creatures can only interact with one another if they are on the same cell.
-	 * The more creatures there are on the cell, the more likely two given creatures are to interact with each other.
-	 * (If the number of creatures on the cell is sufficiently low, then no interactions will even occur.)
-	 * </br>
-	 * Interactions are limited to predation.
-	 * If a creature detects another creature with at least one similar characteristic (e.g., size), it may attempt to
-	 * eat it.
+	 * Updates the cell that's at the given coordinates.
 	 *
 	 * @param x the abscissa of the cell to update
 	 * @param y the ordinate of the cell to update
 	 */
-	public void updateCell(int x, int y){
-		
-		Cell c = map[x][y];
-		int size = c.creatures.size();
-
-		if(size==0){
-			return;
-		}
-
-		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
-		Collections.shuffle(shuffled_creatures_arr, Constants.rand);
-
-		for (int temp_i = 0; temp_i < size; temp_i++) {
-			int i = shuffled_creatures_arr.get(temp_i);
-
-			EmbodiedIndividual creature = (EmbodiedIndividual) c.creatures.get(i);
-            boolean alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
-					cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
-					cst_sensor_cost, cst_free_energy, cst_energy_cost_factor, cst_step_cost
-			);
-            double[] position = creature.getPosition();
-
-            if(!alive){
-            	remove.add(creature);
-            } else{
-            	double np[] = new double[2];
-	            boolean moved = false;
-				double speed = creature.getSpeed();
-
-            	if(!creature.isLight()){
-	            	//move
-	        		for(int j=0;j<2;j++){
-	        			if(generateBool()){
-	        				np[j]= position[j]+(speed*cst_speed_factor);
-	        			}else{
-	        				np[j] = position[j]-(speed*cst_speed_factor);
-	        			}
-	        			if(np[j]<0) np[j]=0;
-	        			if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
-	        			if(np[j] != position[j]){
-	        				moved = true;
-	        			}
-	        		}
-            	}
-            	
-        		Tree sensors = creature.getSensors();
-        		
-        		//interactions between creatures
-                //iterate on properties
-                HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
-				for (Iterator<Integer> propIt = sChildren.keySet().iterator(); propIt.hasNext();){
-                	// property
-					int k = propIt.next();
-					// sensed values
-                	Node propValues = sChildren.get(k);
-                	for (Iterator<Integer> valuesIt = propValues.getChildren().keySet().iterator(); valuesIt.hasNext();){
-						int valueSensed = valuesIt.next();
-						int action = propValues.getChildren().get(valueSensed);
-						//interactions with other creatures
-						if (action < 2) {
-							//iterate creatures on this cell
-							for (int m = 0; m < c.creatures.size(); m++) {
-								double p = 1 * 3 / (double) c.creatures.size();
-								if (Constants.uniformDouble() > p) {
-									continue;
-								}
-
-								Individual cr2 = c.creatures.get(m);
-								if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
-									continue;
-								}
-								//creature can't interact on itself
-								if (m == i) {
-									continue;
-								}
-
-								double ind_prop = cr2.getProperties()[k];
-
-								if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
-									tryEat(creature, cr2);
-								}
-							}
-						}
-                	}
-                }
-        		
-        		if(moved){
-        			newPositions.add(np[0]);
-        			newPositions.add(np[1]);
-        			moving.add(creature);
-        			//costs energy
-        			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
-        				creature.setEnergy(energy);
-        			}
-        		}
-            }    
-        }
-	}
-
-	private void tryEat(Individual predator, Individual prey) {
-
-		double ok = predator.getEnergy() - prey.getEnergy();
-		if(ok>=0){
-			//give energy to predator
-			double e = prey.getEnergy();
-			if(e>0){
-				double energy = predator.getEnergy() + e;
-				predator.setEnergy(energy);
-				//record prey as dead
-				prey.setEnergy(0);
-				prey.setEatenBy(predator.getID());
-				predator.setBorderColor(Color.black);
-			}
-			// only save successful predation
-			if(Constants.Save){
-				// reduce file size
-				if(Constants.uniformDouble()<1){ //0.01
-					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
-					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-					/*
-						String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
-						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
-						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids,energy, parentIsLight " +
-						 prey_id +  pos[0], pos[1] +prey_islight +
-						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
-						"prey_pgmDeath, prey_matForKids, energy, parentIsLight\n";
-					 */
-					String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
-					try {
-						predationWriter.append(str);
-						predationWriter.flush();
-					} catch (IOException ep) {
-						// TODO Auto-generated catch block
-						ep.printStackTrace();
-					}
-				}
-			}
-		} else if(ok<=0){
-			double ePred = predator.getEnergy();
-			double ePrey = prey.getEnergy();
-			//wound predator
-			double energy = ePred-abs(ePrey*cst_error_cost);
-			predator.setEnergy(energy);
-			//wound prey
-			energy = ePrey-abs(ePred*cst_error_cost);//*3
-			prey.setEnergy(energy);
-			predator.setBorderColor(Color.red);
-			prey.setBorderColor(Color.gray);
-		}
-	}
+	public abstract void updateCell(int x, int y);
 
 	public void updateMoved(){
 		time++;
@@ -454,8 +305,8 @@ public class Map {
 	 * Creates a new directory of format <code>dd_HH_mm</code> and puts in it :
 	 * <ul>
 	 *     <li>a copy of the config.properties file</li>
-	 *     <li>a snapshot.csv file (which contains information about the creatures)</li>
-	 *     <li>a sensors.csv file</li>
+	 *     <li>a snapshot file (which contains information about the creatures)</li>
+	 *     <li>a sensors file</li>
 	 * </ul>
 	 *
 	 * @param dataFolderName the directory of the current simulation
@@ -493,10 +344,10 @@ public class Map {
 		}
 		mlog.say("properties copied to " + dataFolderName+"/"+strDate);
 
-		String filePath = strDate + "/" + Constants.SnapshotFileName;
+		String filePath = strDate + "/" + snapshotFileName;
 		saveCreatures(dataFolderName, filePath);
 		// save sensors
-		filePath = strDate + "/" + Constants.SensorsFileName;
+		filePath = strDate + "/" + sensorsFileName;
 		saveSensors(dataFolderName, filePath);
 
 		return filePath;
@@ -608,115 +459,33 @@ public class Map {
 	public void setTime(int t) {
 		time = t;
 	}
-
-	/**
-	 * a cell on the map
-	 * should have own class file.
-	 * @author lana
-	 *
-	 */
-	private class Cell {
-		//cell's physical properties
-		/**
-		 * how easy light goes through it (0=does not get out)
-		 */
-		double transparency = 1;
-		/**
-		 * how easy it is to move through (1=cannot move)
-		 */
-		double density = 0;//TODO use. may also change how sound etc travels.
-
-		/**
-		 * determined by animals and transparency on this cell
-		 */
-		double luminosity;
-		double sound;
-		double smell;
-		double temperature;
-		double electric;
-
-		/**
-		 * all creatures on this cell
-		 */
-		LinkedList<Individual> creatures;
-
-		public Cell() {
-			creatures = new LinkedList<Individual>();
-		}
-
-		public double getPhy(int kk) {
-			double p = 0;
-			switch (kk) {
-				case 0: {
-					p = transparency;
-					break;
-				}
-				case 1: {
-					p = density;
-					break;
-				}
-				default:
-					break;
-			}
-			return p;
-		}
-
-		/**
-		 * return a property of the cell
-		 */
-		public double getProp(int k) {
-			double r = 0;
-			//todo put all in an array
-			switch (k) {
-				case 0:
-					r = luminosity;
-					break;
-				case 1:
-					r = sound;
-					break;
-				case 2:
-					r = smell;
-					break;
-				case 3:
-					r = temperature;
-					break;
-				case 4:
-					r = electric;
-					break;
-				default:
-					r = 0;
-					break;
-			}
-			return r;
-		}
-	}
 	
 	/**
 	 * shifts a number so values closest to max are 1
 	 * @param m between 0..1
 	 * @return
 	 */
-	private double shiftMax(double val, double m) {
+	protected double shiftMax(double val, double m) {
 		double s = 1- abs(m-val);//triangular
 		s = checkZero(s, m-0.2, m+0.2);
 		return s;
 	}
 	
 	//sets at 0 if out of bounds
-	private double checkZero(double val, double low, double high) {
+	protected double checkZero(double val, double low, double high) {
 		if(val<low) val = 0;
 		if(val>high) val = 0;
 		return val;
 	}
 	
 	//set at bounds
-	private double check(double val, double low, double high) {
+	protected double check(double val, double low, double high) {
 		if(val<low) val = low;
 		if(val>high) val = high;
 		return val;
 	}
 	
-	private boolean generateBool(){
+	protected boolean generateBool(){
 		boolean b = false;
 		if(Constants.uniformDouble()>0.5){
 			b = true;
@@ -729,5 +498,6 @@ public class Map {
 		d.dispose();
 	}
 
+	protected abstract MyLog createMyLog();
 
 }
