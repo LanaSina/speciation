@@ -597,4 +597,28 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
 
     protected abstract MyLog createMyLog();
 
+    public boolean equals(Object o) {
+        if (!(o instanceof IndividualWithProperties))
+            return false;
+        IndividualWithProperties other = (IndividualWithProperties) o;
+        return this.cellTransparency == other.cellTransparency &&
+                this.speed == other.speed &&
+                this.maxEnergy == other.maxEnergy &&
+                this.kidEnergy == other.kidEnergy &&
+                this.matForKids == other.matForKids &&
+                this.nKids == other.nKids &&
+                this.death == other.death &&
+                this.ID == other.ID &&
+                this.parentID == other.parentID &&
+                this.firstAncestorID == other.firstAncestorID &&
+                this.birthDate == other.birthDate &&
+                this.life == other.life &&
+                this.isLight == other.isLight &&
+                this.energy == other.energy &&
+                this.position[0] == other.position[0] &&
+                this.position[1] == other.position[1] &&
+                this.color.equals(other.color) &&
+                this.borderColor.equals(other.borderColor);
+    }
+
 }
