@@ -5,6 +5,9 @@ import animals.IndividualWithProperties;
 import animals.ShadowIndividual;
 import visualization.Display;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class for shadow maps.
  */
@@ -101,6 +104,23 @@ public class ShadowMap extends Map {
         Cell cell = map[x][y];
         for (Individual individual : cell.creatures)
             ((ShadowIndividual) individual).update();
+    }
+
+    /**
+     * Returns the list of individuals on this map.
+     *
+     * @return the list of individuals on this map
+     */
+    private ArrayList<ShadowIndividual> getAllIndividuals() {
+        ArrayList<ShadowIndividual> res = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                Cell cell = map[i][j];
+                for (Individual individual : cell.creatures)
+                    res.add((ShadowIndividual) individual);
+            }
+        }
+        return res;
     }
 
     @Override
