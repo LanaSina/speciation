@@ -143,11 +143,16 @@ public class ShadowMap extends Map {
 
     /**
      * Remove <code>number</code> random individuals.
+     * </br>
+     * The provided number must not exceed the total number of individuals.
      *
      * @param number the number of individuals to remove
+     * @throws IllegalArgumentException if trying to remove more individuals than there are
      */
     public void removeRandomIndividuals(int number) {
         ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
+        if (allIndividuals.size() < number)
+            throw new IllegalArgumentException("cannot remove more individuals than there are");
         Random randomizer = new Random();
         for (int i = 0 ; i < number ; i++) {
             ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
