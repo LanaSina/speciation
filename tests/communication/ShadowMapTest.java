@@ -140,4 +140,23 @@ public class ShadowMapTest {
         assertEquals(number, shadowMap.babies.size());
     }
 
+    @Test
+    public void checkWhetherTheNumberOfRandomlyRemovedIndividualsIsCorrect() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        int x = 20;
+        int y = 20;
+        int globalID = 30;
+        int ancestor = 12;
+        int date = 800;
+        int parent = 2;
+        int number = 10;
+        for (int i = 0 ; i < number ; i++) {
+            ShadowIndividual individual = new ShadowIndividual(x, y, globalID++, ancestor++, date++, parent++);
+            shadowMap.addIndividual(x++, y++, individual);
+        }
+        assertEquals(0, shadowMap.remove.size());
+        shadowMap.removeRandomIndividuals(number);
+        assertEquals(number, shadowMap.remove.size());
+    }
+
 }
