@@ -41,7 +41,12 @@ public class ShadowMapTest {
 
     @Test
     public void shadowMapIsSimilarToRealMapAtCreation() {
+        fillRealMap();
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        checkWhetherShadowMapAndRealMapAreSimilar(shadowMap);
+    }
 
+    private static void fillRealMap() {
         int globalID = 666;
         int time = 1789;
 
@@ -56,19 +61,34 @@ public class ShadowMapTest {
         realMap.setTime(time);
         IndividualWithProperties individual1 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
         realMap.addIndividual((int) x, (int) y, individual1);
-        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        x++;
+        y++;
+        id++;
+        firstAncestorID++;
+        birthDate++;
+        parentID++;
         IndividualWithProperties individual2 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
         realMap.addIndividual((int) x, (int) y, individual2);
-        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        x++;
+        y++;
+        id++;
+        firstAncestorID++;
+        birthDate++;
+        parentID++;
         realMap.remove.add(individual1);
         realMap.babies.add(new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID));
-        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        x++;
+        y++;
+        id++;
+        firstAncestorID++;
+        birthDate++;
+        parentID++;
         realMap.moving.add(individual2);
         realMap.newPositions.add(x);
         realMap.newPositions.add(y);
+    }
 
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-
+    private static void checkWhetherShadowMapAndRealMapAreSimilar(ShadowMap shadowMap) {
         assertSame(realMap, shadowMap.realMap);
         assertNotSame(realMap.map, shadowMap.map);
         assertEquals(realMap.size, shadowMap.size);
@@ -119,7 +139,6 @@ public class ShadowMapTest {
                 }
             }
         }
-
     }
 
 }
