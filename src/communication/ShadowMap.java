@@ -5,7 +5,8 @@ import animals.IndividualWithProperties;
 import animals.ShadowIndividual;
 import visualization.Display;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class for shadow maps.
@@ -25,6 +26,8 @@ public class ShadowMap extends Map {
      *     <li>same dimensions</li>
      *     <li>same number of individuals</li>
      *     <li>similar individuals (although they are not identical, see class <code>ShadowIndividual</code>)</li>
+     *     <li>similar <code>babies</code>, <code>remove</code>, <code>moved</code> and <code>newPositions</code>
+     *         (meaning they contain similar individuals)</li>
      *     <li>same global ID</li>
      *     <li>same time</li>
      *     <li>same data folder name</li>
@@ -56,25 +59,38 @@ public class ShadowMap extends Map {
      *     <li>same time</li>
      *     <li>same number of individuals</li>
      *     <li>similar individuals (although they are different, see class <code>ShadowIndividual</code>)</li>
+     *     <li>similar <code>babies</code>, <code>remove</code>, <code>moved</code> and <code>newPositions</code>
+     *         (meaning they contain similar individual</li>
      * </ul>
      */
     public void reset() {
         globalID = realMap.globalID;
         time = realMap.time;
         // Reset individuals
+        babies.clear();
+        remove.clear();
+        moving.clear();
+        newPositions.clear();
         for (int i = 0; i < realMap.size; i++) {
             for (int j = 0; j < realMap.size; j++) {
                 Cell realCell = realMap.map[i][j];
                 Cell shadowCell = map[i][j];
                 // Remove all individuals on the shadow cell
-                shadowCell.creatures = new LinkedList<>();
+                shadowCell.creatures.clear();
                 // Copy all the individuals from the real cell to the shadow cell
                 for (Individual realIndividual : realCell.creatures) {
                     ShadowIndividual shadowIndividual = new ShadowIndividual((IndividualWithProperties) realIndividual);
                     shadowCell.creatures.add(shadowIndividual);
+                    if (realMap.remove.contains(realIndividual))
+                        remove.add(shadowIndividual);
+                    if (realMap.moving.contains(realIndividual))
+                        moving.add(shadowIndividual);
                 }
             }
         }
+        for (Individual baby : realMap.babies)
+            babies.add(new ShadowIndividual((IndividualWithProperties) baby));
+        newPositions.addAll(realMap.newPositions);
     }
 
     @Override
