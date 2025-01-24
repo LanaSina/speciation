@@ -141,6 +141,20 @@ public class ShadowMap extends Map {
         }
     }
 
+    /**
+     * Remove <code>number</code> random individuals.
+     *
+     * @param number the number of individuals to remove
+     */
+    public void removeRandomIndividuals(int number) {
+        ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
+        Random randomizer = new Random();
+        for (int i = 0 ; i < number ; i++) {
+            ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
+            remove.add(randomInd);
+        }
+    }
+
     @Override
     protected MyLog createMyLog() {
         return new MyLog("Shadow map", true);
