@@ -60,33 +60,15 @@ public class ShadowMapTest {
 
         double x = 42;
         double y = 42;
-        int id = 64;
-        int firstAncestorID = 1770;
-        int birthDate = 1840;
-        int parentID = 1936;
 
         realMap.setGlobalId(globalID);
         realMap.setTime(time);
-        IndividualWithProperties individual1 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
-        realMap.addIndividual((int) x, (int) y, individual1);
-        x++;
-        y++;
-        id++;
-        firstAncestorID++;
-        birthDate++;
-        parentID++;
-        IndividualWithProperties individual2 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
-        realMap.addIndividual((int) x, (int) y, individual2);
-        x++;
-        y++;
-        id++;
-        firstAncestorID++;
-        birthDate++;
-        parentID++;
+        IndividualWithProperties individual1 = new EmbodiedIndividual(x, y, 64, 1770, 1840, 1936);
+        realMap.addIndividual((int) x++, (int) y++, individual1);
+        IndividualWithProperties individual2 = new EmbodiedIndividual(x, y, 18, 666, 102, 776);
+        realMap.addIndividual((int) x++, (int) y++, individual2);
         realMap.remove.add(individual1);
-        realMap.babies.add(new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID));
-        x++;
-        y++;
+        realMap.babies.add(new EmbodiedIndividual(x++, y++, 400, 977, 555, 222));
         realMap.moving.add(individual2);
         realMap.newPositions.add(x);
         realMap.newPositions.add(y);
