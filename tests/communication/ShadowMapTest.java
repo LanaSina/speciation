@@ -46,6 +46,14 @@ public class ShadowMapTest {
         checkWhetherShadowMapAndRealMapAreSimilar(shadowMap);
     }
 
+    @Test
+    public void shadowMapIsSimilarToRealMapAfterReset() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        fillRealMap();
+        shadowMap.reset();
+        checkWhetherShadowMapAndRealMapAreSimilar(shadowMap);
+    }
+
     private static void fillRealMap() {
         int globalID = 666;
         int time = 1789;
