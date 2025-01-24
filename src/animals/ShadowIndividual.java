@@ -15,7 +15,7 @@ public class ShadowIndividual extends IndividualWithProperties {
         super(myId, line);
     }
 
-    ShadowIndividual(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+    public ShadowIndividual(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
                      double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
     ) {
         super(in, glID, date, cst_mut_factor, cst_speed_max, cst_light_birth_dst, birth_dst, cst_grid_max, cst_energy_max);
