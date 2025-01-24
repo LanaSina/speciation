@@ -5,9 +5,6 @@ import animals.IndividualWithProperties;
 import animals.ShadowIndividual;
 import visualization.Display;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A class for shadow maps.
  */
@@ -93,9 +90,17 @@ public class ShadowMap extends Map {
         newPositions.addAll(realMap.newPositions);
     }
 
+    /**
+     * Updates the creatures present on the cell specified by the coordinates.
+     *
+     * @param x the abscissa of the cell to update
+     * @param y the ordinate of the cell to update
+     */
     @Override
     public void updateCell(int x, int y) {
-        // TODO
+        Cell cell = map[x][y];
+        for (Individual individual : cell.creatures)
+            ((ShadowIndividual) individual).update();
     }
 
     @Override
