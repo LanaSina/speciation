@@ -127,4 +127,17 @@ public class ShadowMapTest {
         }
     }
 
+    @Test
+    public void checkWhetherTheNumberOfRandomlyCreatedIndividualsIsCorrect() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        int x = 20;
+        int y = 20;
+        int number = 92;
+        ShadowIndividual individual = new ShadowIndividual(x, y, 64, 1770, 1840, 1936);
+        shadowMap.addIndividual(x, y, individual);
+        assertEquals(0, shadowMap.babies.size());
+        shadowMap.createRandomIndividuals(number);
+        assertEquals(number, shadowMap.babies.size());
+    }
+
 }
