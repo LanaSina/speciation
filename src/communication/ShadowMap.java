@@ -6,7 +6,7 @@ import animals.ShadowIndividual;
 import visualization.Display;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 /**
  * A class for shadow maps.
@@ -121,6 +121,24 @@ public class ShadowMap extends Map {
             }
         }
         return res;
+    }
+
+    /**
+     * Make <code>number</code> random individuals have a baby.
+     * </br>
+     * An individual may make several babies if they are selected multiple times. They can even make more baby than
+     * their normal maximum number of babies per time step.
+     *
+     * @param number the number of individuals to create
+     */
+    public void createRandomIndividuals(int number) {
+        ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
+        Random randomizer = new Random();
+        for (int i = 0 ; i < number ; i++) {
+            ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
+            ShadowIndividual baby = new ShadowIndividual(randomInd, -1, time, cst_mut_factor, cst_speed_max, cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
+            babies.add(baby);
+        }
     }
 
     @Override
