@@ -87,10 +87,6 @@ public class ShadowMapTest {
         realMap.babies.add(new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID));
         x++;
         y++;
-        id++;
-        firstAncestorID++;
-        birthDate++;
-        parentID++;
         realMap.moving.add(individual2);
         realMap.newPositions.add(x);
         realMap.newPositions.add(y);
