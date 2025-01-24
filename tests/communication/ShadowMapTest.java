@@ -41,19 +41,31 @@ public class ShadowMapTest {
 
     @Test
     public void shadowMapIsSimilarToRealMapAtCreation() {
-        int x = 42;
-        int y = 42;
+
+        int globalID = 666;
+        int time = 1789;
+
+        double x = 42;
+        double y = 42;
         int id = 64;
         int firstAncestorID = 1770;
         int birthDate = 1840;
         int parentID = 1936;
-        int globalID = 666;
-        int time = 1789;
 
-        IndividualWithProperties individual = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
-        realMap.addIndividual(x, y, individual);
         realMap.setGlobalId(globalID);
         realMap.setTime(time);
+        IndividualWithProperties individual1 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
+        realMap.addIndividual((int) x, (int) y, individual1);
+        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        IndividualWithProperties individual2 = new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID);
+        realMap.addIndividual((int) x, (int) y, individual2);
+        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        realMap.remove.add(individual1);
+        realMap.babies.add(new EmbodiedIndividual(x, y, id, firstAncestorID, birthDate, parentID));
+        x++; y++; id++; firstAncestorID++; birthDate++; parentID++;
+        realMap.moving.add(individual2);
+        realMap.newPositions.add(x);
+        realMap.newPositions.add(y);
 
         ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
 
