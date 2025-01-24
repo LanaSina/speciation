@@ -122,11 +122,6 @@ public abstract class Map {
 				map[i][j] = new Cell();
 			}
 		}
-		
-		//writing data
-		if(Constants.Save) {
-			setupLogFiles();
-		}
 	}
 
 
