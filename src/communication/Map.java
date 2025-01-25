@@ -125,7 +125,7 @@ public abstract class Map {
 	}
 
 
-	protected void setupLogFiles(){
+	public void setupLogFiles(){
 		// individuals info
 		FileBuilder fb = new FileBuilder(dataFolderName, summaryFileName + "_" + time);
 		summaryWriter = fb.getFileWriter();
