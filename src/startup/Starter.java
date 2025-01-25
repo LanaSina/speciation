@@ -88,7 +88,8 @@ public class Starter {
 
 		//worldmap		
 		Map map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
-		
+		map.setupLogFiles();
+
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){
 			for(int j=0; j<lightLimit; j++){
