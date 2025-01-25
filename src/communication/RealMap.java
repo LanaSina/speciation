@@ -209,7 +209,7 @@ public class RealMap extends Map {
 	 * @return the number of new creatures born during a time step
 	 */
 	public int getNbOfBirths() {
-		return 0;// TODO
+		return babies.size();
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class RealMap extends Map {
 	 * @return the number of creatures that just died during a time step
 	 */
 	public int getNbOfDeaths() {
-		return 0;// TODO
+		return remove.size();
 	}
 
 	@Override
