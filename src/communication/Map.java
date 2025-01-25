@@ -189,7 +189,7 @@ public abstract class Map {
 		int x = (int)(position[0] +0.5);
 		int y = (int)(position[1] +0.5);
 		Cell c = map[x][y];
-		int pos = c.creatures.indexOf(i);
+		int pos = Constants.indexOfByReference(c.creatures, i);
 		c.creatures.remove(pos);
 	}
 	
