@@ -1,9 +1,6 @@
 package communication;
 
-import animals.EmbodiedIndividual;
-import animals.Individual;
-import animals.Node;
-import animals.Tree;
+import animals.*;
 import startup.Constants;
 import visualization.Display;
 
