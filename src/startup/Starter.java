@@ -7,9 +7,9 @@ import animals.EmbodiedIndividual;
 import animals.Individual;
 import animals.Node;
 import animals.Tree;
-import communication.Map;
 import communication.MyLog;
 import communication.RealMap;
+import communication.ShadowMap;
 import visualization.Display;
 
 import java.io.File;
@@ -81,13 +81,13 @@ public class Starter {
 		String dname = properties.getProperty("sim_name");
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
 
-		LifeRunnable life = new LifeRunnable();
+		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable() : new LifeRunnable();
 		Display d = new Display(dname, life, dataFolderName);
 		int lightLimit = 30;//30
 		int of = 10;
 
 		//worldmap		
-		Map map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+		RealMap map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 		map.setupLogFiles();
 
 		//initialize map (do it from file!!)
@@ -128,13 +128,13 @@ public class Starter {
 		boolean doSave = false;
 
 		//map
-		Map map = null;
+		RealMap map = null;
 		int mapSize = Constants.GridMax;
 		
 		public LifeRunnable(){
 		}
 
-		public void setMap(Map map){
+		public void setMap(RealMap map){
 			this.map = map;
 		}
 		
@@ -292,6 +292,66 @@ public class Starter {
 			} catch (FileNotFoundException e) {
 				throw new RuntimeException(e);
 			}
+		}
+	}
+
+	public static class ShadowLifeRunnable extends LifeRunnable{
+		ShadowMap shadowMap;
+
+		public void setMap(RealMap map){
+			this.map = map;
+			Display d = new Display("shadow map", this, dataFolderName);
+			this.shadowMap = new ShadowMap(map, d, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
+			this.shadowMap.setupLogFiles();
+		}
+
+		public void run() {
+
+			while(run){
+				// is false after PauseProcedure
+				if(running) {
+					update();
+
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+				if(doSave){
+					String fileName =  map.saveSate(dataFolderName);
+					String savedAt = dataFolderName + fileName;
+					mlog.say("Saved at " + savedAt);
+					fileName =  shadowMap.saveSate(dataFolderName);
+					savedAt = dataFolderName + fileName;
+					mlog.say("Saved at " + savedAt);
+					doSave = false;
+				}
+
+			}
+			mlog.say("dies");
+		}
+
+
+		/** updates each individual and each cell of the map */
+		void update(){
+			for(int i=0; i<mapSize;i++){
+				for(int j=0; j<mapSize;j++){
+					map.updateCell(i, j);
+					shadowMap.updateCell(i, j);
+				}
+			}
+			shadowMap.createRandomIndividuals(map.getNbOfBirths());
+			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
+			map.updateMoved();
+			shadowMap.updateMoved();
 		}
 	}
 

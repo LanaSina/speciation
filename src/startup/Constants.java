@@ -34,6 +34,14 @@ public class Constants {
 	public static String SensorsFileName = "sensors";
 	public static String PredationFileName = "predation";
 
+	/** OEE analysis */
+	// Run shadow model in parallel to the real model
+	public static final boolean RunShadowModel = true;
+	public static final int ShadowModelInterSnaphshotDuration = 1000;
+	public static final String ShadowModelSummaryFileName = "ShadowModel_SummaryIndividuals";
+	public static final String ShadowModelPredationFileName = "ShadowModel_Predation";
+	public static String ShadowModelSnapshotFileName = "ShadowModel_Snapshot";
+	public static String ShadowModelSensorsFileName = "ShadowModel_Sensors";
 
 	/**
 	 * from http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
