@@ -158,6 +158,7 @@ public class ShadowMap extends Map {
         for (int i = 0 ; i < number ; i++) {
             ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
             remove.add(randomInd);
+            allIndividuals.remove(randomInd);
         }
     }
 
