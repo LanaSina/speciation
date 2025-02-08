@@ -3,6 +3,7 @@
  */
 package startup;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -78,6 +79,42 @@ public class Constants {
 	    //rand.nextInt(max - min) + 1)
 
 	    return randomNum;
+	}
+
+	/**
+	 * Equivalent of <code>.indexOf()</code> but uses <code>==</code> comparison instead of <code>.equals()</code>.
+	 *
+	 * @param list   the list to scan
+	 * @param target the item to look for
+	 * @param <T>    the type of elements held in the list
+	 * @return the index of the item in the list, or -1 if the item is not in the list
+	 */
+	public static <T> int indexOfByReference(List<T> list, T target) {
+		if (list == null)
+			return -1;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i) == target)
+				return i;
+		}
+		return -1;
+	}
+
+	/**
+	 * Equivalent of <code>.contains()</code> but uses <code>==</code> comparison instead of <code>.equals()</code>.
+	 *
+	 * @param list   the list to scan
+	 * @param target the item to look for
+	 * @param <T>    the type of elements held in the list
+	 * @return the index of the item in the list, or -1 if the item is not in the list
+	 */
+	public static <T> boolean containsByReference(List<T> list, T target) {
+		if (list == null)
+			return false;
+		for (T element : list) {
+			if (element == target)
+				return true;
+		}
+		return false;
 	}
 }
 

@@ -272,7 +272,7 @@ public class Display extends JFrame {
 				}
 	    	}
 	    	pause = true;
-			int i = components.indexOf(c);
+			int i = Constants.indexOfByReference(components, c);
 			components.remove(i);
 			pause = false;
 		}

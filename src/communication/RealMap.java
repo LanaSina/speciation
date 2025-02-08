@@ -112,7 +112,7 @@ public class RealMap extends Map {
 								}
 
 								Individual cr2 = c.creatures.get(m);
-								if (remove.contains(c.creatures.get(m)) | (cr2.isLight())) {
+								if (Constants.containsByReference(remove, c.creatures.get(m)) | (cr2.isLight())) {
 									continue;
 								}
 								//creature can't interact on itself
