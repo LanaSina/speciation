@@ -417,7 +417,7 @@ public abstract class Map {
 					}
 
 					for (int id = 0; id<size; id++){
-						EmbodiedIndividual creature = (EmbodiedIndividual) c.creatures.get(id);
+						IndividualWithProperties creature = (IndividualWithProperties) c.creatures.get(id);
 						if (creature.hasSensors()==0){
 							continue;
 						}
