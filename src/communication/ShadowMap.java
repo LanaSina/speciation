@@ -3,6 +3,7 @@ package communication;
 import animals.Individual;
 import animals.IndividualWithProperties;
 import animals.ShadowIndividual;
+import startup.Constants;
 import visualization.Display;
 
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ public class ShadowMap extends Map {
         remove.clear();
         moving.clear();
         newPositions.clear();
+        d.removeAllComponents();
         for (int i = 0; i < realMap.size; i++) {
             for (int j = 0; j < realMap.size; j++) {
                 Cell realCell = realMap.map[i][j];
@@ -160,6 +162,13 @@ public class ShadowMap extends Map {
             remove.add(randomInd);
             allIndividuals.remove(randomInd);
         }
+    }
+
+    @Override
+    public void updateMoved() {
+        super.updateMoved();
+        if (time % Constants.ShadowModelInterSnaphshotDuration == 0)
+            reset();
     }
 
     @Override

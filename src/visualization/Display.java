@@ -94,6 +94,10 @@ public class Display extends JFrame {
 		s.removeComponent(c);
 	}
 
+	public void removeAllComponents() {
+		s.components.clear();
+	}
+
 	public void pauseProcedure(boolean b){
 		s.pauseProcedure(b);
 	}
