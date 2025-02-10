@@ -41,6 +41,7 @@ public class ShadowIndividual extends IndividualWithProperties {
         this.death = in.death;
 
         this.sensors = in.sensors.copy();
+        this.parentIsLight = in.parentIsLight;
         this.life = in.life;
         this.isLight = in.isLight;
         this.energy = in.energy;
