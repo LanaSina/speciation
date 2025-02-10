@@ -72,7 +72,8 @@ public class ShadowMap extends Map {
         remove.clear();
         moving.clear();
         newPositions.clear();
-        d.removeAllComponents();
+        if (!(d == null))
+            d.removeAllComponents();
         for (int i = 0; i < realMap.size; i++) {
             for (int j = 0; j < realMap.size; j++) {
                 Cell realCell = realMap.map[i][j];
@@ -83,7 +84,8 @@ public class ShadowMap extends Map {
                 for (Individual realIndividual : realCell.creatures) {
                     ShadowIndividual shadowIndividual = new ShadowIndividual((IndividualWithProperties) realIndividual);
                     shadowCell.creatures.add(shadowIndividual);
-                    d.addComponent(shadowIndividual);
+                    if (!(d == null))
+                        d.addComponent(shadowIndividual);
                     if (realMap.remove.contains(realIndividual))
                         remove.add(shadowIndividual);
                     if (realMap.moving.contains(realIndividual))
