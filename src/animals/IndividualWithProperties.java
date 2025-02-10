@@ -612,6 +612,7 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
                 this.parentID == other.parentID &&
                 this.firstAncestorID == other.firstAncestorID &&
                 this.birthDate == other.birthDate &&
+                this.parentIsLight == other.parentIsLight &&
                 this.life == other.life &&
                 this.isLight == other.isLight &&
                 this.energy == other.energy &&
