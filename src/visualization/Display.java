@@ -98,6 +98,10 @@ public class Display extends JFrame {
 		s.components.clear();
 	}
 
+	public int getNbOfComponents() {
+		return s.components.size();
+	}
+
 	public void pauseProcedure(boolean b){
 		s.pauseProcedure(b);
 	}

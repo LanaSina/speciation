@@ -493,6 +493,10 @@ public abstract class Map {
 		d.dispose();
 	}
 
+	public int getNbOfDisplayComponents() {
+		return d.getNbOfComponents();
+	}
+
 	protected abstract MyLog createMyLog();
 
 }

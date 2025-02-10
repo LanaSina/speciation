@@ -352,6 +352,8 @@ public class Starter {
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.updateMoved();
 			shadowMap.updateMoved();
+			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
+				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
 		}
 	}
 
