@@ -1,7 +1,7 @@
 ---
 title: "oee-md"
 author: "Lana"
-date: "2024-10-13"
+date: "2025_02_15_19_29"
 output: html_document
 ---
 
@@ -18,12 +18,11 @@ library(rgl)
 base_folder = "../../new_data/"
 ```
 
-
 ## Read agents data
 
 ```{r}
-folder = "2024_12_29_17_15" #"trees/best-2024_11_05_20_37"
-fileName = paste(base_folder, folder,"SummaryIndividuals_75000.csv",sep="/")
+folder = "2025_02_15_19_29" #"trees/best-2024_11_05_20_37"
+fileName = paste(base_folder, folder,"SummaryIndividuals_0.csv",sep="/")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world
@@ -67,7 +66,6 @@ rglwidget()
 
 ```
 
-
 ```{r}
 # plot each variable separately
 # par(mfrow=c(2,3))
@@ -81,7 +79,6 @@ plot(x = world$created, y=world$nkids, main = folder)
 plot(x = world$created, y=world$pgmDeath, main = folder)
 #plot(x = world$created, y=world$matForKids, main = folder)
 ```
-
 
 ```{r}
 #  Plot number of agents
@@ -102,13 +99,12 @@ colnames(n_agents_t) = c("t", "n")
 plot(n_agents_t, type = "l", main="Number of agents")
 
 ```
+
 ```{r}
 plot(x = world$created, y=world$maxEnergy, main = folder)
 points(n_agents_t$t, n_agents_t$n/10, type = "l", col="blue")
 
 ```
-
-
 
 ## PCA
 
@@ -139,8 +135,6 @@ plot3d(x= world$created, y=pc$x[,2], z = pc$x[,1], col = colors, main = folder)
 rglwidget()
 ```
 
-
-
 ```{r}
 # PCA over time!
 t = min(world$created)
@@ -166,7 +160,6 @@ while (t < max_t) {
   t = t + step_size
 } 
 ```
-
 
 ```{r}
 # PCA on whole tree according to one time slice's projection
@@ -206,12 +199,11 @@ for (cid in c(4:8, 10:12)){
 
 ```
 
-
 ## Analysis of predation data (Deprecated)
 
 ```{r}
 
-# folder = "2024_11_07_19_38" 
+# folder = "2025_01_06_16_36" 
 fileName = paste(base_folder, folder,"predation.csv",sep="/")
 
 interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE, row.names=NULL)
@@ -222,7 +214,6 @@ sub_interactions = interactions
 max_t = max(sub_interactions$t)
 print(max_t)
 ```
-
 
 ```{r}
 # 	//-1: death by life span; -2: death by too many kids; -3: eaten; -4 mistake; 0 should mean alive
@@ -236,7 +227,6 @@ hist(early$deathCause, breaks = c(-4,-3,-2,-1,0))
 hist(late$deathCause, breaks = c(-4,-3,-2,-1,0))
 ```
 
-
 ```{r}
 hist(interactions$pred_maxEnergy)
 hist(interactions$prey_maxEnergy)
@@ -245,7 +235,6 @@ big_preys = subset(interactions, interactions$prey_maxEnergy>10)
 hist(big_preys$prey_maxEnergy)
 
 ```
-
 
 ```{r}
 hist(sub_interactions$successful)
@@ -256,8 +245,6 @@ late = subset(sub_interactions, t>=(max_t/2))
 hist(early$successful)
 hist(late$successful)
 ```
-
-
 
 ```{r}
 sub_interactions = subset(interactions, t>30000)
@@ -274,7 +261,6 @@ hist(success_eat$prey_maxEnergy)
 hist(success_eat$prey_nkids)
 
 ```
-
 
 ```{r}
 sub_success_eat = subset(success_eat, success_eat$prey_maxEnergy>6)
@@ -342,19 +328,14 @@ points(predation$t, predation$pred_percent*factor + min(world$matForKids), type 
 
 ```
 
-
-
 ```{r}
 hist(significant_interactions$pred_maxEnergy)
 hist(significant_interactions$prey_maxEnergy)
 ```
 
-
-
 ```{r}
 plot(significant_interactions$pred_id, significant_interactions$prey_speed)
 ```
-
 
 ```{r}
 # subset
@@ -374,7 +355,6 @@ plot(late_interactions$r_pred, late_interactions$g_pred, col = colors_prey)
 
 ```
 
-
 Debug saved data
 
 ```{r}
@@ -390,10 +370,27 @@ snapshot <- read.csv(fileName, header=TRUE)
 plot(snapshot$x, snapshot$y)
 ```
 
-
 ```{r}
 not_light = subset(snapshot, snapshot$isLight == "false")
 plot(not_light$pos_x, not_light$pos_y)
 
 ```
 
+## OEE Analysis
+
+### Step 1: Compute basic evolutionary activity statistics
+
+```{r}
+folder = "2025_03_02_18_07"
+fileName = paste(base_folder, folder,"TotalCumulativeEvolutionaryActivityOverTime.csv",sep="/")
+tcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
+
+
+```
+
+```{r}
+# Afficher un graphique
+plot(tcea$t, tcea$A_cum, type="l", col="blue", lwd=2,
+     xlab="Temps", ylab="A_cum", main="Évolution de A_cum au fil du temps")
+grid()
+```

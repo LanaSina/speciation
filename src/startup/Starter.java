@@ -10,12 +10,10 @@ import animals.Tree;
 import communication.MyLog;
 import communication.RealMap;
 import communication.ShadowMap;
+import oee_analysis.OeeAnalyzer;
 import visualization.Display;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -126,6 +124,7 @@ public class Starter {
 		boolean run = true;
 		public boolean running = true;
 		boolean doSave = false;
+		OeeAnalyzer oeeAnalyzer;
 
 		//map
 		RealMap map = null;
@@ -136,10 +135,11 @@ public class Starter {
 
 		public void setMap(RealMap map){
 			this.map = map;
+			this.oeeAnalyzer = new OeeAnalyzer(map, dataFolderName);
 		}
 		
 		public void run() {
-			
+
 			while(run){
 				// is false after PauseProcedure
 				if(running) {
@@ -184,6 +184,8 @@ public class Starter {
 				}
 			}
 			map.updateMoved();
+			if (map.getTime() % 25 == 0)
+				oeeAnalyzer.update();
 		}
 		
 		public void kill(){

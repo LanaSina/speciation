@@ -451,6 +451,10 @@ public abstract class Map {
 		globalID = i;
 	}
 
+	public int getTime() {
+		return time;
+	}
+
 	public void setTime(int t) {
 		time = t;
 	}
@@ -495,6 +499,25 @@ public abstract class Map {
 
 	public int getNbOfDisplayComponents() {
 		return d.getNbOfComponents();
+	}
+
+	/**
+	 * Returns all individuals of this map that are non-light and whose parent is a non-light.
+	 *
+	 * @return all individuals of this map that are non-light and whose parent is a non-light
+	 */
+	public ArrayList<IndividualWithProperties> getAllEvolvedIndividuals() {
+		ArrayList<IndividualWithProperties> res = new ArrayList<>();
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Cell cell = map[i][j];
+				for (Individual individual : cell.creatures) {
+					if (!individual.isLight() && !individual.parentIsLight())
+						res.add((IndividualWithProperties) individual);
+				}
+			}
+		}
+		return res;
 	}
 
 	protected abstract MyLog createMyLog();
