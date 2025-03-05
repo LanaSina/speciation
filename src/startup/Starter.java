@@ -10,7 +10,8 @@ import animals.Tree;
 import communication.MyLog;
 import communication.RealMap;
 import communication.ShadowMap;
-import oee_analysis.OeeAnalyzer;
+import oee_analysis.OeeAnalyzerStep1;
+import oee_analysis.OeeAnalyzerStep2;
 import visualization.Display;
 
 import java.io.*;
@@ -124,7 +125,7 @@ public class Starter {
 		boolean run = true;
 		public boolean running = true;
 		boolean doSave = false;
-		OeeAnalyzer oeeAnalyzer;
+		OeeAnalyzerStep1 oeeAnalyzerStep1;
 
 		//map
 		RealMap map = null;
@@ -135,7 +136,7 @@ public class Starter {
 
 		public void setMap(RealMap map){
 			this.map = map;
-			this.oeeAnalyzer = new OeeAnalyzer(map, dataFolderName);
+			this.oeeAnalyzerStep1 = new OeeAnalyzerStep1(map, dataFolderName);
 		}
 		
 		public void run() {
@@ -184,8 +185,8 @@ public class Starter {
 				}
 			}
 			map.updateMoved();
-			if (map.getTime() % 25 == 0)
-				oeeAnalyzer.update();
+			if (map.getTime() % Constants.ShadowModelInterSnaphshotDuration == 0)
+				oeeAnalyzerStep1.update();
 		}
 		
 		public void kill(){
@@ -299,12 +300,14 @@ public class Starter {
 
 	public static class ShadowLifeRunnable extends LifeRunnable{
 		ShadowMap shadowMap;
+		OeeAnalyzerStep2 oeeAnalyzerStep2;
 
 		public void setMap(RealMap map){
-			this.map = map;
+			super.setMap(map);
 			Display d = new Display("shadow map", this, dataFolderName);
 			this.shadowMap = new ShadowMap(map, d, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			this.shadowMap.setupLogFiles();
+			this.oeeAnalyzerStep2 = new OeeAnalyzerStep2(map, shadowMap, dataFolderName);
 		}
 
 		public void run() {
@@ -354,6 +357,11 @@ public class Starter {
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.updateMoved();
 			shadowMap.updateMoved();
+			if (map.getTime() % Constants.ShadowModelInterSnaphshotDuration == 0) {
+				oeeAnalyzerStep1.update();
+				oeeAnalyzerStep2.update();
+				shadowMap.reset();
+			}
 			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
 				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
 		}

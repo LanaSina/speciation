@@ -378,19 +378,30 @@ plot(not_light$pos_x, not_light$pos_y)
 
 ## OEE Analysis
 
+```{r}
+folder = "2025_03_05_17_31"
+```
+
 ### Step 1: Compute basic evolutionary activity statistics
 
 ```{r}
-folder = "2025_03_02_18_07"
-fileName = paste(base_folder, folder,"TotalCumulativeEvolutionaryActivityOverTime.csv",sep="/")
+fileName = paste(base_folder, folder,"TotalCumulativeEvolutionaryActivity.csv",sep="/")
 tcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
 
-
-```
-
-```{r}
-# Afficher un graphique
+# Display graph
 plot(tcea$t, tcea$A_cum, type="l", col="blue", lwd=2,
      xlab="Temps", ylab="A_cum", main="Évolution de A_cum au fil du temps")
+grid()
+```
+
+### Step 2: Compute component-normalized evolutionary activity statistics
+
+```{r}
+fileName = paste(base_folder, folder,"NormalizedTotalCumulativeEvolutionaryActivity.csv",sep="/")
+ntcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
+
+# Display graph
+plot(tcea$t, ntcea$AN_cum, type="l", col="blue", lwd=2,
+     xlab="Temps", ylab="AN_cum", main="Évolution de A^N_cum au fil du temps")
 grid()
 ```

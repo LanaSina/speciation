@@ -166,12 +166,6 @@ public class ShadowMap extends Map {
         }
     }
 
-    @Override
-    public void updateMoved() {
-        super.updateMoved();
-        if (time % Constants.ShadowModelInterSnaphshotDuration == 0)
-            reset();
-    }
 
     @Override
     protected MyLog createMyLog() {

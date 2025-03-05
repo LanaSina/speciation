@@ -12,7 +12,7 @@ import java.util.HashMap;
 /**
  * A class for analyzing the open-endedness of the simulator.
  */
-public class OeeAnalyzer {
+public class OeeAnalyzerStep1 {
 
     private final Map map;
 
@@ -27,7 +27,7 @@ public class OeeAnalyzer {
 
     private final FileWriter summaryWriter;
 
-    public OeeAnalyzer(Map map, String dataFolderName) {
+    public OeeAnalyzerStep1(Map map, String dataFolderName) {
         this.map = map;
         // initialize the statistics
         this.deltas = new HashMap<>();
