@@ -46,7 +46,7 @@ public class OeeAnalyzerStep1 {
             thing.put("matForKids", new HashMap<>());
         }
         // initialize the file
-        FileBuilder fb = new FileBuilder(dataFolderName, "TotalCumulativeEvolutionaryActivity");
+        FileBuilder fb = new FileBuilder(dataFolderName, "Step1Stats");
         summaryWriter = fb.getFileWriter();
         String str = "t, A_cum" + "\n";
         try {

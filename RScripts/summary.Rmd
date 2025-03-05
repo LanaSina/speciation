@@ -379,29 +379,33 @@ plot(not_light$pos_x, not_light$pos_y)
 ## OEE Analysis
 
 ```{r}
-folder = "2025_03_05_17_31"
+folder = "2025_03_05_18_58"
 ```
 
 ### Step 1: Compute basic evolutionary activity statistics
 
 ```{r}
-fileName = paste(base_folder, folder,"TotalCumulativeEvolutionaryActivity.csv",sep="/")
+fileName = paste(base_folder, folder,"Step1Stats.csv",sep="/")
 tcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
 
 # Display graph
 plot(tcea$t, tcea$A_cum, type="l", col="blue", lwd=2,
-     xlab="Temps", ylab="A_cum", main="Évolution de A_cum au fil du temps")
+     xlab="Time", ylab="A_cum", main="Evolution of total cumulative evolutionary activity")
 grid()
 ```
 
 ### Step 2: Compute component-normalized evolutionary activity statistics
 
 ```{r}
-fileName = paste(base_folder, folder,"NormalizedTotalCumulativeEvolutionaryActivity.csv",sep="/")
+fileName = paste(base_folder, folder,"Step2Stats.csv",sep="/")
 ntcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
 
 # Display graph
 plot(tcea$t, ntcea$AN_cum, type="l", col="blue", lwd=2,
-     xlab="Temps", ylab="AN_cum", main="Évolution de A^N_cum au fil du temps")
+     xlab="Time", ylab="AN_cum", main="Evolution of adaptive total cumulative evolutionary activity")
+grid()
+
+plot(tcea$t, ntcea$AN_cum_median, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="AN_cum_median", main="Evolution of adaptive median cumulative evolutionary activity")
 grid()
 ```

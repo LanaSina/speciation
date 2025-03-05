@@ -21,18 +21,26 @@ public class OeeAnalyzerStep2 {
     private final Map map;
     private final ShadowMap shadowMap;
 
-    /** The delta_i's of the real model. */
-    public HashMap<String, HashMap<Integer, Integer>> realDeltas;
-    /** The delta_i's of the shadow model. */
-    public HashMap<String, HashMap<Integer, Integer>> shadowDeltas;
-    /** The normalized delta_i's. */
-    public HashMap<String, HashMap<Integer, Integer>> normalizedDeltas;
-    /** Accumulations of delta_i's since t=0. Intermediate values to calculate the a_i. */
-    public HashMap<String, HashMap<Integer, Integer>> accumulations;
-    /** The a_i's. */
-    public HashMap<String, HashMap<Integer, Integer>> cumulativeActivities;
-    /** A_cum */
-    public int totalCumulativeActivity;
+    /** The deltas of the real model. */
+    public HashMap<String, HashMap<Integer, Integer>> deltas_R;
+    /** Accumulations of delta_R's since t=0. Intermediate values to calculate the cumulative evolutionary activities of the real model. */
+    public HashMap<String, HashMap<Integer, Integer>> accumulations_R;
+    /** The cumulative evolutionary activities (a_i's) of the real model. */
+    public HashMap<String, HashMap<Integer, Integer>> cumulativeActivities_R;
+    /** The deltas of the shadow model. */
+    public HashMap<String, HashMap<Integer, Integer>> deltas_S;
+    /** The normalized deltas. */
+    public HashMap<String, HashMap<Integer, Integer>> deltas_N;
+    /** Accumulations of delta_N's since t=0. Intermediate values to calculate the normalized cumulative evolutionary activities. */
+    public HashMap<String, HashMap<Integer, Integer>> accumulations_N;
+    /** The normalized cumulative evolutionary activities. */
+    public HashMap<String, HashMap<Integer, Integer>> cumulativeActivities_N;
+    /** The adaptive total cumulative evolutionary activity (A^N_cum). */
+    public int totalCumulativeActivity_N;
+    /** Component diversity in the real model (D^R), or <quote>the number of components present, in use in the real run</quote>. */
+    private int diversity_R;
+    /** The adaptive median cumulative evolutionary activity. */
+    public int medianCumulativeActivity_N;
 
     private final FileWriter summaryWriter;
 
@@ -40,17 +48,21 @@ public class OeeAnalyzerStep2 {
         this.map = map;
         this.shadowMap = shadowMap;
         // initialize the statistics
-        this.realDeltas = new HashMap<>();
-        this.shadowDeltas = new HashMap<>();
-        this.normalizedDeltas = new HashMap<>();
-        this.accumulations = new HashMap<>();
-        this.cumulativeActivities = new HashMap<>();
+        this.deltas_R = new HashMap<>();
+        this.accumulations_R = new HashMap<>();
+        this.cumulativeActivities_R = new HashMap<>();
+        this.deltas_S = new HashMap<>();
+        this.deltas_N = new HashMap<>();
+        this.accumulations_N = new HashMap<>();
+        this.cumulativeActivities_N = new HashMap<>();
         ArrayList<HashMap<String, HashMap<Integer, Integer>>> list = new ArrayList<>();
-        list.add(this.realDeltas);
-        list.add(this.shadowDeltas);
-        list.add(this.normalizedDeltas);
-        list.add(this.accumulations);
-        list.add(this.cumulativeActivities);
+        list.add(this.deltas_R);
+        list.add(this.accumulations_R);
+        list.add(this.cumulativeActivities_R);
+        list.add(this.deltas_S);
+        list.add(this.deltas_N);
+        list.add(this.accumulations_N);
+        list.add(this.cumulativeActivities_N);
         for (HashMap<String, HashMap<Integer, Integer>> thing : list) {
             thing.put("speed", new HashMap<>());
             thing.put("maxEnergy", new HashMap<>());
@@ -60,9 +72,9 @@ public class OeeAnalyzerStep2 {
             thing.put("matForKids", new HashMap<>());
         }
         // initialize the file
-        FileBuilder fb = new FileBuilder(dataFolderName, "NormalizedTotalCumulativeEvolutionaryActivity");
+        FileBuilder fb = new FileBuilder(dataFolderName, "Step2Stats");
         summaryWriter = fb.getFileWriter();
-        String str = "t, AN_cum" + "\n";
+        String str = "t, AN_cum, AN_cum_median" + "\n";
         try {
             summaryWriter.append(str);
         } catch (IOException e) {
@@ -71,14 +83,26 @@ public class OeeAnalyzerStep2 {
     }
 
     public void update() {
-        updateDeltas(realDeltas, map);
-        updateDeltas(shadowDeltas, shadowMap);
+        // compute adaptive total cumulative activity
+        updateDeltas(deltas_R, map);
+        updateDeltas(deltas_S, shadowMap);
         updateNormalizedDeltas();
-        updateAccumulations(normalizedDeltas);
-        updateActivities(normalizedDeltas);
-        updateTotalActivity();
+        updateAccumulations(accumulations_N, deltas_N);
+        updateCumulativeActivities(cumulativeActivities_N, accumulations_N, deltas_N);
+        totalCumulativeActivity_N = computeTotalCumulativeActivity(accumulations_N);
+        // compute adaptive median cumulative activity
+        updateAccumulations(accumulations_R, deltas_R);
+        updateCumulativeActivities(cumulativeActivities_R, accumulations_R, deltas_R);
+        diversity_R = computeDiversity(cumulativeActivities_R);
+        String medianCumulativeActivity_N_str;
         try {
-            String line = map.getTime() + "," + totalCumulativeActivity + "\n";
+            medianCumulativeActivity_N = totalCumulativeActivity_N / diversity_R;
+            medianCumulativeActivity_N_str = Integer.toString(medianCumulativeActivity_N);
+        } catch(ArithmeticException e) {
+            medianCumulativeActivity_N_str = "N/A";
+        }
+        try {
+            String line = map.getTime() + "," + totalCumulativeActivity_N + "," + medianCumulativeActivity_N_str + "\n";
             summaryWriter.append(line);
             summaryWriter.flush();
         } catch (IOException e) {
@@ -86,7 +110,16 @@ public class OeeAnalyzerStep2 {
         }
     }
 
-
+    private int computeDiversity(HashMap<String, HashMap<Integer, Integer>> cumulativeActivities) {
+        int diversity = 0;
+        for (String property : cumulativeActivities.keySet()) {
+            for (int key : cumulativeActivities.get(property).keySet()) {
+                if (cumulativeActivities.get(property).get(key) > 0)
+                    diversity++;
+            }
+        }
+        return diversity;
+    }
 
 
     /**
@@ -111,24 +144,24 @@ public class OeeAnalyzerStep2 {
      * Computes the normalized deltas.
      */
     private void updateNormalizedDeltas() {
-        for (String property : normalizedDeltas.keySet()) {
-            Set<Integer> unionOfKeys = Stream.concat(realDeltas.get(property).keySet().stream(), shadowDeltas.get(property).keySet().stream())
+        for (String property : deltas_N.keySet()) {
+            Set<Integer> unionOfKeys = Stream.concat(deltas_R.get(property).keySet().stream(), deltas_S.get(property).keySet().stream())
                                        .collect(Collectors.toSet());
             for (int key : unionOfKeys) {
-                if (!realDeltas.get(property).containsKey(key))
-                    realDeltas.get(property).put(key, 0);
-                else if (!shadowDeltas.get(property).containsKey(key))
-                    shadowDeltas.get(property).put(key, 0);
-                normalizedDeltas.get(property).put(key, realDeltas.get(property).get(key) - shadowDeltas.get(property).get(key));
+                if (!deltas_R.get(property).containsKey(key))
+                    deltas_R.get(property).put(key, 0);
+                else if (!deltas_S.get(property).containsKey(key))
+                    deltas_S.get(property).put(key, 0);
+                deltas_N.get(property).put(key, deltas_R.get(property).get(key) - deltas_S.get(property).get(key));
             }
         }
     }
 
     /**
-     * Computes the accumulations of delta_i since t=0.
+     * Computes the accumulations of the given deltas since t=0.
      * <br>
      */
-    private void updateAccumulations(HashMap<String, HashMap<Integer, Integer>> deltas) {
+    private void updateAccumulations(HashMap<String, HashMap<Integer, Integer>> accumulations, HashMap<String, HashMap<Integer, Integer>> deltas) {
         for (String property : deltas.keySet()) {
             for (int key : deltas.get(property).keySet()) {
                 if (!accumulations.get(property).containsKey(key))
@@ -141,7 +174,7 @@ public class OeeAnalyzerStep2 {
     /**
      * Computes a_i.
      */
-    private void updateActivities(HashMap<String, HashMap<Integer, Integer>> deltas) {
+    private void updateCumulativeActivities(HashMap<String, HashMap<Integer, Integer>> cumulativeActivities, HashMap<String, HashMap<Integer, Integer>> accumulations, HashMap<String, HashMap<Integer, Integer>> deltas) {
         for (String property : deltas.keySet()) {
             for (int key : deltas.get(property).keySet()) {
                 if (deltas.get(property).get(key) == 0)
@@ -155,10 +188,11 @@ public class OeeAnalyzerStep2 {
     /**
      * Computes A_cum.
      */
-    private void updateTotalActivity() {
-        totalCumulativeActivity = 0;
+    private int computeTotalCumulativeActivity(HashMap<String, HashMap<Integer, Integer>> cumulativeActivities) {
+        int totalCumulativeActivity = 0;
         for (String property : cumulativeActivities.keySet())
             totalCumulativeActivity += cumulativeActivities.get(property).values().stream().reduce(0, Integer::sum);
+        return totalCumulativeActivity;
     }
 
 }
