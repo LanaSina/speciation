@@ -199,6 +199,8 @@ public class RealMap extends Map {
 	/**
 	 * Returns the number of new creatures born during a time step.
 	 * </br>
+	 * Babies of light creatures are not counted.
+	 * </br>
 	 * This method only works between a call to <code>updateCell()</code> and a call to <code>updateMoved()</code>,
 	 * because this is the only moment where the new creatures are gathered in a single data structure (i.e.
 	 * <code>babies</code>) and can be counted.
@@ -206,11 +208,18 @@ public class RealMap extends Map {
 	 * @return the number of new creatures born during a time step
 	 */
 	public int getNbOfBirths() {
-		return babies.size();
+		int res = 0;
+		for (Individual baby : babies) {
+			if (!baby.parentIsLight())
+				res++;
+		}
+		return res;
 	}
 
 	/**
 	 * Returns the number of creatures that died during a time step.
+	 * </br>
+	 * Creatures that are light or have a light creature as parent are not counted.
 	 * </br>
 	 * This method only works between a call to <code>updateCell()</code> and a call to <code>updateMoved()</code>,
 	 * because this is the only moment where the creatures that just died are gathered in a single data structure (i.e.
@@ -219,7 +228,12 @@ public class RealMap extends Map {
 	 * @return the number of creatures that just died during a time step
 	 */
 	public int getNbOfDeaths() {
-		return remove.size();
+		int res = 0;
+		for (Individual removed : remove) {
+			if (!removed.isLight() && !removed.parentIsLight())
+				res++;
+		}
+		return res;
 	}
 
 	@Override

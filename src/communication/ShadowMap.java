@@ -82,6 +82,8 @@ public class ShadowMap extends Map {
                 shadowCell.creatures.clear();
                 // Copy all the individuals from the real cell to the shadow cell
                 for (Individual realIndividual : realCell.creatures) {
+                    if (realIndividual.isLight() || realIndividual.parentIsLight())
+                        continue;
                     ShadowIndividual shadowIndividual = new ShadowIndividual((IndividualWithProperties) realIndividual);
                     shadowCell.creatures.add(shadowIndividual);
                     if (!(d == null))
@@ -116,7 +118,7 @@ public class ShadowMap extends Map {
      *
      * @return the list of individuals on this map
      */
-    private ArrayList<ShadowIndividual> getAllIndividuals() {
+    public ArrayList<ShadowIndividual> getAllIndividuals() {
         ArrayList<ShadowIndividual> res = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {

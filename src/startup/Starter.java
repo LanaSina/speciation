@@ -353,8 +353,10 @@ public class Starter {
 					shadowMap.updateCell(i, j);
 				}
 			}
-			shadowMap.createRandomIndividuals(map.getNbOfBirths());
-			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
+			if (!shadowMap.getAllIndividuals().isEmpty()) {
+				shadowMap.createRandomIndividuals(map.getNbOfBirths());
+				shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
+			}
 			map.updateMoved();
 			shadowMap.updateMoved();
 			if (map.getTime() % Constants.ShadowModelInterSnaphshotDuration == 0) {
@@ -362,8 +364,9 @@ public class Starter {
 				oeeAnalyzerStep2.update();
 				shadowMap.reset();
 			}
-			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
-				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
+			if (!shadowMap.getAllIndividuals().isEmpty()
+					&& (map.getAllEvolvedIndividuals().size() != shadowMap.getAllIndividuals().size()))
+				throw new RuntimeException("The real map and the shadow map must have the same number of evolved individuals.");
 		}
 	}
 
