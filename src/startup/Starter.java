@@ -79,8 +79,9 @@ public class Starter {
 		Properties properties = loadProperties("src/config.properties");
 		String dname = properties.getProperty("sim_name");
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
+		final int interSnaphshotDuration = Integer.parseInt(properties.getProperty("intersnapshot_duration"));
 
-		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable() : new LifeRunnable();
+		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable(interSnaphshotDuration) : new LifeRunnable(interSnaphshotDuration);
 		Display d = new Display(dname, life, dataFolderName);
 		int lightLimit = 30;//30
 		int of = 10;
@@ -126,12 +127,14 @@ public class Starter {
 		public boolean running = true;
 		boolean doSave = false;
 		OeeAnalyzerStep1 oeeAnalyzerStep1;
+		int interSnaphshotDuration;
 
 		//map
 		RealMap map = null;
 		int mapSize = Constants.GridMax;
 		
-		public LifeRunnable(){
+		public LifeRunnable(int interSnaphshotDuration){
+			this.interSnaphshotDuration = interSnaphshotDuration;
 		}
 
 		public void setMap(RealMap map){
@@ -185,7 +188,7 @@ public class Starter {
 				}
 			}
 			map.updateMoved();
-			if (map.getTime() % Constants.ShadowModelInterSnaphshotDuration == 0)
+			if (map.getTime() % interSnaphshotDuration == 0)
 				oeeAnalyzerStep1.update();
 		}
 		
@@ -302,6 +305,10 @@ public class Starter {
 		ShadowMap shadowMap;
 		OeeAnalyzerStep2 oeeAnalyzerStep2;
 
+		public ShadowLifeRunnable(int interSnapshotDuration) {
+			super(interSnapshotDuration);
+		}
+
 		public void setMap(RealMap map){
 			super.setMap(map);
 			Display d = new Display("shadow map", this, dataFolderName);
@@ -357,7 +364,7 @@ public class Starter {
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.updateMoved();
 			shadowMap.updateMoved();
-			if (map.getTime() % Constants.ShadowModelInterSnaphshotDuration == 0) {
+			if (map.getTime() % interSnaphshotDuration == 0) {
 				oeeAnalyzerStep1.update();
 				oeeAnalyzerStep2.update();
 				shadowMap.reset();

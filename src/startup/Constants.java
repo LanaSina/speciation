@@ -38,7 +38,6 @@ public class Constants {
 	/** OEE analysis */
 	// Run shadow model in parallel to the real model
 	public static final boolean RunShadowModel = true;
-	public static final int ShadowModelInterSnaphshotDuration = 1000;
 	public static final String ShadowModelSummaryFileName = "ShadowModel_SummaryIndividuals";
 	public static final String ShadowModelPredationFileName = "ShadowModel_Predation";
 	public static String ShadowModelSnapshotFileName = "ShadowModel_Snapshot";
