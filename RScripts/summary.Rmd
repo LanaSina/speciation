@@ -379,17 +379,60 @@ plot(not_light$pos_x, not_light$pos_y)
 ## OEE Analysis
 
 ```{r}
-folder = "2025_03_05_18_58"
+folder = "2025_04_03_21_46"
+realMapDeltasFile <- paste(base_folder, folder,"RealMapDeltas.csv",sep="/")
+shadowMapDeltasFile <- paste(base_folder, folder,"ShadowMapDeltas.csv",sep="/")
 ```
 
 ### Step 1: Compute basic evolutionary activity statistics
 
 ```{r}
-fileName = paste(base_folder, folder,"Step1Stats.csv",sep="/")
-tcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
 
-# Display graph
-plot(tcea$t, tcea$A_cum, type="l", col="blue", lwd=2,
+# COMPUTE A_cums
+
+
+# Note: in this chunk and the next ones, a variable name that starts with "curr" indicate the current data, that is, the data at the current time stamp (which corresponds to a single CSV line)
+
+
+deltas <- read.csv(realMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
+
+
+# the number of components
+nbComponents <- ncol(deltas) - 1
+
+# init current cumuls of deltas (intermediate values to compute a's from the deltas)
+currCumuls <- rep(0, times=nbComponents)
+# init current a's (i.e. cumulative evolutionary activities)
+currAs <- array(dim = nbComponents)
+# init A_cum's
+Acums <- data.frame(
+  t = integer(nrow(deltas)),
+  Acum = integer(nrow(deltas))
+)
+
+
+# loop for computing A_cums
+for (line in 1:nrow(deltas)) {
+  # get time stamp
+  t <- deltas[line, "t"]
+  # get current deltas
+  currDeltas <- as.numeric(deltas[line, 2:ncol(deltas)])
+  # compute current cumuls
+  currCumuls <- currCumuls + currDeltas
+  # compute current a's
+  for (i in 1:nbComponents)  {
+    currAs[i] <- ifelse(currDeltas[i] == 1, currCumuls[i], 0)
+  }
+  # compute current A_cum
+  currAcum <- sum(currAs)
+  Acums[line,] <- c(t, currAcum)
+}
+```
+
+```{r}
+# DISPLAY A_cums
+
+plot(Acums$t, Acums$Acum, type="l", col="blue", lwd=2,
      xlab="Time", ylab="A_cum", main="Evolution of total cumulative evolutionary activity")
 grid()
 ```
@@ -397,15 +440,119 @@ grid()
 ### Step 2: Compute component-normalized evolutionary activity statistics
 
 ```{r}
-fileName = paste(base_folder, folder,"Step2Stats.csv",sep="/")
-ntcea <- read.csv(fileName, stringsAsFactors=FALSE, header=TRUE, dec =".")
 
-# Display graph
-plot(tcea$t, ntcea$AN_cum, type="l", col="blue", lwd=2,
-     xlab="Time", ylab="AN_cum", main="Evolution of adaptive total cumulative evolutionary activity")
+# COMPUTE NORMALIZED A_cums AND MEDIANS
+
+
+realDeltas <- read.csv(realMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
+shadowDeltas <- read.csv(shadowMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
+
+
+# gather all components (i.e. those from the real model and those from the shadow model)
+realComponents <- setdiff(names(realDeltas), "t") # (ignoring name "t" which is not a component)
+shadowComponents <- setdiff(names(shadowDeltas), "t")
+allComponents <- union(realComponents, shadowComponents)
+
+# count number of components in the real model, then in total
+nbRealComponents <- length(realComponents)
+nbAllComponents <- length(allComponents)
+
+# count number of lines
+nbLines <- nrow(realDeltas) # NB: nrow(realDeltas) == nrow(shadowDeltas)
+
+
+# init current cumuls of real deltas
+currRealCumuls <- rep(0, times=nbRealComponents)
+# init current real a's
+currRealAs <- integer(nbRealComponents)
+# init current normalized deltas
+currNormDeltas <- as.data.frame(matrix(NA, ncol = length(allComponents), nrow = 1))
+colnames(currNormDeltas) <- allComponents
+# init current cumuls of normalized deltas
+currNormCumuls <- rep(0, times=nbAllComponents)
+# init current normalized a's
+currNormAs <- integer(nbAllComponents)
+# init normalized A_cums
+normAcums <- data.frame(
+  t = integer(nbLines),
+  normAcum = integer(nbLines)
+)
+# init normalized medians
+normMedians <- data.frame(
+  t = integer(nbLines), 
+  normMedian = integer(nbLines)
+)
+
+
+# loop for computing the A_cums and the medians
+for (line in 1:nbLines) {
+  
+  
+  # GET TIME STAMP
+  t <- realDeltas[line, "t"]
+  
+  
+  #COMPUTE CURRENT NORMALIZED A'S (REQUIRED TO COMPUTE NORMALIZED A_cums)
+  # compute current normalized deltas
+  for (comp in allComponents) {
+    rDelta <- ifelse(comp %in% realComponents, realDeltas[line, comp], 0)
+    sDelta <- ifelse(comp %in% shadowComponents, shadowDeltas[line, comp], 0)
+    currNormDeltas[1, comp] = rDelta - sDelta
+  }
+  # compute current normalized cumuls
+  currNormCumuls <- currNormCumuls + as.numeric(currNormDeltas)
+  # compute current normalized a's
+  for (i in seq_along(allComponents)) {
+    comp <- allComponents[i]
+    rDelta <- ifelse(comp %in% realComponents, realDeltas[line, comp], 0)
+    currNormAs[i] <- ifelse(rDelta == 1, currNormCumuls[i], 0)
+  }
+  
+  # COMPUTE CURRENT NORMALIZED A_cum
+  currNormAcum <- sum(currNormAs)
+  normAcums[line,] <- c(t, currNormAcum)
+  
+  
+  # COMPUTE REAL DIVERSITY (REQUIRED TO COMPUTE MEDIANS)
+  currRealDeltas <- realDeltas[line, 2:ncol(realDeltas)]
+  currRealCumuls <- currRealCumuls + as.numeric(currRealDeltas)
+  # compute current real a's (required to compute real diversity)
+  for (i in 1:nbRealComponents)  {
+    if (currRealDeltas[i] == 1) {
+      currRealAs[i] = currRealCumuls[i]
+    }
+    else {
+      currRealAs[i] = 0
+    }
+  }
+  # compute real diversity (required to compute medians)
+  currRealDiversity <- sum(currRealAs > 0, na.rm=TRUE)
+  
+  # COMPUTE CURRENT NORMALIZED MEDIAN
+  currNormMedian <- normAcums[line, "normAcum"] / currRealDiversity
+  normMedians[line,] <- c(t, currNormMedian)
+  
+  
+  # TODO : compute A_news
+  
+}
+
+```
+
+```{r}
+
+# COMPUTE NORMALIZED A_cums AND MEDIANS
+
+# display A_cums
+plot(normAcums$t, normAcums$normAcum, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="normalized A_cum", main="Evolution of adaptive total cumulative evolutionary activity")
 grid()
 
-plot(tcea$t, ntcea$AN_cum_median, type="l", col="blue", lwd=2,
-     xlab="Time", ylab="AN_cum_median", main="Evolution of adaptive median cumulative evolutionary activity")
+# display medians
+plot(normMedians$t, normMedians$normMedian, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="Median normalized A_cum", main="Evolution of adaptive median cumulative evolutionary activity")
 grid()
+
+# display A_new
+# TODO
 ```
