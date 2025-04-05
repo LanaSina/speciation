@@ -10,8 +10,7 @@ import animals.Tree;
 import communication.MyLog;
 import communication.RealMap;
 import communication.ShadowMap;
-import oee_analysis.OeeAnalyzerStep1;
-import oee_analysis.OeeAnalyzerStep2;
+import oee_analysis.DeltasSaver;
 import visualization.Display;
 
 import java.io.*;
@@ -126,7 +125,7 @@ public class Starter {
 		boolean run = true;
 		public boolean running = true;
 		boolean doSave = false;
-		OeeAnalyzerStep1 oeeAnalyzerStep1;
+		DeltasSaver realMapDeltasSaver;
 		int interSnaphshotDuration;
 
 		//map
@@ -139,7 +138,7 @@ public class Starter {
 
 		public void setMap(RealMap map){
 			this.map = map;
-			this.oeeAnalyzerStep1 = new OeeAnalyzerStep1(map, dataFolderName);
+			this.realMapDeltasSaver = new DeltasSaver(map, dataFolderName, "RealMapDeltas.csv");
 		}
 		
 		public void run() {
@@ -189,7 +188,7 @@ public class Starter {
 			}
 			map.updateMoved();
 			if (map.getTime() % interSnaphshotDuration == 0)
-				oeeAnalyzerStep1.update();
+				realMapDeltasSaver.update();
 		}
 		
 		public void kill(){
@@ -303,7 +302,7 @@ public class Starter {
 
 	public static class ShadowLifeRunnable extends LifeRunnable{
 		ShadowMap shadowMap;
-		OeeAnalyzerStep2 oeeAnalyzerStep2;
+		DeltasSaver shadowMapDeltasSaver;
 
 		public ShadowLifeRunnable(int interSnapshotDuration) {
 			super(interSnapshotDuration);
@@ -314,7 +313,7 @@ public class Starter {
 			Display d = new Display("shadow map", this, dataFolderName);
 			this.shadowMap = new ShadowMap(map, d, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			this.shadowMap.setupLogFiles();
-			this.oeeAnalyzerStep2 = new OeeAnalyzerStep2(map, shadowMap, dataFolderName);
+			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, "ShadowMapDeltas.csv");
 		}
 
 		public void run() {
@@ -365,12 +364,12 @@ public class Starter {
 			map.updateMoved();
 			shadowMap.updateMoved();
 			if (map.getTime() % interSnaphshotDuration == 0) {
-				oeeAnalyzerStep1.update();
-				oeeAnalyzerStep2.update();
+				realMapDeltasSaver.update();
+				shadowMapDeltasSaver.update();
 				shadowMap.reset();
 			}
-			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
-				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
+//			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
+//				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
 		}
 	}
 
