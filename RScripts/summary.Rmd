@@ -469,9 +469,11 @@ currRealAs <- integer(nbRealComponents)
 currNormDeltas <- as.data.frame(matrix(NA, ncol = length(allComponents), nrow = 1))
 colnames(currNormDeltas) <- allComponents
 # init current cumuls of normalized deltas
-currNormCumuls <- rep(0, times=nbAllComponents)
+currNormCumuls <- as.data.frame(t(rep(0, times=nbAllComponents)))
+colnames(currNormCumuls) <- allComponents
 # init current normalized a's
-currNormAs <- integer(nbAllComponents)
+currNormAs <- as.data.frame(t(integer(nbAllComponents)))
+colnames(currNormAs) <- allComponents
 # init normalized A_cums
 normAcums <- data.frame(
   t = integer(nbLines),
@@ -500,37 +502,25 @@ for (line in 1:nbLines) {
     currNormDeltas[1, comp] = rDelta - sDelta
   }
   # compute current normalized cumuls
-  currNormCumuls <- currNormCumuls + as.numeric(currNormDeltas)
+  currNormCumuls[1,] <- as.numeric(currNormCumuls) + as.numeric(currNormDeltas)
   # compute current normalized a's
-  for (i in seq_along(allComponents)) {
-    comp <- allComponents[i]
+  for (comp in allComponents) {
     rDelta <- ifelse(comp %in% realComponents, realDeltas[line, comp], 0)
-    currNormAs[i] <- ifelse(rDelta == 1, currNormCumuls[i], 0)
+    currNormAs[comp] <- ifelse(rDelta == 1, currNormCumuls[comp], 0)
   }
   
   # COMPUTE CURRENT NORMALIZED A_cum
-  currNormAcum <- sum(currNormAs)
+  currNormAcum <- sum(currNormAs[1,])
   normAcums[line,] <- c(t, currNormAcum)
   
-  
-  # COMPUTE REAL DIVERSITY (REQUIRED TO COMPUTE MEDIANS)
-  currRealDeltas <- realDeltas[line, 2:ncol(realDeltas)]
-  currRealCumuls <- currRealCumuls + as.numeric(currRealDeltas)
-  # compute current real a's (required to compute real diversity)
-  for (i in 1:nbRealComponents)  {
-    if (currRealDeltas[i] == 1) {
-      currRealAs[i] = currRealCumuls[i]
-    }
-    else {
-      currRealAs[i] = 0
-    }
-  }
-  # compute real diversity (required to compute medians)
-  currRealDiversity <- sum(currRealAs > 0, na.rm=TRUE)
-  
   # COMPUTE CURRENT NORMALIZED MEDIAN
-  currNormMedian <- normAcums[line, "normAcum"] / currRealDiversity
-  normMedians[line,] <- c(t, currNormMedian)
+  # filter out components that don't currently exist in the real model
+  realActiveComps <- realComponents[realDeltas[line, realComponents] == 1]
+  medianValues <- currNormAs[realActiveComps]
+  # Compute current median
+  currNormMedian <- ifelse(length(medianValues) > 0, median(as.numeric(medianValues[1,])), NA)
+  # Save
+  normMedians[line, ] <- c(t, currNormMedian)
   
   
   # TODO : compute A_news
@@ -541,7 +531,7 @@ for (line in 1:nbLines) {
 
 ```{r}
 
-# COMPUTE NORMALIZED A_cums AND MEDIANS
+# DISPLAY NORMALIZED A_cums AND MEDIANS
 
 # display A_cums
 plot(normAcums$t, normAcums$normAcum, type="l", col="blue", lwd=2,
