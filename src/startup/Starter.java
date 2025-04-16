@@ -86,7 +86,7 @@ public class Starter {
 		int of = 10;
 
 		//worldmap		
-		RealMap map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+		RealMap map = new RealMap(cst_grid_max,null, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 		map.setupLogFiles();
 
 		//initialize map (do it from file!!)
@@ -98,7 +98,8 @@ public class Starter {
 				int id = map.incrementGlobalID();
 				Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
 				map.addIndividual(x, y, l);
-				d.addComponent(l);
+				if (d != null)
+					d.addComponent(l);
 			}
 		}
 
@@ -251,7 +252,8 @@ public class Starter {
 					EmbodiedIndividual individual = new EmbodiedIndividual(id, line);
 					individualMap.put(id, individual);
 					map.addIndividual(x, y, individual);
-					d.addComponent(individual);
+					if (d != null)
+						d.addComponent(individual);
 				}
 				sc.close();  //closes the scanner
 			} catch (FileNotFoundException e) {
@@ -311,7 +313,7 @@ public class Starter {
 		public void setMap(RealMap map){
 			super.setMap(map);
 			Display d = new Display("shadow map", this, dataFolderName);
-			this.shadowMap = new ShadowMap(map, d, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
+			this.shadowMap = new ShadowMap(map, null, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			this.shadowMap.setupLogFiles();
 			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, "ShadowMapDeltas.csv");
 		}

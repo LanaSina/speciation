@@ -219,11 +219,15 @@ public abstract class Map {
 
 		if(Constants.Save && (time%5000 == 0)){
 			mlog.say("backup all logs");
-			d.pauseProcedure(true);
-			d.screenshot();
+			if (d != null) {
+				d.pauseProcedure(true);
+				d.screenshot();
+			}
 			setupLogFiles();
-			d.saveProcedure();
-			d.pauseProcedure(false);
+			if (d != null) {
+				d.saveProcedure();
+				d.pauseProcedure(false);
+			}
 		}
 		
 		//update dead
@@ -247,7 +251,8 @@ public abstract class Map {
 			}
 
 			//remove from display
-	    	d.removeComponent(creature);
+			if (d != null)
+	    		d.removeComponent(creature);
 	    	//remove from map
 	    	removeIndividual(creature);
 		}		
@@ -276,7 +281,8 @@ public abstract class Map {
 			int nx = (int) (position[0]+0.5);
 			int ny = (int) (position[1]+0.5);
 			addIndividual(nx, ny, baby);
-			d.addComponent(baby);
+			if (d != null)
+				d.addComponent(baby);
         }		
 		
 		//clear
@@ -494,7 +500,8 @@ public abstract class Map {
 	}
 
 	public void kill(){
-		d.dispose();
+		if (d != null)
+		    d.dispose();
 	}
 
 	public int getNbOfDisplayComponents() {
