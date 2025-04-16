@@ -148,12 +148,6 @@ public class Starter {
 				// is false after PauseProcedure
 				if(running) {
 					update();
-
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
 				} else {
 					try {
 						Thread.sleep(50);
@@ -324,12 +318,6 @@ public class Starter {
 				// is false after PauseProcedure
 				if(running) {
 					update();
-
-					try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
 				} else {
 					try {
 						Thread.sleep(50);
