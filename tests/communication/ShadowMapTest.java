@@ -2,12 +2,13 @@ package communication;
 
 import animals.EmbodiedIndividual;
 import animals.Individual;
-import animals.IndividualWithProperties;
 import animals.ShadowIndividual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import visualization.Display;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ShadowMapTest {
 
 
-    private static Map realMap;
+    private static RealMap realMap;
     private static final int MAP_SIZE = 50;
     private static final Display DISPLAY = null;
     private static final String DATA_FOLDER_NAME = "../new_data/some_date/";
@@ -27,7 +28,6 @@ public class ShadowMapTest {
     private static final String SENSORS_FILE_NAME = "Sensors";
 
     // For the shadow map
-    private static final Display SHADOW_DISPLAY = null;
     private static final String SHADOW_SUMMARY_FILE_NAME = "ShadowModel_SummaryIndividuals";
     private static final String SHADOW_PREDATION_FILE_NAME = "ShadowModel_Predation";
     private static final String SHADOW_SNAPSHOT_FILE_NAME = "ShadowModel_Snapshot";
@@ -42,17 +42,72 @@ public class ShadowMapTest {
     @Test
     public void shadowMapIsSimilarToRealMapAtCreation() {
         fillRealMap();
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        checkWhetherShadowMapAndRealMapAreSimilar(shadowMap);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        checkIfShadowMapAndRealMapAreSimilar(shadowMap);
     }
 
     @Test
     public void shadowMapIsSimilarToRealMapAfterReset() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         fillRealMap();
         shadowMap.reset();
-        checkWhetherShadowMapAndRealMapAreSimilar(shadowMap);
+        checkIfShadowMapAndRealMapAreSimilar(shadowMap);
     }
+
+    @Test
+    public void checkWhetherTheNumberOfRandomlyCreatedIndividualsIsCorrect() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        int x = 20;
+        int y = 20;
+        int number = 92;
+        ShadowIndividual individual = new ShadowIndividual(64, 1770, 1840, 1936);
+        shadowMap.addIndividual(individual);
+        assertEquals(0, shadowMap.babies.size());
+        shadowMap.createRandomIndividuals(number);
+        assertEquals(number, shadowMap.babies.size());
+    }
+
+    @Test
+    public void checkWhetherTheNumberOfRandomlyRemovedIndividualsIsCorrect() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        int x = 20;
+        int y = 20;
+        int globalID = 30;
+        int ancestor = 12;
+        int date = 800;
+        int parent = 2;
+        int number = 10;
+        for (int i = 0 ; i < number ; i++) {
+            ShadowIndividual individual = new ShadowIndividual(globalID++, ancestor++, date++, parent++);
+            shadowMap.addIndividual(individual);
+        }
+        assertEquals(0, shadowMap.remove.size());
+        shadowMap.removeRandomIndividuals(number);
+        assertEquals(number, shadowMap.remove.size());
+    }
+
+    @Test
+    public void tryingToRemoveMoreIndividualsThanThereAreThrowsIllegalArgumentException() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        int x = 20;
+        int y = 20;
+        int globalID = 30;
+        int ancestor = 12;
+        int date = 800;
+        int parent = 2;
+        int number = 10;
+        for (int i = 0 ; i < number - 1 ; i++) {
+            ShadowIndividual individual = new ShadowIndividual(globalID++, ancestor++, date++, parent++);
+            shadowMap.addIndividual(individual);
+        }
+        assertEquals(0, shadowMap.remove.size());
+        assertThrows(IllegalArgumentException.class, () -> {
+            shadowMap.removeRandomIndividuals(number);
+        });
+    }
+
+
+
 
     private static void fillRealMap() {
         int globalID = 666;
@@ -63,9 +118,9 @@ public class ShadowMapTest {
 
         realMap.setGlobalId(globalID);
         realMap.setTime(time);
-        IndividualWithProperties individual1 = new EmbodiedIndividual(x, y, 64, 1770, 1840, 1936);
+        EmbodiedIndividual individual1 = new EmbodiedIndividual(x, y, 64, 1770, 1840, 1936);
         realMap.addIndividual((int) x++, (int) y++, individual1);
-        IndividualWithProperties individual2 = new EmbodiedIndividual(x, y, 18, 666, 102, 776);
+        EmbodiedIndividual individual2 = new EmbodiedIndividual(x, y, 18, 666, 102, 776);
         realMap.addIndividual((int) x++, (int) y++, individual2);
         realMap.remove.add(individual1);
         realMap.babies.add(new EmbodiedIndividual(x++, y++, 400, 977, 555, 222));
@@ -74,10 +129,8 @@ public class ShadowMapTest {
         realMap.newPositions.add(y);
     }
 
-    private static void checkWhetherShadowMapAndRealMapAreSimilar(ShadowMap shadowMap) {
+    private static void checkIfShadowMapAndRealMapAreSimilar(ShadowMap shadowMap) {
         assertSame(realMap, shadowMap.realMap);
-        assertNotSame(realMap.map, shadowMap.map);
-        assertEquals(realMap.size, shadowMap.size);
         assertEquals(realMap.globalID, shadowMap.globalID);
         assertEquals(realMap.time, shadowMap.time);
         assertEquals(realMap.dataFolderName, shadowMap.dataFolderName);
@@ -86,7 +139,6 @@ public class ShadowMapTest {
         assertEquals(realMap.cst_speed_max, shadowMap.cst_speed_max);
         assertEquals(realMap.cst_light_birth_dst, shadowMap.cst_light_birth_dst);
         assertEquals(realMap.cst_birth_dst, shadowMap.cst_birth_dst);
-        assertEquals(realMap.cst_grid_max, shadowMap.cst_grid_max);
         assertEquals(realMap.cst_energy_max, shadowMap.cst_energy_max);
         assertEquals(realMap.cst_speed_cost, shadowMap.cst_speed_cost);
         assertEquals(realMap.cst_sensor_cost, shadowMap.cst_sensor_cost);
@@ -96,87 +148,22 @@ public class ShadowMapTest {
         assertEquals(realMap.cst_max_number_actions, shadowMap.cst_max_number_actions);
         assertEquals(realMap.cst_energy_cost_factor, shadowMap.cst_energy_cost_factor);
         assertEquals(realMap.cst_step_cost, shadowMap.cst_step_cost);
-        assertNotSame(realMap.babies, shadowMap.babies);
-        assertEquals(realMap.babies, shadowMap.babies);
-        assertNotSame(realMap.remove, shadowMap.remove);
-        assertEquals(realMap.remove, shadowMap.remove);
-        assertNotSame(realMap.moving, shadowMap.moving);
-        assertEquals(realMap.moving, shadowMap.moving);
-        assertNotSame(realMap.newPositions, shadowMap.newPositions);
-        assertEquals(realMap.newPositions, shadowMap.newPositions);
-
-        // Check whether the individuals are similar and present in the same quantity
-        for (int i = 0; i < realMap.size; i++) {
-            for (int j = 0; j < realMap.size; j++) {
-                Cell realCell = realMap.map[i][j];
-                Cell shadowCell = shadowMap.map[i][j];
-                assertSame(realCell.creatures.size(), shadowCell.creatures.size());
-                // Compare each real individual with the shadow individual with the same ID
-                for (Individual realInd : realCell.creatures) {
-                    ShadowIndividual shadowIndividual = null;
-                    for (Individual shadowInd : shadowCell.creatures) {
-                        if (shadowInd.getID() == realInd.getID()) {
-                            shadowIndividual = (ShadowIndividual) shadowInd;
-                            break;
-                        }
-                    }
-                    assertEquals(realInd, shadowIndividual);
-
-                }
-            }
-        }
+        checkEqualityOfLists(realMap.babies, shadowMap.babies);
+        checkEqualityOfLists(realMap.remove, shadowMap.remove);
+        checkEqualityOfLists(realMap.getAllIndividuals(), shadowMap.getAllIndividuals());
     }
 
-    @Test
-    public void checkWhetherTheNumberOfRandomlyCreatedIndividualsIsCorrect() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
-        int number = 92;
-        ShadowIndividual individual = new ShadowIndividual(x, y, 64, 1770, 1840, 1936);
-        shadowMap.addIndividual(x, y, individual);
-        assertEquals(0, shadowMap.babies.size());
-        shadowMap.createRandomIndividuals(number);
-        assertEquals(number, shadowMap.babies.size());
-    }
-
-    @Test
-    public void checkWhetherTheNumberOfRandomlyRemovedIndividualsIsCorrect() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
-        int globalID = 30;
-        int ancestor = 12;
-        int date = 800;
-        int parent = 2;
-        int number = 10;
-        for (int i = 0 ; i < number ; i++) {
-            ShadowIndividual individual = new ShadowIndividual(x, y, globalID++, ancestor++, date++, parent++);
-            shadowMap.addIndividual(x++, y++, individual);
+    private static void checkEqualityOfLists(List<EmbodiedIndividual> realList, List<ShadowIndividual> shadowList) {
+        List<Individual> rList = realList.stream()
+                .map(ind -> (Individual) ind)
+                .toList();
+        List<Individual> sList = shadowList.stream()
+                .map(ind -> (Individual) ind)
+                .toList();
+        assertEquals(rList.size(), sList.size());
+        for (Individual realInd : rList) {
+            assertTrue(sList.contains(realInd));
         }
-        assertEquals(0, shadowMap.remove.size());
-        shadowMap.removeRandomIndividuals(number);
-        assertEquals(number, shadowMap.remove.size());
-    }
-
-    @Test
-    public void tryingToRemoveMoreIndividualsThanThereAreThrowsIllegalArgumentException() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_DISPLAY, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
-        int globalID = 30;
-        int ancestor = 12;
-        int date = 800;
-        int parent = 2;
-        int number = 10;
-        for (int i = 0 ; i < number - 1 ; i++) {
-            ShadowIndividual individual = new ShadowIndividual(x, y, globalID++, ancestor++, date++, parent++);
-            shadowMap.addIndividual(x++, y++, individual);
-        }
-        assertEquals(0, shadowMap.remove.size());
-        assertThrows(IllegalArgumentException.class, () -> {
-            shadowMap.removeRandomIndividuals(number);
-        });
     }
 
 }
