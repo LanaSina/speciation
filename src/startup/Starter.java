@@ -4,7 +4,6 @@
 package startup;
 
 import animals.EmbodiedIndividual;
-import animals.Individual;
 import animals.Node;
 import animals.Tree;
 import communication.MyLog;
@@ -96,7 +95,7 @@ public class Starter {
 				int y = j+of;
 
 				int id = map.incrementGlobalID();
-				Individual l = new EmbodiedIndividual(x,y,id,0,0, -1);
+				EmbodiedIndividual l = new EmbodiedIndividual(x,y,id,0,0, -1);
 				map.addIndividual(x, y, l);
 				if (d != null)
 					d.addComponent(l);
@@ -306,8 +305,7 @@ public class Starter {
 
 		public void setMap(RealMap map){
 			super.setMap(map);
-			Display d = new Display("shadow map", this, dataFolderName);
-			this.shadowMap = new ShadowMap(map, null, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
+			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			this.shadowMap.setupLogFiles();
 			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, "ShadowMapDeltas.csv");
 		}
@@ -346,9 +344,9 @@ public class Starter {
 			for(int i=0; i<mapSize;i++){
 				for(int j=0; j<mapSize;j++){
 					map.updateCell(i, j);
-					shadowMap.updateCell(i, j);
 				}
 			}
+			shadowMap.incrementAgeOfAllIndividuals();
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.updateMoved();
@@ -358,8 +356,6 @@ public class Starter {
 				shadowMapDeltasSaver.update();
 				shadowMap.reset();
 			}
-//			if (map.getNbOfDisplayComponents() != shadowMap.getNbOfDisplayComponents())
-//				throw new RuntimeException("The real model's display and the shadow model's display don't have the same number of individuals.");
 		}
 	}
 

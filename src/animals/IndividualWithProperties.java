@@ -2,21 +2,14 @@ package animals;
 
 import communication.MyLog;
 import startup.Constants;
-import visualization.GraphicalComponent;
 
-import java.awt.*;
+import static java.lang.Math.max;
 
-import static java.lang.Math.*;
-
-public abstract class IndividualWithProperties implements GraphicalComponent, Individual {
+public abstract class IndividualWithProperties implements Individual {
 
     MyLog mlog = createMyLog();
 
-    //cell
-    /**
-     * 1 = completely transparent
-     */
-    double cellTransparency = 1;
+
     int eaten_by = -1;//1 = true;
 
     //general
@@ -53,26 +46,21 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
     //particular
     public double energy;
     protected double[] position = new double[2];
-    public Color color;
-    public Color borderColor = Color.white;
     //for eternal light cells
     protected boolean isLight = false;
 
+    protected IndividualWithProperties() {}
 
     /**
      * creates "light" at specified postion
      *
-     * @param x
-     * @param y
      * @param glID     id to give to this individual
      * @param ancestor id of the 1st ancestor
      * @param date     in-simulation time
      * @param parent   parent id
      */
-    public IndividualWithProperties(double x, double y, int glID, int ancestor, int date, int parent) {
+    public IndividualWithProperties(int glID, int ancestor, int date, int parent) {
         super();
-        position[0] = x;
-        position[1] = y;
 
         ID = glID;
         firstAncestorID = ancestor;
@@ -94,50 +82,8 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         properties[5] = matForKids;
 
         sensors = new Tree(nProperties);//root is not important
-        makeColor();
     }
 
-    public IndividualWithProperties(int myId, String line) {
-        String[] lineArray = line.split(",");
-        ID = myId;
-
-        //x, y, id
-        int pos = 3;
-        position[0] = Double.parseDouble(lineArray[pos]);
-        position[1] = Double.parseDouble(lineArray[pos + 1]);
-        pos = pos + 2;
-        isLight = Boolean.parseBoolean(lineArray[pos]);
-        pos++;
-        parentID = Integer.parseInt(lineArray[pos]);
-        pos++;
-        birthDate = Integer.parseInt(lineArray[pos]);
-        pos++;
-        // lifeSpan
-        pos++;
-        //
-        speed = Integer.parseInt(lineArray[pos]);
-        pos++;
-        maxEnergy = Integer.parseInt(lineArray[pos]);
-        pos++;
-        kidEnergy = Integer.parseInt(lineArray[pos]);
-        pos++;
-        // number or sensors
-        pos++;
-        firstAncestorID = Integer.parseInt(lineArray[pos]);
-        pos++;
-        nKids = Integer.parseInt(lineArray[pos]);
-        pos++;
-        death = Integer.parseInt(lineArray[pos]);
-        pos++;
-        matForKids = Integer.parseInt(lineArray[pos]);
-        pos++;
-        energy = Double.parseDouble(lineArray[pos]);
-        pos++;
-        parentIsLight = Boolean.parseBoolean(lineArray[pos]);
-
-        sensors = new Tree(nProperties);
-        makeColor();
-    }
 
     /**
      * clones with mutations
@@ -168,27 +114,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
 
         //copy sensor map
         sensors = in.sensors.copy();
-        //spawn at different postion
-        //random close position
-        int i = 1, j = 1;
-        if (generateBool()) {
-            i = -1;
-        }
-        if (generateBool()) {
-            j = -1;
-        }
-        if (parentIsLight) {
-            position[0] = (in.position[0] + i * cst_light_birth_dst * Constants.uniformDouble());
-            position[1] = (in.position[1] + j * cst_light_birth_dst * Constants.uniformDouble());
-        } else {
-            position[0] = (in.position[0] + i * birth_dst * Constants.uniformDouble());
-            position[1] = (in.position[1] + j * birth_dst * Constants.uniformDouble());
-        }
-
-        for (int k = 0; k < 2; k++) {
-            if (position[k] < 0) position[k] = 0;
-            if (position[k] >= cst_grid_max - 1) position[k] = cst_grid_max - 2;
-        }
 
         // 50% chance to mutate
         if (generateBool()) {
@@ -312,33 +237,12 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         properties[3] = getNKids();
         properties[4] = death;
         properties[5] = matForKids;
-
-        makeColor();
     }
 
     protected double check(double val, double low, double high) {
         if (val < low) val = low;
         if (val > high) val = high;
         return val;
-    }
-
-
-    protected void makeColor() {
-		/*int red = (hasSensors()-(nPhysicalProperties-1))*256/(2*10);
-		if(red>255) red = 255; if(red<0) red =0;
-		//red = 255-red;
-		int green = maxEnergy*255/70;//20
-		//green = 255-green;
-		if(green>255) green = 255; if(green<0) green =0;
-		int blue = kidEnergy*255/10;//13
-		if(blue>255) blue = 255; if(green<0) green =0;
-		//blue = 255 - blue;*/
-        int green = (int) (min(1, (speed * 1.0 / 100)) * 255 + 0.5);
-        double d = min(1, (kidEnergy * 1.0 / 100));
-        int blue = (int) (d * 255 + 0.5);
-        d = min(1, (maxEnergy * 1.0 / 200));
-        int red = (int) (d * 255 + 0.5);
-        color = new Color(red, green, blue);
     }
 
     /**
@@ -352,7 +256,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
      * @param in the individual to copy
      */
     protected void copy(IndividualWithProperties in) {
-        this.color = in.color;
         this.position = in.position.clone();
         this.maxEnergy = in.maxEnergy;
         this.energy = in.kidEnergy;
@@ -362,35 +265,8 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         this.matForKids = in.matForKids;
         this.setNKids(in.getNKids());
         this.death = in.death;
-        this.cellTransparency = in.cellTransparency;
 
         this.sensors = in.sensors.copy();
-    }
-
-    public void draw(Graphics g, int gridStep) {
-        Graphics2D g2d = (Graphics2D) g;
-        int x = (int) (position[0] * gridStep + 0.5);
-        int y = (int) (position[1] * gridStep + 0.5);
-        int size = 8;
-
-        if (!parentIsLight) {
-            Color c = color;
-            g2d.setColor(c);
-            if (isLight) {
-                g2d.drawRect(x, y, size, size);
-            } else {
-                g2d.fillRect(x, y, size, size);
-            }
-            g2d.setColor(borderColor);
-            g2d.drawRect(x, y, size, size);
-        }
-        if (isLight) {
-            borderColor = Color.black;
-            Color c = new Color(borderColor.getRed() / 255.0f, borderColor.getGreen() / 255.0f, borderColor.getBlue() / 255.0f, (float) (cellTransparency));
-            g2d.setColor(c);
-            g2d.setColor(c);
-            g2d.fillRect(x, y, size, size);
-        }
     }
 
     /**
@@ -469,14 +345,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         return isLight;
     }
 
-    public double[] getPosition() {
-        return position;
-    }
-
-    public void setBorderColor(Color color) {
-        borderColor = color;
-    }
-
     public boolean parentIsLight() {
         return parentIsLight;
     }
@@ -486,7 +354,7 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
      */
     public String stringDesc() {
 
-        String description = ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
+        String description = ID + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
                 + speed + "," + maxEnergy + "," + getKidEnergy() + ","
                 + hasSensors() + "," + getAncestor() + "," + getNKids() + ","
                 + death + "," + matForKids + "," + energy + "," + parentIsLight;
@@ -495,11 +363,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
 
     public int[] getProperties() {
         return properties;
-    }
-
-    public void setPosition(double[] position2) {
-        position[0] = position2[0];
-        position[1] = position2[1];
     }
 
     public int getDeath() {
@@ -535,11 +398,6 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
 
     public void setEatenBy(int eaten) {
         this.eaten_by = eaten;
-    }
-
-
-    public void setCellTransparency(double cellTransparency) {
-        this.cellTransparency = cellTransparency;
     }
 
     public void setParentID(int parentID) {
@@ -601,8 +459,7 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
         if (!(o instanceof IndividualWithProperties))
             return false;
         IndividualWithProperties other = (IndividualWithProperties) o;
-        return this.cellTransparency == other.cellTransparency &&
-                this.speed == other.speed &&
+        return this.speed == other.speed &&
                 this.maxEnergy == other.maxEnergy &&
                 this.kidEnergy == other.kidEnergy &&
                 this.matForKids == other.matForKids &&
@@ -617,9 +474,7 @@ public abstract class IndividualWithProperties implements GraphicalComponent, In
                 this.isLight == other.isLight &&
                 this.energy == other.energy &&
                 this.position[0] == other.position[0] &&
-                this.position[1] == other.position[1] &&
-                this.color.equals(other.color) &&
-                this.borderColor.equals(other.borderColor);
+                this.position[1] == other.position[1];
     }
 
 }

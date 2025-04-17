@@ -7,19 +7,6 @@ import communication.MyLog;
  */
 public class ShadowIndividual extends IndividualWithProperties {
 
-    public ShadowIndividual(double x, double y, int glID, int ancestor, int date, int parent) {
-        super(x, y, glID, ancestor, date, parent);
-    }
-
-    public ShadowIndividual(int myId, String line) {
-        super(myId, line);
-    }
-
-    public ShadowIndividual(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
-                     double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
-    ) {
-        super(in, glID, date, cst_mut_factor, cst_speed_max, cst_light_birth_dst, birth_dst, cst_grid_max, cst_energy_max);
-    }
 
     /**
      * Creates a shadow version of the given individual.
@@ -29,9 +16,7 @@ public class ShadowIndividual extends IndividualWithProperties {
      * @param in the individual to copy
      */
     public ShadowIndividual(IndividualWithProperties in) {
-        this(in.getPosition()[0], in.getPosition()[1], in.getID(), in.getFirstAncestorID(), in.getBirthDate(), in.getParentID());
-
-        this.cellTransparency = in.cellTransparency;
+        this(in.getID(), in.getFirstAncestorID(), in.getBirthDate(), in.getParentID());
 
         this.speed = in.speed;
         this.maxEnergy = in.maxEnergy;
@@ -45,10 +30,33 @@ public class ShadowIndividual extends IndividualWithProperties {
         this.life = in.life;
         this.isLight = in.isLight;
         this.energy = in.energy;
-        this.color = in.color;
-        this.borderColor = in.borderColor;
     }
 
+
+    /**
+     * creates "light" at specified postion
+     *
+     * @param glID     id to give to this individual
+     * @param ancestor id of the 1st ancestor
+     * @param date     in-simulation time
+     * @param parent   parent id
+     */
+    public ShadowIndividual(int glID, int ancestor, int date, int parent) {
+        super(glID, ancestor, date, parent);
+    }
+
+
+    /**
+     * clones with mutations
+     *
+     * @param in   individual to be cloned
+     * @param glID id of this one
+     */
+    public ShadowIndividual(ShadowIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+                            double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
+    ) {
+        super(in, glID, date, cst_mut_factor, cst_speed_max, cst_light_birth_dst, birth_dst, cst_grid_max, cst_energy_max);
+    }
 
     /**
      * Increments this individual's age.
@@ -57,11 +65,8 @@ public class ShadowIndividual extends IndividualWithProperties {
         life++;
     }
 
-
-    @Override
     protected MyLog createMyLog() {
         return new MyLog("shadow ind",true);
     }
-
 
 }

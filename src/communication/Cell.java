@@ -1,6 +1,6 @@
 package communication;
 
-import animals.Individual;
+import animals.EmbodiedIndividual;
 
 import java.util.LinkedList;
 
@@ -33,7 +33,7 @@ public class Cell {
     /**
      * all creatures on this cell
      */
-    LinkedList<Individual> creatures;
+    LinkedList<EmbodiedIndividual> creatures;
 
     public Cell() {
         creatures = new LinkedList<>();
