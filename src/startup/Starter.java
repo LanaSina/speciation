@@ -86,7 +86,8 @@ public class Starter {
 
 		//worldmap		
 		RealMap map = new RealMap(cst_grid_max,null, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
-		map.setupLogFiles();
+		if (Constants.Save)
+			map.setupLogFiles();
 
 		//initialize map (do it from file!!)
 		for(int i=0; i<lightLimit; i++){
@@ -306,7 +307,8 @@ public class Starter {
 		public void setMap(RealMap map){
 			super.setMap(map);
 			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
-			this.shadowMap.setupLogFiles();
+			if (Constants.Save)
+				this.shadowMap.setupLogFiles();
 			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, "ShadowMapDeltas.csv");
 		}
 
