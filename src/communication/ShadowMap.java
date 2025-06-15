@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class ShadowMap extends Map {
 
-    List<ShadowIndividual> map;
+    java.util.Map<Integer, ShadowIndividual> map;
     //for updates
     //for new ones
     LinkedList<ShadowIndividual> babies;
@@ -59,7 +59,7 @@ public class ShadowMap extends Map {
                      String sensorsFileName) {
         super(realMap.dataFolderName, summaryFileName, predationFileName, snapshotFileName, sensorsFileName);
 
-        map = new ArrayList<>();
+        map = new HashMap<>();
 
         //for new ones
         babies = new LinkedList<ShadowIndividual>();
@@ -241,7 +241,7 @@ public class ShadowMap extends Map {
             stateWriter.append(str);
             stateWriter.flush();
 
-            for (ShadowIndividual creature : map){
+            for (ShadowIndividual creature : map.values()){
                 String astr = creature.stringDesc() + "\n";
                 stateWriter.append(astr);
                 stateWriter.flush();
@@ -305,7 +305,7 @@ public class ShadowMap extends Map {
             stateWriter.append(str);
             stateWriter.flush();
 
-            for (ShadowIndividual creature : map){
+            for (ShadowIndividual creature : map.values()){
                 if (creature.hasSensors()==0){
                     continue;
                 }
@@ -339,7 +339,7 @@ public class ShadowMap extends Map {
      * @return the list of individuals on this map
      */
     public ArrayList<ShadowIndividual> getAllIndividuals() {
-        return (ArrayList<ShadowIndividual>) map;
+        return new ArrayList<>(map.values());
     }
 
     /**
@@ -348,7 +348,7 @@ public class ShadowMap extends Map {
      * @return all individuals of this map that are non-light and whose parent is a non-light
      */
     public List<IndividualWithProperties> getAllEvolvedIndividuals() {
-        return map.stream()
+        return new ArrayList<>(map.values()).stream()
                 .filter(ind -> !ind.isLight() && !ind.parentIsLight)
                 .map(ind -> (IndividualWithProperties) ind)
                 .toList();
@@ -363,10 +363,11 @@ public class ShadowMap extends Map {
      * @param number the number of individuals to create
      */
     public void createRandomIndividuals(int number) {
-        List<ShadowIndividual> allIndividuals = getAllIndividuals();
+        ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
         Random randomizer = new Random();
         for (int i = 0 ; i < number ; i++) {
-            ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
+            int randomIndex = randomizer.nextInt(allIndividuals.size());
+            ShadowIndividual randomInd = allIndividuals.get(randomIndex);
             ShadowIndividual baby = new ShadowIndividual(randomInd, -1, time, cst_mut_factor, cst_speed_max, cst_light_birth_dst, cst_birth_dst, 0 /* valeur sentinelle */, cst_energy_max);
             babies.add(baby);
         }
@@ -381,23 +382,27 @@ public class ShadowMap extends Map {
      * @throws IllegalArgumentException if trying to remove more individuals than there are
      */
     public void removeRandomIndividuals(int number) {
-        List<ShadowIndividual> allIndividuals = getAllIndividuals();
+        ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
         if (allIndividuals.size() < number)
             throw new IllegalArgumentException("cannot remove more individuals than there are");
         Random randomizer = new Random();
         for (int i = 0 ; i < number ; i++) {
-            ShadowIndividual randomInd = allIndividuals.get(randomizer.nextInt(allIndividuals.size()));
-            remove.add(randomInd);
-            allIndividuals.remove(randomInd);
+            int randomIndex = randomizer.nextInt(allIndividuals.size());
+            ShadowIndividual randomIndividual = allIndividuals.get(randomIndex);
+            remove.add(randomIndividual);
+            // remove individual from list of individuals that can be removed
+            int lastIndex = allIndividuals.size() - 1;
+            allIndividuals.set(randomIndex, allIndividuals.get(lastIndex));
+            allIndividuals.remove(lastIndex);
         }
     }
 
     public void addIndividual(ShadowIndividual in) {
-        map.add(in);
+        map.put(in.getID(), in);
     }
 
     private void removeIndividual(ShadowIndividual creature) {
-        map.remove(creature);
+        map.remove(creature.getID());
     }
 
     @Override
@@ -406,7 +411,7 @@ public class ShadowMap extends Map {
     }
 
     public void incrementAgeOfAllIndividuals() {
-        for (ShadowIndividual ind : map)
+        for (ShadowIndividual ind : map.values())
             ind.update();
     }
 }
