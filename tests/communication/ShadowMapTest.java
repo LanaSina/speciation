@@ -131,7 +131,7 @@ public class ShadowMapTest {
 
     private static void checkIfShadowMapAndRealMapAreSimilar(ShadowMap shadowMap) {
         assertSame(realMap, shadowMap.realMap);
-        assertEquals(realMap.globalID, shadowMap.globalID);
+        assertEquals(realMap.globalID.get(), shadowMap.globalID.get());
         assertEquals(realMap.time, shadowMap.time);
         assertEquals(realMap.dataFolderName, shadowMap.dataFolderName);
         assertEquals(realMap.cst_mut_factor, shadowMap.cst_mut_factor);
