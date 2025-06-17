@@ -35,6 +35,9 @@ public class Constants {
 	public static String SensorsFileName = "sensors";
 	public static String PredationFileName = "predation";
 
+	/** Number of threads to use in RealMap.updateMoved() */
+	public static final int NB_THREADS = 16;
+
 	/** OEE analysis */
 	// Run shadow model in parallel to the real model
 	public static final boolean RunShadowModel = true;

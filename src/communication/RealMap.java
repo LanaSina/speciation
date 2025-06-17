@@ -149,17 +149,27 @@ public class RealMap extends Map {
 
 	public void addIndividual(int x, int y, EmbodiedIndividual i){
 		Cell c = map[x][y];
-		i.setCellTransparency(c.transparency);
-		c.creatures.add(i);
+		synchronized (i) {
+			synchronized (c) {
+				i.setCellTransparency(c.transparency);
+			}
+		}
+		synchronized (c) {
+			c.creatures.add(i);
+		}
 	}
 
 	public void removeIndividual(EmbodiedIndividual i) {
-		double[] position = i.getPosition();
-		int x = (int)(position[0] +0.5);
-		int y = (int)(position[1] +0.5);
-		Cell c = map[x][y];
-		int pos = Constants.indexOfByReference(c.creatures, i);
-		c.creatures.remove(pos);
+		synchronized (i) {
+			double[] position = i.getPosition();
+			int x = (int)(position[0] +0.5);
+			int y = (int)(position[1] +0.5);
+			Cell c = map[x][y];
+			synchronized (c) {
+				int pos = Constants.indexOfByReference(c.creatures, i);
+				c.creatures.remove(pos);
+			}
+		}
 	}
 
 	/**
@@ -387,59 +397,45 @@ public class RealMap extends Map {
 			}
 		}
 
-		//update dead
-		for(int i=0; i<remove.size();i++){
-			EmbodiedIndividual creature = remove.get(i);
-			if(Constants.Save) {
-				if(Constants.uniformDouble()<1) { //0.01
-					if (!creature.isLight() & !creature.parentIsLight()) {
-						//write down info
-						// "ID,pred_pos_x, pred_pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor, parentIsLight\n";
-						String str = creature.stringDesc() + "\n";
-						try {
-							summaryWriter.append(str);
-							summaryWriter.flush();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-			}
+		Thread[] theThreads = new Thread[Constants.NB_THREADS];
 
-			//remove from display
-			if (d != null)
-				d.removeComponent(creature);
-			//remove from map
-			removeIndividual(creature);
+		// remove dead
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+			theThreads[threadNumber] = new Thread(new ThreadRemoveDead(this, threadNumber));
+			theThreads[threadNumber].start();
 		}
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+            try {
+                theThreads[threadNumber].join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
 		//update moved
-		for (int i = 0; i < moving.size(); i++) {
-			EmbodiedIndividual creature = moving.get(i);
-			double[] position = creature.getPosition();
-			//new x,y
-			int nx = (int) (newPositions.get(i*2)+0.5);
-			int ny = (int) (newPositions.get(i*2+1)+0.5);
-			updatePosition(nx,ny,creature);
-			position[0] = newPositions.get(i*2);
-			position[1] = newPositions.get(i*2+1);
-			creature.setPosition(position);
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+			theThreads[threadNumber] = new Thread(new ThreadUpdateMoving(this, threadNumber));
+			theThreads[threadNumber].start();
+		}
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+			try {
+				theThreads[threadNumber].join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
-		//add new babies
-		for (int i = 0; i < babies.size(); i++) {
-			EmbodiedIndividual baby = babies.get(i);
-			double[] position = baby.getPosition();
-
-			globalID++;
-			baby.setID(globalID);
-			//mlog.say("added to map");
-			int nx = (int) (position[0]+0.5);
-			int ny = (int) (position[1]+0.5);
-			addIndividual(nx, ny, baby);
-			if (d != null)
-				d.addComponent(baby);
+		//add babies
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+			theThreads[threadNumber] = new Thread(new ThreadAddBabies(this, threadNumber));
+			theThreads[threadNumber].start();
+		}
+		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
+			try {
+				theThreads[threadNumber].join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		//clear

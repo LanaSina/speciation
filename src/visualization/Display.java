@@ -75,7 +75,7 @@ public class Display extends JFrame {
 	 * Add a object to be drawn on the pannel.
 	 * @param c the object implementing the component interface
 	 */
-	public void addComponent(GraphicalComponent c){
+	public synchronized void addComponent(GraphicalComponent c){
 		s.addComponent(c);
 	}
 
@@ -88,29 +88,29 @@ public class Display extends JFrame {
 		return s;
 	}
 
-	public void removeComponent(GraphicalComponent c) {
+	public synchronized void removeComponent(GraphicalComponent c) {
 		//int i = s.components.indexOf(c);
 		//s.components.remove(i);
 		s.removeComponent(c);
 	}
 
-	public void removeAllComponents() {
+	public synchronized void removeAllComponents() {
 		s.components.clear();
 	}
 
-	public int getNbOfComponents() {
+	public synchronized int getNbOfComponents() {
 		return s.components.size();
 	}
 
-	public void pauseProcedure(boolean b){
+	public synchronized void pauseProcedure(boolean b){
 		s.pauseProcedure(b);
 	}
 
-	public void saveProcedure() {
+	public synchronized void saveProcedure() {
 		s.saveProcedure();
 	}
 
-	public void screenshot() {
+	public synchronized void screenshot() {
 		s.screenshot();
 	}
 }

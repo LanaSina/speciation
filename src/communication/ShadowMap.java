@@ -107,7 +107,7 @@ public class ShadowMap extends Map {
      * </ul>
      */
     public void reset() {
-        globalID = realMap.globalID;
+        globalID.set(realMap.globalID.get());
         time = realMap.time;
         map.clear();
         babies.clear();
@@ -208,7 +208,7 @@ public class ShadowMap extends Map {
         //add new babies
         for (int i = 0; i < babies.size(); i++) {
             ShadowIndividual baby = babies.get(i);
-            baby.setID(++globalID);
+            baby.setID(globalID.incrementAndGet());
             addIndividual(baby);
         }
 

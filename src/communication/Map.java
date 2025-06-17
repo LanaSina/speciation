@@ -5,6 +5,7 @@ import startup.Constants;
 
 import java.io.FileWriter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.abs;
 
@@ -14,7 +15,7 @@ public abstract class Map {
 
 
 	/** global var: id & number of animals until now*/
-	int globalID = 0;
+	final AtomicInteger globalID = new AtomicInteger(0);
 	/** data recording*/
 	FileWriter summaryWriter;
 	FileWriter predationWriter;
@@ -55,20 +56,13 @@ public abstract class Map {
 		this.snapshotFileName = snapshotFileName;
 		this.sensorsFileName = sensorsFileName;
 	}
-	
-	public int incrementGlobalID(){
-		globalID++;
-		return globalID;
+
+	public int incrementAndGetGlobalID(){
+		return globalID.incrementAndGet();
 	}
 
-
-
-
-
-
-
 	public void setGlobalId(int i) {
-		globalID = i;
+		globalID.set(i);
 	}
 
 	public int getTime() {
