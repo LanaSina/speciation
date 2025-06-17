@@ -378,7 +378,7 @@ public class RealMap extends Map {
 	}
 
 
-	public void updateMoved(){
+	public void applyChanges(){
 		time++; System.out.println(time);
 		if (time%1000==0){
 			mlog.say("step " + time);

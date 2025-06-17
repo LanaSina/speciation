@@ -181,7 +181,7 @@ public class Starter {
 					map.updateCell(i, j);
 				}
 			}
-			map.updateMoved();
+			map.applyChanges();
 			if (map.getTime() % interSnaphshotDuration == 0)
 				realMapDeltasSaver.update();
 		}
@@ -351,7 +351,7 @@ public class Starter {
 			shadowMap.incrementAgeOfAllIndividuals();
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
-			map.updateMoved();
+			map.applyChanges();
 			shadowMap.updateMoved();
 			if (map.getTime() % interSnaphshotDuration == 0) {
 				realMapDeltasSaver.update();
