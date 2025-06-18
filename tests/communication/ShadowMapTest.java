@@ -58,8 +58,6 @@ public class ShadowMapTest {
     @Test
     public void checkWhetherTheNumberOfRandomlyCreatedIndividualsIsCorrect() {
         ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
         int number = 92;
         ShadowIndividual individual = new ShadowIndividual(64, 1770, 1840, 1936);
         shadowMap.addIndividual(individual);
@@ -71,8 +69,6 @@ public class ShadowMapTest {
     @Test
     public void checkWhetherTheNumberOfRandomlyRemovedIndividualsIsCorrect() {
         ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
         int globalID = 30;
         int ancestor = 12;
         int date = 800;
@@ -90,8 +86,6 @@ public class ShadowMapTest {
     @Test
     public void tryingToRemoveMoreIndividualsThanThereAreThrowsIllegalArgumentException() {
         ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
-        int x = 20;
-        int y = 20;
         int globalID = 30;
         int ancestor = 12;
         int date = 800;
@@ -102,9 +96,7 @@ public class ShadowMapTest {
             shadowMap.addIndividual(individual);
         }
         assertEquals(0, shadowMap.remove.size());
-        assertThrows(IllegalArgumentException.class, () -> {
-            shadowMap.removeRandomIndividuals(number);
-        });
+        assertThrows(IllegalArgumentException.class, () -> shadowMap.removeRandomIndividuals(number));
     }
 
 
