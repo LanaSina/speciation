@@ -113,8 +113,7 @@ public class RealMap extends Map {
 			summaryWriter.append(str);
 			summaryWriter.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		// predation info
@@ -142,8 +141,7 @@ public class RealMap extends Map {
 			predationWriter.append(header_predation);
 			predationWriter.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -214,7 +212,7 @@ public class RealMap extends Map {
 		for (int temp_i = 0; temp_i < size; temp_i++) {
 			int i = shuffled_creatures_arr.get(temp_i);
 
-			EmbodiedIndividual creature = (EmbodiedIndividual) c.creatures.get(i);
+			EmbodiedIndividual creature = c.creatures.get(i);
             boolean alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
 					cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
 					cst_sensor_cost, cst_free_energy, cst_energy_cost_factor, cst_step_cost
@@ -249,40 +247,38 @@ public class RealMap extends Map {
         		//interactions between creatures
                 //iterate on properties
                 HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
-				for (Iterator<Integer> propIt = sChildren.keySet().iterator(); propIt.hasNext();){
-                	// property
-					int k = propIt.next();
-					// sensed values
-                	Node propValues = sChildren.get(k);
-                	for (Iterator<Integer> valuesIt = propValues.getChildren().keySet().iterator(); valuesIt.hasNext();){
-						int valueSensed = valuesIt.next();
-						int action = propValues.getChildren().get(valueSensed);
-						//interactions with other creatures
-						if (action < 2) {
-							//iterate creatures on this cell
-							for (int m = 0; m < c.creatures.size(); m++) {
-								double p = 1 * 3 / (double) c.creatures.size();
-								if (Constants.uniformDouble() > p) {
-									continue;
-								}
+                for (int k : sChildren.keySet()) {
+                    // property
+                    // sensed values
+                    Node propValues = sChildren.get(k);
+                    for (int valueSensed : propValues.getChildren().keySet()) {
+                        int action = propValues.getChildren().get(valueSensed);
+                        //interactions with other creatures
+                        if (action < 2) {
+                            //iterate creatures on this cell
+                            for (int m = 0; m < c.creatures.size(); m++) {
+                                double p = 1 * 3 / (double) c.creatures.size();
+                                if (Constants.uniformDouble() > p) {
+                                    continue;
+                                }
 
-								EmbodiedIndividual cr2 = c.creatures.get(m);
-								if (remove.containsKey(cr2.getID()) | (cr2.isLight())) {
-									continue;
-								}
-								//creature can't interact on itself
-								if (m == i) {
-									continue;
-								}
+                                EmbodiedIndividual cr2 = c.creatures.get(m);
+                                if (remove.containsKey(cr2.getID()) | (cr2.isLight())) {
+                                    continue;
+                                }
+                                //creature can't interact on itself
+                                if (m == i) {
+                                    continue;
+                                }
 
-								double ind_prop = cr2.getProperties()[k];
+                                double ind_prop = cr2.getProperties()[k];
 
-								if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
-									tryEat(creature, cr2);
-								}
-							}
-						}
-                	}
+                                if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
+                                    tryEat(creature, cr2);
+                                }
+                            }
+                        }
+                    }
                 }
         		
         		if(moved){
@@ -304,9 +300,8 @@ public class RealMap extends Map {
 		double ok = predator.getEnergy() - prey.getEnergy();
 		if(ok>=0){
 			//give energy to predator
-			double e = prey.getEnergy();
-			if(e>0){
-				double energy = predator.getEnergy() + e;
+			if(prey.getEnergy() > 0){
+				double energy = predator.getEnergy() + prey.getEnergy();
 				predator.setEnergy(energy);
 				//record prey as dead
 				prey.setEnergy(0);
@@ -317,9 +312,7 @@ public class RealMap extends Map {
 			if(Constants.Save){
 				// reduce file size
 				if(Constants.uniformDouble()<1){ //0.01
-					EmbodiedIndividual ei_prey = (EmbodiedIndividual) prey;
-					EmbodiedIndividual ei_pred = (EmbodiedIndividual) predator;
-					/*
+                    /*
 						String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
 						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
 						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids,energy, parentIsLight " +
@@ -327,13 +320,12 @@ public class RealMap extends Map {
 						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
 						"prey_pgmDeath, prey_matForKids, energy, parentIsLight\n";
 					 */
-					String str = time + "," + ei_pred.stringDesc() + "," + ei_prey.stringDesc() + "\n";
+					String str = time + "," + predator.stringDesc() + "," + prey.stringDesc() + "\n";
 					try {
 						predationWriter.append(str);
 						predationWriter.flush();
-					} catch (IOException ep) {
-						// TODO Auto-generated catch block
-						ep.printStackTrace();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					}
 				}
 			}
@@ -491,7 +483,7 @@ public class RealMap extends Map {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -518,15 +510,12 @@ public class RealMap extends Map {
 		// if the directory does not exist, create it
 		if (!theDir.exists()) {
 			mlog.say("creating directory: " + dataFolderName);
-			boolean result = false;
 			try{
 				theDir.mkdir();
-				result = true;
-			}
-			catch(SecurityException se){
-			}
-			if(result) {
 				System.out.println("DIR created");
+			}
+			catch(SecurityException e){
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -556,54 +545,48 @@ public class RealMap extends Map {
 		fb = null;
 
 		//csv file header
-		String str = "creatureID,sensorId,sensorValue,action"+"\n";
+		StringBuilder str = new StringBuilder("creatureID,sensorId,sensorValue,action" + "\n");
 		//String debugstr = "";
 		try {
-			stateWriter.append(str);
+			stateWriter.append(str.toString());
 			stateWriter.flush();
 
-			for(int x=0; x<map.length;x++) {
-				for (int y = 0; y < map[0].length; y++) {
-					Cell c = map[x][y];
-					int size = c.creatures.size();
+            for (Cell[] cells : map) {
+                for (int y = 0; y < map[0].length; y++) {
+                    Cell c = cells[y];
+                    int size = c.creatures.size();
 
-					if(size==0){
-						continue;
-					}
+                    if (size == 0) {
+                        continue;
+                    }
 
-					for (int id = 0; id<size; id++){
-						IndividualWithProperties creature = (IndividualWithProperties) c.creatures.get(id);
-						if (creature.hasSensors()==0){
-							continue;
-						}
+                    for (int id = 0; id < size; id++) {
+                        IndividualWithProperties creature = (IndividualWithProperties) c.creatures.get(id);
+                        if (creature.hasSensors() == 0) {
+                            continue;
+                        }
 
-						str = "";
-						//tree nodes: root-> n properties -> detectionValue -> action
-						Tree sensors = creature.getSensors();
-						HashMap<Integer, Node> sensorProps = sensors.properties;
-						for (Iterator<Integer> propIt = sensorProps.keySet().iterator(); propIt.hasNext();){
-							int prop = propIt.next();
-							Node detectionValuesNode = sensorProps.get(prop);
-							HashMap<Integer, Integer> detectionValues = detectionValuesNode.getChildren();
-							for (Iterator<Integer> senseIt = detectionValues.keySet().iterator(); senseIt.hasNext();){
-								int sensedValue = senseIt.next();
-								int action =  detectionValues.get(sensedValue);
-								// "creatureID,property,sensorValue,action"+"\n";
-								str = str + creature.getID() + "," + prop + "," + sensedValue + "," + action + "\n";
-							}
-						}
-						stateWriter.append(str);
-						stateWriter.flush();
-					}
-				}
-			}
+                        str = new StringBuilder();
+                        //tree nodes: root-> n properties -> detectionValue -> action
+                        Tree sensors = creature.getSensors();
+                        HashMap<Integer, Node> sensorProps = sensors.properties;
+                        for (int prop : sensorProps.keySet()) {
+                            Node detectionValuesNode = sensorProps.get(prop);
+                            HashMap<Integer, Integer> detectionValues = detectionValuesNode.getChildren();
+                            for (int sensedValue : detectionValues.keySet()) {
+                                int action = detectionValues.get(sensedValue);
+                                // "creatureID,property,sensorValue,action"+"\n";
+                                str.append(creature.getID()).append(",").append(prop).append(",").append(sensedValue).append(",").append(action).append("\n");
+                            }
+                        }
+                        stateWriter.append(str.toString());
+                        stateWriter.flush();
+                    }
+                }
+            }
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-	}
-
-	public int getNbOfDisplayComponents() {
-		return d.getNbOfComponents();
 	}
 
 	/**
@@ -632,9 +615,9 @@ public class RealMap extends Map {
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				Cell cell = map[i][j];
-				for (Individual individual : cell.creatures) {
+				for (IndividualWithProperties individual : cell.creatures) {
 					if (!individual.isLight() && !individual.parentIsLight())
-						res.add((IndividualWithProperties) individual);
+						res.add(individual);
 				}
 			}
 		}
