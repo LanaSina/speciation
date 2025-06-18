@@ -173,7 +173,7 @@ public class ShadowMap extends Map {
         }
     }
 
-    public void updateMoved() {
+    public void applyChanges() {
         time++;
 
         if(Constants.Save && (time%5000 == 0)){

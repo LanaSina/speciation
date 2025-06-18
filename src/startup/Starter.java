@@ -352,7 +352,7 @@ public class Starter {
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.applyChanges();
-			shadowMap.updateMoved();
+			shadowMap.applyChanges();
 			if (map.getTime() % interSnaphshotDuration == 0) {
 				realMapDeltasSaver.update();
 				shadowMapDeltasSaver.update();
