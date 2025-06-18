@@ -36,7 +36,7 @@ public class RealMap extends Map {
 	//for new ones
 	LinkedList<EmbodiedIndividual> babies;
 	//for dead ones
-	LinkedList<EmbodiedIndividual> remove;
+	java.util.Map<Integer, EmbodiedIndividual> remove;
 	//for moved ones
 	LinkedList<EmbodiedIndividual> moving;
 	LinkedList<Double> newPositions;
@@ -60,12 +60,12 @@ public class RealMap extends Map {
 			}
 		}
 		//for new ones
-		babies = new LinkedList<EmbodiedIndividual>();
+		babies = new LinkedList<>();
 		//for dead ones
-		remove = new LinkedList<EmbodiedIndividual>();
+		remove = new HashMap<>();
 		//for moved ones
-		moving = new LinkedList<EmbodiedIndividual>();
-		newPositions = new LinkedList<Double>();
+		moving = new LinkedList<>();
+		newPositions = new LinkedList<>();
 
 		// read configuration file
 		Properties properties = new Properties();
@@ -222,7 +222,7 @@ public class RealMap extends Map {
             double[] position = creature.getPosition();
 
             if(!alive){
-            	remove.add(creature);
+            	remove.put(creature.getID(), creature);
             } else{
             	double[] np = new double[2];
 	            boolean moved = false;
@@ -267,7 +267,7 @@ public class RealMap extends Map {
 								}
 
 								EmbodiedIndividual cr2 = c.creatures.get(m);
-								if (Constants.containsByReference(remove, c.creatures.get(m)) | (cr2.isLight())) {
+								if (remove.containsKey(cr2.getID()) | (cr2.isLight())) {
 									continue;
 								}
 								//creature can't interact on itself
@@ -400,8 +400,9 @@ public class RealMap extends Map {
 		Thread[] theThreads = new Thread[Constants.NB_THREADS];
 
 		// remove dead
+		List<EmbodiedIndividual> removeAsList = new ArrayList<>(remove.values());
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
-			theThreads[threadNumber] = new Thread(new ThreadRemoveDead(this, threadNumber));
+			theThreads[threadNumber] = new Thread(new ThreadRemoveDead(this, removeAsList, threadNumber));
 			theThreads[threadNumber].start();
 		}
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {

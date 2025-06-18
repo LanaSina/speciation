@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import visualization.Display;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,7 +123,7 @@ public class ShadowMapTest {
         realMap.addIndividual((int) x++, (int) y++, individual1);
         EmbodiedIndividual individual2 = new EmbodiedIndividual(x, y, 18, 666, 102, 776);
         realMap.addIndividual((int) x++, (int) y++, individual2);
-        realMap.remove.add(individual1);
+        realMap.remove.put(individual1.getID(), individual1);
         realMap.babies.add(new EmbodiedIndividual(x++, y++, 400, 977, 555, 222));
         realMap.moving.add(individual2);
         realMap.newPositions.add(x);
@@ -149,7 +150,7 @@ public class ShadowMapTest {
         assertEquals(realMap.cst_energy_cost_factor, shadowMap.cst_energy_cost_factor);
         assertEquals(realMap.cst_step_cost, shadowMap.cst_step_cost);
         checkEqualityOfLists(realMap.babies, shadowMap.babies);
-        checkEqualityOfLists(realMap.remove, shadowMap.remove);
+        checkEqualityOfLists(new LinkedList<>(realMap.remove.values()), shadowMap.remove);
         checkEqualityOfLists(realMap.getAllIndividuals(), shadowMap.getAllIndividuals());
     }
 
