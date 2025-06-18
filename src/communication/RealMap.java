@@ -34,12 +34,12 @@ public class RealMap extends Map {
 
 	//for updates
 	//for new ones
-	LinkedList<EmbodiedIndividual> babies;
+	ArrayList<EmbodiedIndividual> babies;
 	//for dead ones
 	java.util.Map<Integer, EmbodiedIndividual> remove;
 	//for moved ones
-	LinkedList<EmbodiedIndividual> moving;
-	LinkedList<Double> newPositions;
+	ArrayList<EmbodiedIndividual> moving;
+	ArrayList<Double> newPositions;
 
 	public RealMap(int mapSize,
 				   Display d,
@@ -60,12 +60,12 @@ public class RealMap extends Map {
 			}
 		}
 		//for new ones
-		babies = new LinkedList<>();
+		babies = new ArrayList<>();
 		//for dead ones
 		remove = new HashMap<>();
 		//for moved ones
-		moving = new LinkedList<>();
-		newPositions = new LinkedList<>();
+		moving = new ArrayList<>();
+		newPositions = new ArrayList<>();
 
 		// read configuration file
 		Properties properties = new Properties();
