@@ -13,7 +13,8 @@ import java.util.Random;
 public class Constants {
 	public static Random rand = new Random(5);
 
-	public static boolean draw = true;
+	/** Controls whether the RealMap is displayed. (NB: the ShadowMap is never displayed.) */
+	public static final boolean ENABLE_DISPLAY = false;
 	/** percentage of elements drawn*/
 	public static double draw_coarse = 1;
 	

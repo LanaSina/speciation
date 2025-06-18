@@ -307,28 +307,25 @@ public class Display extends JFrame {
 	    public void paintComponent(Graphics g) {
 	        super.paintComponent(g);
 	        init(g);
-	        
-	        if(Constants.draw){
-	        	while(pause){
-		    		try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-		    	}
-	        	
-	        	pause = true;
-	        	
-		        for(GraphicalComponent graphicalComponent : components.values()){
-		        	if(Constants.uniformDouble()<Constants.draw_coarse){
-		        		graphicalComponent.draw(g,step);
-		        	}
-		        }
-		        
-		        pause = false;
-	        }
-	        
+
+			while(pause){
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			pause = true;
+
+			for(GraphicalComponent graphicalComponent : components.values()){
+				if(Constants.uniformDouble()<Constants.draw_coarse){
+					graphicalComponent.draw(g,step);
+				}
+			}
+
+			pause = false;
 	    }
 	    
 	    public int getWidth(){

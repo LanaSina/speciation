@@ -80,12 +80,12 @@ public class Starter {
 		final int interSnaphshotDuration = Integer.parseInt(properties.getProperty("intersnapshot_duration"));
 
 		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable(interSnaphshotDuration) : new LifeRunnable(interSnaphshotDuration);
-		Display d = new Display(dname, life, dataFolderName);
+		Display d = Constants.ENABLE_DISPLAY ? new Display(dname, life, dataFolderName) : null;
 		int lightLimit = 30;//30
 		int of = 10;
 
 		//worldmap		
-		RealMap map = new RealMap(cst_grid_max,null, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+		RealMap map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 		if (Constants.Save)
 			map.setupLogFiles();
 
