@@ -62,9 +62,9 @@ public class ShadowMap extends Map {
         map = new HashMap<>();
 
         //for new ones
-        babies = new LinkedList<ShadowIndividual>();
+        babies = new LinkedList<>();
         //for dead ones
-        remove = new LinkedList<ShadowIndividual>();
+        remove = new LinkedList<>();
 
         // read configuration file
         Properties properties = new Properties();
@@ -119,7 +119,7 @@ public class ShadowMap extends Map {
                 remove.add(shadowInd);
         }
         for (IndividualWithProperties realBaby : realMap.babies)
-            babies.add((ShadowIndividual) new ShadowIndividual(realBaby));
+            babies.add(new ShadowIndividual(realBaby));
     }
 
     public void setupLogFiles(){
@@ -141,8 +141,7 @@ public class ShadowMap extends Map {
             summaryWriter.append(str);
             summaryWriter.flush();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         // predation info
@@ -170,8 +169,7 @@ public class ShadowMap extends Map {
             predationWriter.append(header_predation);
             predationWriter.flush();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -184,8 +182,7 @@ public class ShadowMap extends Map {
         }
 
         //update dead
-        for(int i=0; i<remove.size();i++) {
-            ShadowIndividual creature = remove.get(i);
+        for (ShadowIndividual creature : remove) {
             if (Constants.Save) {
                 if (Constants.uniformDouble() < 1) { //0.01
                     if (!creature.isLight() & !creature.parentIsLight()) {
@@ -195,8 +192,7 @@ public class ShadowMap extends Map {
                             summaryWriter.append(str);
                             summaryWriter.flush();
                         } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            throw new RuntimeException(e);
                         }
                     }
                 }
@@ -206,8 +202,7 @@ public class ShadowMap extends Map {
         }
 
         //add new babies
-        for (int i = 0; i < babies.size(); i++) {
-            ShadowIndividual baby = babies.get(i);
+        for (ShadowIndividual baby : babies) {
             baby.setID(globalID.incrementAndGet());
             addIndividual(baby);
         }
@@ -247,7 +242,7 @@ public class ShadowMap extends Map {
                 stateWriter.flush();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -261,15 +256,12 @@ public class ShadowMap extends Map {
         // if the directory does not exist, create it
         if (!theDir.exists()) {
             mlog.say("creating directory: " + dataFolderName);
-            boolean result = false;
             try{
                 theDir.mkdir();
-                result = true;
-            }
-            catch(SecurityException se){
-            }
-            if(result) {
                 System.out.println("DIR created");
+            }
+            catch(SecurityException e){
+                throw new RuntimeException(e);
             }
         }
 
@@ -299,10 +291,10 @@ public class ShadowMap extends Map {
         fb = null;
 
         //csv file header
-        String str = "creatureID,sensorId,sensorValue,action"+"\n";
+        StringBuilder str = new StringBuilder("creatureID,sensorId,sensorValue,action" + "\n");
         //String debugstr = "";
         try {
-            stateWriter.append(str);
+            stateWriter.append(str.toString());
             stateWriter.flush();
 
             for (ShadowIndividual creature : map.values()){
@@ -310,26 +302,24 @@ public class ShadowMap extends Map {
                     continue;
                 }
 
-                str = "";
+                str = new StringBuilder();
                 //tree nodes: root-> n properties -> detectionValue -> action
                 Tree sensors = creature.getSensors();
                 HashMap<Integer, Node> sensorProps = sensors.properties;
-                for (Iterator<Integer> propIt = sensorProps.keySet().iterator(); propIt.hasNext();){
-                    int prop = propIt.next();
+                for (int prop : sensorProps.keySet()) {
                     Node detectionValuesNode = sensorProps.get(prop);
                     HashMap<Integer, Integer> detectionValues = detectionValuesNode.getChildren();
-                    for (Iterator<Integer> senseIt = detectionValues.keySet().iterator(); senseIt.hasNext();){
-                        int sensedValue = senseIt.next();
-                        int action =  detectionValues.get(sensedValue);
+                    for (int sensedValue : detectionValues.keySet()) {
+                        int action = detectionValues.get(sensedValue);
                         // "creatureID,property,sensorValue,action"+"\n";
-                        str = str + creature.getID() + "," + prop + "," + sensedValue + "," + action + "\n";
+                        str.append(creature.getID()).append(",").append(prop).append(",").append(sensedValue).append(",").append(action).append("\n");
                     }
                 }
-                stateWriter.append(str);
+                stateWriter.append(str.toString());
                 stateWriter.flush();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
