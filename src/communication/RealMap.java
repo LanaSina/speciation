@@ -402,7 +402,7 @@ public class RealMap extends Map {
 
 		//update moved
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
-			theThreads[threadNumber] = new Thread(new ThreadUpdateMoving(this, threadNumber));
+			theThreads[threadNumber] = new Thread(new ThreadUpdateMoving(this, moving, threadNumber));
 			theThreads[threadNumber].start();
 		}
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
@@ -415,7 +415,7 @@ public class RealMap extends Map {
 
 		//add babies
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {
-			theThreads[threadNumber] = new Thread(new ThreadAddBabies(this, threadNumber));
+			theThreads[threadNumber] = new Thread(new ThreadAddBabies(this, babies, threadNumber));
 			theThreads[threadNumber].start();
 		}
 		for (int threadNumber = 0 ; threadNumber < Constants.NB_THREADS ; threadNumber++) {

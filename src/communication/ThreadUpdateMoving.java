@@ -1,38 +1,34 @@
 package communication;
 
 import animals.EmbodiedIndividual;
-import startup.Constants;
 
-public class ThreadUpdateMoving implements Runnable {
+import java.util.ArrayList;
 
-    private final RealMap realMap;
-    private final int threadNumber;
+/**
+ * Thread for updating the positions of creatures that move on the RealMap.
+ */
+public class ThreadUpdateMoving extends ThreadApplyChanges {
 
-    public ThreadUpdateMoving(RealMap realMap, int threadNumber) {
-        this.realMap = realMap;
-        this.threadNumber = threadNumber;
+    public ThreadUpdateMoving(RealMap realMap, ArrayList<EmbodiedIndividual> moving, int threadNumber) {
+        super(realMap, moving, threadNumber);
     }
 
-    public void run() {
-        // compute bounds of the interval of `moving` to treat
-        int total = realMap.moving.size();
-        int chunk = total / Constants.NB_THREADS;
-        int remainder = total % Constants.NB_THREADS;
-        int start = threadNumber * chunk + Math.min(threadNumber, remainder);
-        int end = start + chunk + (threadNumber < remainder ? 1 : 0);
-        // treat one interval of `moving`
-        for (int i = start; i < end; i++) {
-            EmbodiedIndividual creature = realMap.moving.get(i);
-            synchronized (creature) {
-                double[] position = creature.getPosition();
-                //new x,y
-                int nx = (int) (realMap.newPositions.get(i*2)+0.5);
-                int ny = (int) (realMap.newPositions.get(i*2+1)+0.5);
-                realMap.updatePosition(nx,ny,creature);
-                position[0] = realMap.newPositions.get(i*2);
-                position[1] = realMap.newPositions.get(i*2+1);
-                creature.setPosition(position);
-            }
+    /**
+     * Updates the position of one creature that moves.
+     *
+     * @param i the index of the creature to treat
+     */
+    protected void treatCreature(int i) {
+        EmbodiedIndividual creature = creaturesToTreat.get(i);
+        synchronized (creature) {
+            double[] position = creature.getPosition();
+            //new x,y
+            int nx = (int) (realMap.newPositions.get(i *2)+0.5);
+            int ny = (int) (realMap.newPositions.get(i *2+1)+0.5);
+            realMap.updatePosition(nx,ny,creature);
+            position[0] = realMap.newPositions.get(i *2);
+            position[1] = realMap.newPositions.get(i *2+1);
+            creature.setPosition(position);
         }
     }
 }
