@@ -47,25 +47,20 @@ public class Constants {
 	public static String ShadowModelSensorsFileName = "ShadowModel_Sensors";
 
 	/**
-	 * from http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
-	 * and http://stackoverflow.com/questions/3680637/how-to-generate-a-random-double-in-a-given-range
-	 * Returns a pseudo-random number between min and max, inclusive.
-	 * Uniform distribution.
-	 * The difference between min and max can be at most
-	 * <code>Integer.MAX_VALUE - 1</code>.
-	 *
-	 * @param min Minimum value
-	 * @param max Maximum value.  Must be greater than min.
-	 * @return Integer between min and max, inclusive.
-	 * @see java.util.Random#nextInt(int)
-	 */
+     * from <a href="http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java">this page</a>
+     * and <a href="http://stackoverflow.com/questions/3680637/how-to-generate-a-random-double-in-a-given-range">this page</a>
+     * Returns a pseudo-random number between min and max, exclusive.
+     * Uniform distribution.
+     * The difference between min and max can be at most
+     * <code>Integer.MAX_VALUE - 1</code>.
+     *
+     * @param min Minimum value
+     * @param max Maximum value.  Must be greater than min.
+     * @return Integer between min and max, exclusive.
+     * @see Random#nextInt(int)
+     */
 	public static double uniformDouble(double min, double max) {
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
-	    double randomNum = min + (max - min) * rand.nextDouble();
-	    //rand.nextInt(max - min) + 1)
-
-	    return randomNum;
+	    return min + (max - min) * rand.nextDouble();
 	}
 	
 	/**
@@ -73,14 +68,7 @@ public class Constants {
 	 * @return random number
 	 */
 	public static double uniformDouble() {
-		double min = 0;
-		double max = 1;
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
-	    double randomNum = min + (max - min) * rand.nextDouble();
-	    //rand.nextInt(max - min) + 1)
-
-	    return randomNum;
+	    return rand.nextDouble();
 	}
 
 	/**
