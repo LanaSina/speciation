@@ -31,12 +31,12 @@ public class Cell {
     double electric;
 
     /**
-     * all creatures on this cell
+     * All creatures on this cell. Associates the creatures' IDs to the creatures themselves.
      */
-    LinkedList<EmbodiedIndividual> creatures;
+    java.util.Map<Integer, EmbodiedIndividual> creatures;
 
     public Cell() {
-        creatures = new LinkedList<>();
+        creatures = new java.util.HashMap<>();
     }
 
     public double getPhy(int kk) {

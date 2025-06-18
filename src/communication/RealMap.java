@@ -153,7 +153,7 @@ public class RealMap extends Map {
 			}
 		}
 		synchronized (c) {
-			c.creatures.add(i);
+			c.creatures.put(i.getID(), i);
 		}
 	}
 
@@ -164,8 +164,7 @@ public class RealMap extends Map {
 			int y = (int)(position[1] +0.5);
 			Cell c = map[x][y];
 			synchronized (c) {
-				int pos = Constants.indexOfByReference(c.creatures, i);
-				c.creatures.remove(pos);
+				c.creatures.remove(i.getID());
 			}
 		}
 	}
@@ -206,92 +205,88 @@ public class RealMap extends Map {
 			return;
 		}
 
-		List<Integer> shuffled_creatures_arr = IntStream.range(0, size).boxed().collect(Collectors.toList());
-		Collections.shuffle(shuffled_creatures_arr, Constants.rand);
+		List<EmbodiedIndividual> shuffledCreatures = new LinkedList<>(c.creatures.values());
+		Collections.shuffle(shuffledCreatures, Constants.rand);
 
-		for (int temp_i = 0; temp_i < size; temp_i++) {
-			int i = shuffled_creatures_arr.get(temp_i);
+		for (EmbodiedIndividual creature : shuffledCreatures) {
 
-			EmbodiedIndividual creature = c.creatures.get(i);
             boolean alive = creature.update(babies, time, c.transparency, cst_mut_factor, cst_speed_max,
 					cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max, cst_speed_cost,
 					cst_sensor_cost, cst_free_energy, cst_energy_cost_factor, cst_step_cost
 			);
-            double[] position = creature.getPosition();
 
             if(!alive){
             	remove.put(creature.getID(), creature);
-            } else{
-            	double[] np = new double[2];
-	            boolean moved = false;
-				double speed = creature.getSpeed();
+				return;
+            }
 
-            	if(!creature.isLight()){
-	            	//move
-	        		for(int j=0;j<2;j++){
-	        			if(generateBool()){
-	        				np[j]= position[j]+(speed*cst_speed_factor);
-	        			}else{
-	        				np[j] = position[j]-(speed*cst_speed_factor);
-	        			}
-	        			if(np[j]<0) np[j]=0;
-	        			if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
-	        			if(np[j] != position[j]){
-	        				moved = true;
-	        			}
-	        		}
-            	}
-            	
-        		Tree sensors = creature.getSensors();
-        		
-        		//interactions between creatures
-                //iterate on properties
-                HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
-                for (int k : sChildren.keySet()) {
-                    // property
-                    // sensed values
-                    Node propValues = sChildren.get(k);
-                    for (int valueSensed : propValues.getChildren().keySet()) {
-                        int action = propValues.getChildren().get(valueSensed);
-                        //interactions with other creatures
-                        if (action < 2) {
-                            //iterate creatures on this cell
-                            for (int m = 0; m < c.creatures.size(); m++) {
-                                double p = 1 * 3 / (double) c.creatures.size();
-                                if (Constants.uniformDouble() > p) {
-                                    continue;
-                                }
+            double[] position = creature.getPosition();
+			double[] np = new double[2];
+			boolean moved = false;
+			double speed = creature.getSpeed();
+			if(!creature.isLight()){
+				//move
+				for(int j=0;j<2;j++){
+					if(generateBool()){
+						np[j]= position[j]+(speed*cst_speed_factor);
+					}else{
+						np[j] = position[j]-(speed*cst_speed_factor);
+					}
+					if(np[j]<0) np[j]=0;
+					if(np[j]>=cst_grid_max-1) np[j] = cst_grid_max-2;
+					if(np[j] != position[j]){
+						moved = true;
+					}
+				}
+			}
 
-                                EmbodiedIndividual cr2 = c.creatures.get(m);
-                                if (remove.containsKey(cr2.getID()) | (cr2.isLight())) {
-                                    continue;
-                                }
-                                //creature can't interact on itself
-                                if (m == i) {
-                                    continue;
-                                }
+			Tree sensors = creature.getSensors();
 
-                                double ind_prop = cr2.getProperties()[k];
+			//interactions between creatures
+			//iterate on properties
+			HashMap<Integer, Node> sChildren = sensors.properties;//.getChildren();
+			for (int k : sChildren.keySet()) {
+				// property
+				// sensed values
+				Node propValues = sChildren.get(k);
+				for (int valueSensed : propValues.getChildren().keySet()) {
+					int action = propValues.getChildren().get(valueSensed);
+					//interactions with other creatures
+					if (action < 2) {
+						//iterate creatures on this cell
+						for (EmbodiedIndividual otherCreature : c.creatures.values()) {
+							double p = 1 * 3 / (double) c.creatures.size();
+							if (Constants.uniformDouble() > p) {
+								continue;
+							}
+							if (remove.containsKey(otherCreature.getID()) | (otherCreature.isLight())) {
+								continue;
+							}
+							//creature can't interact on itself
+							if (otherCreature == creature) {
+								continue;
+							}
 
-                                if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
-                                    tryEat(creature, cr2);
-                                }
-                            }
-                        }
-                    }
-                }
-        		
-        		if(moved){
-        			newPositions.add(np[0]);
-        			newPositions.add(np[1]);
-        			moving.add(creature);
-        			//costs energy
-        			if(!creature.isLight()){
-        				double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
-        				creature.setEnergy(energy);
-        			}
-        		}
-            }    
+							double ind_prop = otherCreature.getProperties()[k];
+
+							if ((valueSensed >= ind_prop - 5) && (valueSensed <= ind_prop + 5)) {
+								tryEat(creature, otherCreature);
+							}
+						}
+					}
+				}
+			}
+
+			if(moved){
+				newPositions.add(np[0]);
+				newPositions.add(np[1]);
+				moving.add(creature);
+				//costs energy
+				if(!creature.isLight()){
+					double energy = creature.getEnergy() - speed*cst_speed_cost;// - numberActions*Constants.ActionCost;
+					creature.setEnergy(energy);
+				}
+			}
         }
 	}
 
@@ -474,8 +469,7 @@ public class RealMap extends Map {
 					// mlog.say("snapshot " + x + " " + y + " " + size);
 					//debugstr = debugstr + size + " ";
 
-					for (int id = 0; id<size; id++){
-						Individual creature = c.creatures.get(id);
+					for (EmbodiedIndividual creature : c.creatures.values()){
 						String astr = x + "," + y + "," + creature.stringDesc() + "\n";
 						stateWriter.append(astr);
 						stateWriter.flush();
@@ -560,8 +554,7 @@ public class RealMap extends Map {
                         continue;
                     }
 
-                    for (int id = 0; id < size; id++) {
-                        IndividualWithProperties creature = (IndividualWithProperties) c.creatures.get(id);
+                    for (IndividualWithProperties creature : c.creatures.values()) {
                         if (creature.hasSensors() == 0) {
                             continue;
                         }
@@ -599,7 +592,7 @@ public class RealMap extends Map {
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				Cell cell = map[i][j];
-                res.addAll(cell.creatures);
+                res.addAll(cell.creatures.values());
 			}
 		}
 		return res;
@@ -615,10 +608,10 @@ public class RealMap extends Map {
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				Cell cell = map[i][j];
-				for (IndividualWithProperties individual : cell.creatures) {
-					if (!individual.isLight() && !individual.parentIsLight())
-						res.add(individual);
-				}
+				List<IndividualWithProperties> evolvedIndividuals = cell.creatures.values().stream()
+						.filter(individual -> !individual.isLight() && !individual.parentIsLight())
+						.collect(Collectors.toList());
+				res.addAll(evolvedIndividuals);
 			}
 		}
 		return res;
