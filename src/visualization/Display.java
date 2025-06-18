@@ -7,9 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -138,8 +137,8 @@ public class Display extends JFrame {
 		Starter.LifeRunnable lifeRunnable;
 		String dataFolder = null;
 
-		//list of things to draw
-		public List<GraphicalComponent> components = new ArrayList<GraphicalComponent>();
+		/** The things to draw. Associates the GraphicalComponents' IDs to the GraphicalComponents themselves*/
+		public java.util.Map<Integer, GraphicalComponent> components = new HashMap<>();
 
 		public Surface(Starter.LifeRunnable myLifeRunnable, String myDataFolder){
 			super();
@@ -262,7 +261,7 @@ public class Display extends JFrame {
 				}
 	    	}
 	    	pause = true;
-	    	components.add(c);
+	    	components.put(c.getID(), c);
 	    	pause = false;
 	    }
 	    
@@ -276,8 +275,7 @@ public class Display extends JFrame {
 				}
 	    	}
 	    	pause = true;
-			int i = Constants.indexOfByReference(components, c);
-			components.remove(i);
+			components.remove(c.getID());
 			pause = false;
 		}
 	    
@@ -322,9 +320,9 @@ public class Display extends JFrame {
 	        	
 	        	pause = true;
 	        	
-		        for(int i=0;i<components.size();i++){
+		        for(GraphicalComponent graphicalComponent : components.values()){
 		        	if(Constants.uniformDouble()<Constants.draw_coarse){
-		        		components.get(i).draw(g,step);
+		        		graphicalComponent.draw(g,step);
 		        	}
 		        }
 		        

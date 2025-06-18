@@ -9,8 +9,9 @@ import java.awt.Graphics;
  *
  */
 public interface GraphicalComponent {
-	
-	public void draw(Graphics g, int gridStep);
+
+	int getID();
+	void draw(Graphics g, int gridStep);
 
 	//public boolean onTop = false;
 }
