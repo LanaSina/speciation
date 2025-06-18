@@ -23,6 +23,9 @@ import static java.lang.Math.abs;
 
 public class RealMap extends Map {
 
+	/** Gap between two times the time is printed (in number of time steps). */
+	protected static final int TIME_PRINTING_GAP = 100;
+
 	/**graphic panel*/
 	Display d;
 	/** 2D map is made of cells, in each cell there are creatures;*/
@@ -365,9 +368,9 @@ public class RealMap extends Map {
 
 
 	public void applyChanges(){
-		time++; System.out.println(time);
-		if (time%1000==0){
-			mlog.say("step " + time);
+		time++;
+		if (time % TIME_PRINTING_GAP == 0) {
+			mlog.say("time = " + time);
 		}
 
 		if(Constants.Save && (time%5000 == 0)){

@@ -103,6 +103,7 @@ public class Starter {
 			}
 		}
 
+		System.out.println("Saving of information about individuals" + (Constants.Save ? "enabled" : " DISABLED") + ".");
 		life.setMap(map);
 		new Thread(life).start();
 	}	
@@ -313,6 +314,8 @@ public class Starter {
 		}
 
 		public void run() {
+
+			System.out.println("Shadow map enabled.");
 
 			while(run){
 				// is false after PauseProcedure
