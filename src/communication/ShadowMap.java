@@ -324,7 +324,12 @@ public class ShadowMap extends Map {
     }
 
     /**
-     * Returns the list of individuals on this map.
+     * <p>
+     *     Returns the list of individuals on this map.
+     * </p>
+     * <p>
+     *     Time complexity and space complexity are in Θ(n), where n is the number of individuals of this map.
+     * </p>
      *
      * @return the list of individuals on this map
      */
@@ -345,10 +350,18 @@ public class ShadowMap extends Map {
     }
 
     /**
-     * Make <code>number</code> random individuals have a baby.
-     * </br>
-     * An individual may make several babies if they are selected multiple times. They can even make more baby than
-     * their normal maximum number of babies per time step.
+     * <p>
+     *      Makes <code>number</code> random individuals have a baby.
+     * </p>
+     * <p>
+     *      This method uses the "drawing with replacement" method, since each individual can make several babies at a
+     *      given time step. Note that individuals can even make more baby than their normal maximum number of babies
+     *      per time step.
+     * </p>
+     * <p>
+     *      Space complexity is in Θ(n) and time complexity is in Θ(n+<code>number</code>), where n is the number of
+     *      individuals on this map.
+     * </p>
      *
      * @param number the number of individuals to create
      */
@@ -364,9 +377,16 @@ public class ShadowMap extends Map {
     }
 
     /**
-     * Remove <code>number</code> random individuals.
-     * </br>
-     * The provided number must not exceed the total number of individuals.
+     * <p>
+     *      Removes <code>number</code> random individuals.
+     * </p>
+     * <p>
+     *      This method uses the "drawing without replacement" method, since each individual can only die once.
+     * </p>
+     * <p>
+     *      Space complexity is in Θ(n) and time complexity is in Θ(n+<code>number</code>), where n is the number of
+     *      individuals on this map.
+     * </p>
      *
      * @param number the number of individuals to remove
      * @throws IllegalArgumentException if trying to remove more individuals than there are
