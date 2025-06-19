@@ -364,9 +364,12 @@ public class ShadowMap extends Map {
      * </p>
      *
      * @param number the number of individuals to create
+     * @throws RuntimeException if we try to make more than 0 babies and this map contains no individual to make babies from
      */
     public void createRandomIndividuals(int number) {
         ArrayList<ShadowIndividual> allIndividuals = getAllIndividuals();
+        if (number > 0 && allIndividuals.isEmpty())
+            throw new RuntimeException("No individuals present to make babies");
         Random randomizer = new Random();
         for (int i = 0 ; i < number ; i++) {
             int randomIndex = randomizer.nextInt(allIndividuals.size());
