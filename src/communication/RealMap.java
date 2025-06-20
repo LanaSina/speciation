@@ -343,7 +343,7 @@ public class RealMap extends Map {
 	/**
 	 * Returns the number of new creatures born during a time step.
 	 * </br>
-	 * This method only works between a call to <code>updateCell()</code> and a call to <code>updateMoved()</code>,
+	 * This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
 	 * because this is the only moment where the new creatures are gathered in a single data structure (i.e.
 	 * <code>babies</code>) and can be counted.
 	 *
@@ -356,7 +356,7 @@ public class RealMap extends Map {
 	/**
 	 * Returns the number of creatures that died during a time step.
 	 * </br>
-	 * This method only works between a call to <code>updateCell()</code> and a call to <code>updateMoved()</code>,
+	 * This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
 	 * because this is the only moment where the creatures that just died are gathered in a single data structure (i.e.
 	 * <code>remove</code>) and can be counted.
 	 *
