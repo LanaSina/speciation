@@ -379,7 +379,7 @@ plot(not_light$pos_x, not_light$pos_y)
 ## OEE Analysis
 
 ```{r}
-folder = "2025_04_03_21_46"
+folder = "2025_06_20_15_06_jusqu_a_200000"
 realMapDeltasFile <- paste(base_folder, folder,"RealMapDeltas.csv",sep="/")
 shadowMapDeltasFile <- paste(base_folder, folder,"ShadowMapDeltas.csv",sep="/")
 ```
@@ -388,45 +388,53 @@ shadowMapDeltasFile <- paste(base_folder, folder,"ShadowMapDeltas.csv",sep="/")
 
 ```{r}
 
-# COMPUTE A_cums
+# this library allows super fast reading of CSV files!
+library(data.table)
 
+# load file
+deltas <- fread(realMapDeltasFile, dec = ".")
 
-# Note: in this chunk and the next ones, a variable name that starts with "curr" indicate the current data, that is, the data at the current time stamp (which corresponds to a single CSV line)
+# components' names
+componentCols <- setdiff(names(deltas), "t")
+# number of components
+nbComponents <- length(componentCols)
+# number of lines
+nbLines <- nrow(deltas)
 
+# initialize matrices
+currCumuls <- setNames(rep(0, nbComponents), componentCols)
+currAs <- numeric(nbComponents)
 
-deltas <- read.csv(realMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
+# data structure that will store the results
+Acums <- data.table(t = integer(nbLines), Acum = numeric(nbLines))
 
+# to measure the time the computation takes
+start_time <- proc.time()
 
-# the number of components
-nbComponents <- ncol(deltas) - 1
+for (line in 1:nbLines) {
+  t <- deltas[line, t]
 
-# init current cumuls of deltas (intermediate values to compute a's from the deltas)
-currCumuls <- rep(0, times=nbComponents)
-# init current a's (i.e. cumulative evolutionary activities)
-currAs <- array(dim = nbComponents)
-# init A_cum's
-Acums <- data.frame(
-  t = integer(nrow(deltas)),
-  Acum = integer(nrow(deltas))
-)
-
-
-# loop for computing A_cums
-for (line in 1:nrow(deltas)) {
-  # get time stamp
-  t <- deltas[line, "t"]
-  # get current deltas
-  currDeltas <- as.numeric(deltas[line, 2:ncol(deltas)])
-  # compute current cumuls
-  currCumuls <- currCumuls + currDeltas
-  # compute current a's
-  for (i in 1:nbComponents)  {
-    currAs[i] <- ifelse(currDeltas[i] == 1, currCumuls[i], 0)
+  # print the elapsed computation time
+  if (t %% 100000 == 0) {
+    elapsed <- (proc.time() - start_time)[["elapsed"]]
+    cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
   }
-  # compute current A_cum
-  currAcum <- sum(currAs)
-  Acums[line,] <- c(t, currAcum)
+  
+  # === COMPUTE THE CUMULATIVE EVOLUTIONARY ACTIVITIES ===
+
+  # current deltas
+  currDeltas <- as.numeric(deltas[line, ..componentCols])
+  # current accumulations ("cumuls actuels" in French)
+  currCumuls <- currCumuls + currDeltas
+  # current cumulative evolutionary activities
+  currAs <- ifelse(currDeltas == 1, currCumuls, 0)
+  
+  # === COMPUTE FINAL RESULTS ===
+
+  # total cumulative evolutionary activity 
+  Acums[line, ] <- list(t, sum(currAs))
 }
+
 ```
 
 ```{r}
@@ -441,130 +449,78 @@ grid()
 
 ```{r}
 
-# COMPUTE NORMALIZED A_cums AND MEDIANS (original formula and alternative formula)
+# load files
+realDeltas <- fread(realMapDeltasFile, dec = ".")
+shadowDeltas <- fread(shadowMapDeltasFile, dec = ".")
 
-
-realDeltas <- read.csv(realMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
-shadowDeltas <- read.csv(shadowMapDeltasFile, stringsAsFactors=FALSE, header=TRUE, dec =".")
-
-
-# gather all components (i.e. those from the real model and those from the shadow model)
-realComponents <- setdiff(names(realDeltas), "t") # (ignoring name "t" which is not a component)
+# component names
+realComponents <- setdiff(names(realDeltas), "t")
 shadowComponents <- setdiff(names(shadowDeltas), "t")
 allComponents <- union(realComponents, shadowComponents)
 
-# count number of components in the real model, then in total
-nbRealComponents <- length(realComponents)
-nbAllComponents <- length(allComponents)
+nbLines <- nrow(realDeltas)
 
-# count number of lines
-nbLines <- nrow(realDeltas) # NB: nrow(realDeltas) == nrow(shadowDeltas)
+# initialize matrices
+currNormCumuls     <- setNames(rep(0, length(allComponents)), allComponents)
+currAltNormCumuls  <- setNames(rep(0, length(realComponents)), realComponents)
 
-# Tells if a component currently exists in the real model
-currRealDeltas <- as.data.frame(t(integer(nbAllComponents)))
-colnames(currRealDeltas) <- allComponents
-# init current normalized deltas
-currNormDeltas <- as.data.frame(matrix(NA, ncol = length(allComponents), nrow = 1))
-colnames(currNormDeltas) <- allComponents
-# init current cumuls of normalized deltas
-currNormCumuls <- as.data.frame(t(rep(0, times=nbAllComponents)))
-colnames(currNormCumuls) <- allComponents
-# init current normalized a's
-currNormAs <- as.data.frame(t(integer(nbAllComponents)))
-colnames(currNormAs) <- allComponents
-
-# init normalized A_cums
-normAcums <- data.frame(
-  t = integer(nbLines),
-  normAcum = integer(nbLines)
-)
-# init normalized medians
-normMedians <- data.frame(
-  t = integer(nbLines), 
-  normMedian = integer(nbLines)
-)
-
-# init current alternative cumuls of normalized deltas
-currAltNormCumuls <- as.data.frame(t(rep(0, times=nbRealComponents)))
-colnames(currAltNormCumuls) <- realComponents
-# init current alternative normalized a's
-currAltNormAs <- as.data.frame(t(integer(nbRealComponents)))
-colnames(currAltNormAs) <- realComponents
-
-# init alternative normalized A_cums
-altNormAcums <- data.frame(
-  t = integer(nbLines),
-  normAcum = integer(nbLines)
-)
-# init alternative normalized medians
-altNormMedians <- data.frame(
-  t = integer(nbLines),
-  normMedian = integer(nbLines)
-)
+# data structures that will store the results
+normAcums      <- data.table(t = integer(nbLines), normAcum = numeric(nbLines))
+normMedians    <- data.table(t = integer(nbLines), normMedian = numeric(nbLines))
+altNormAcums   <- data.table(t = integer(nbLines), normAcum = numeric(nbLines))
+altNormMedians <- data.table(t = integer(nbLines), normMedian = numeric(nbLines))
 
 
-# loop for computing the A_cums and the medians
+# to measure the time the computation takes
+start_time <- proc.time()
+
 for (line in 1:nbLines) {
-  
-  
-  # GET TIME STAMP
-  t <- realDeltas[line, "t"]
-  
-  
-  # COMPUTE CURRENT NORMALIZED A'S (REQUIRED TO COMPUTE NORMALIZED A_cums)
-  # compute current normalized deltas
-  for (comp in allComponents) {
-    currRealDeltas[1, comp] <- ifelse(comp %in% realComponents, realDeltas[line, comp], 0)
-    currShadowDelta <- ifelse(comp %in% shadowComponents, shadowDeltas[line, comp], 0)
-    currNormDeltas[1, comp] = currRealDeltas[1, comp] - currShadowDelta
-  }
-  # compute current normalized cumuls
-  currNormCumuls[1,] <- as.numeric(currNormCumuls) + as.numeric(currNormDeltas)
-  # compute current normalized a's
-  for (comp in allComponents) {
-    currNormAs[1, comp] <- ifelse(currRealDeltas[1, comp] == 1, currNormCumuls[1, comp], 0)
+  t <- realDeltas[line, t]
+
+  # print the elapsed computation time
+  if (t %% 10000 == 0) {
+    elapsed <- (proc.time() - start_time)[["elapsed"]]
+    cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
   }
 
-  # COMPUTE CURRENT ALTERNATIVE NORMALIZED A'S (REQUIRED TO COMPUTE ALTERNATIVE NORMALIZED A_cums)
-  # compute current alternative normalized cumuls
+  # === COMPUTE THE NORMALIZED CUMULATIVE EVOLUTIONARY ACTIVITIES (original formula) ===
+  
+  currReal <- setNames(rep(0, length(allComponents)), allComponents)
+  currShadow <- setNames(rep(0, length(allComponents)), allComponents)
+  if (length(realComponents) > 0) {
+    currReal[realComponents] <- as.numeric(realDeltas[line, ..realComponents])
+  }
+  if (length(shadowComponents) > 0) {
+    currShadow[shadowComponents] <- as.numeric(shadowDeltas[line, ..shadowComponents])
+  }
+  currNorm <- currReal - currShadow
+  names(currNorm) <- allComponents
+
+  currNormCumuls <- currNormCumuls + currNorm
+  currNormAs <- ifelse(currReal == 1, currNormCumuls, 0)
+
+  # === COMPUTE THE NORMALIZED CUMULATIVE EVOLUTIONARY ACTIVITIES (alternative formula) ===
+
   for (comp in realComponents) {
-    if (currRealDeltas[1, comp] == 1) { # if component currently exists in the real model
-      currAltNormCumuls[1, comp] <- currAltNormCumuls[1, comp] + currNormDeltas[1, comp]
+    if (currReal[comp] == 1) {
+      currAltNormCumuls[comp] <- currAltNormCumuls[comp] + currNorm[comp]
     }
   }
-  # compute current alternative normalized a's
-  for (comp in realComponents) {
-    currAltNormAs[1, comp] <- ifelse(currRealDeltas[1, comp] == 1, currAltNormCumuls[1, comp], 0)
-  }
+  currAltNormAs <- ifelse(currReal[realComponents] == 1, currAltNormCumuls, 0)
 
-  # COMPUTE CURRENT NORMALIZED A_cum
-  currNormAcum <- sum(currNormAs[1,])
-  normAcums[line,] <- c(t, currNormAcum)
+  # === COMPUTE FINAL RESULTS ===
 
-  # COMPUTE CURRENT NORMALIZED MEDIAN
-  # filter out components that don't currently exist in the real model
-  realActiveComps <- realComponents[realDeltas[line, realComponents] == 1]
-  medianValues <- currNormAs[realActiveComps]
-  # Compute current median
-  currNormMedian <- ifelse(length(medianValues) > 0, median(as.numeric(medianValues[1,])), NA)
-  # Save
-  normMedians[line, ] <- c(t, currNormMedian)
-  
-  # COMPUTE CURRENT ALTERNATIVE NORMALIZED A_cum
-  currAltNormAcum <- sum(currAltNormAs[1,])
-  altNormAcums[line,] <- c(t, currAltNormAcum)
-  
-  # COMPUTE CURRENT ALTERNATIVE NORMALIZED MEDIAN
-  # filter out components that don't currently exist in the real model
-  altMedianValues <- currAltNormAs[realActiveComps]
-  # Compute current alternative median
-  currAltNormMedian <- ifelse(length(altMedianValues) > 0, median(as.numeric(altMedianValues[1,])), NA)
-  # Save
-  altNormMedians[line, ] <- c(t, currAltNormMedian)
-  
-  
-  # TODO : compute A_news
-  
+  realActiveComps <- realComponents[which(realDeltas[line, ..realComponents] == 1)]
+
+  # normalized total cumulative evolutionary activities (original formula)
+  normAcums[line]      <- list(t, sum(currNormAs))
+  # normalized median cumulative evolutionary activities (original formula)
+  normMedians[line]    <- list(t, if (length(realActiveComps) > 0) median(currNormAs[realActiveComps]) else NA)
+  # normalized total cumulative evolutionary activities (alternative formula)
+  altNormAcums[line]   <- list(t, sum(currAltNormAs))
+  # normalized median cumulative evolutionary activities (alternative formula)
+  altNormMedians[line] <- list(t, if (length(realActiveComps) > 0) median(currAltNormAs[realActiveComps]) else NA)
+
 }
 
 ```
