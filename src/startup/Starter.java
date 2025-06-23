@@ -25,12 +25,16 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
 
+
+
+
 /**
  * @author lana
  * This class is the main class.
  *
  */
 public class Starter {
+
 	static String dataFolderName;
 
 
@@ -81,7 +85,7 @@ public class Starter {
 		final int shadowModelResetEvery = Integer.parseInt(properties.getProperty("shadow_model_reset_every"));
 		final int deltasSavedEvery = Integer.parseInt(properties.getProperty("deltas_saved_every"));
 
-		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable(deltasSavedEvery, shadowModelResetEvery) : new LifeRunnable(deltasSavedEvery);
+		LifeRunnable life = Constants.RunShadowModel ? new LifeRunnableWithShadow(deltasSavedEvery, shadowModelResetEvery) : new LifeRunnable(deltasSavedEvery);
 		Display d = Constants.ENABLE_DISPLAY ? new Display(dname, life, dataFolderName) : null;
 		int lightLimit = 30;//30
 		int of = 10;
@@ -110,6 +114,9 @@ public class Starter {
 		new Thread(life).start();
 	}	
 
+
+
+
 	public static Properties loadProperties(String path){
 		// read configuration file
 		Properties properties = new Properties();
@@ -123,70 +130,109 @@ public class Starter {
 
 		return(properties);
 	}
-	
-	public static class LifeRunnable implements Runnable{
-		MyLog mlog = new MyLog("lifeRunnable",true);
-		boolean run = true;
-		public boolean running = true;
-		boolean doSave = false;
-		DeltasSaver realMapDeltasSaver;
-		/** Number of time steps between two saves of the deltas. */
-		int deltasSavedEvery;
 
-		//map
+
+	/**
+	 * Runnable that runs the real map.
+	 */
+	public static class LifeRunnable implements Runnable {
+
+		/** Logger */
+		MyLog mlog = new MyLog("lifeRunnable", true);
+		/** This field is true while the runnable stays alive. */
+		boolean run = true;
+		/** This field is true while the runnable isn't paused. */
+		public boolean running = true;
+		/** Indicates whether the state of the map(s) must be saved at the next update. */
+		boolean doSave = false;
+
+		/** The map. */
 		RealMap map = null;
+		/** The map's size. */
 		int mapSize = Constants.GridMax;
+		/** An object that serves to save the deltas of the map. */
+		DeltasSaver realMapDeltasSaver;
+		/** The number of time steps between two saves of the deltas. */
+		final int deltasSavedEvery;
+
 
 		/**
 		 * Builds a runnable that runs the real model.
 		 *
 		 * @param deltasSavedEvery number of time steps between two saves of the deltas
 		 */
-		public LifeRunnable(int deltasSavedEvery){
+		public LifeRunnable(int deltasSavedEvery) {
 			this.deltasSavedEvery = deltasSavedEvery;
 		}
 
-		public void setMap(RealMap map){
+
+		/**
+		 * Sets this LifeRunnable's map.
+		 *
+		 * @param map the map to set
+		 */
+		public void setMap(RealMap map) {
 			this.map = map;
 			this.realMapDeltasSaver = new DeltasSaver(map, dataFolderName, Constants.RealMapDeltasFileName + ".csv");
 		}
-		
-		public void run() {
 
-			while(run){
+
+		/**
+		 * Main loop of the program.
+		 */
+		public void run() {
+			while (run) {
 				// is false after PauseProcedure
-				if(running) {
+				if (running) {
 					update();
 				} else {
 					try {
 						Thread.sleep(50);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
 				}
-
-				if(doSave){
-					String fileName =  map.saveSate(dataFolderName);
-					String savedAt = dataFolderName + fileName;
-					mlog.say("Saved at " + savedAt);
+				if (doSave) {
+					saveMapsState();
 					doSave = false;
 				}
-
 			}
 			mlog.say("dies");
 		}
 
 
-		public void save(){
-			doSave = true;
-			// only save after proper updates
+		/**
+		 * Saves the state of the map(s).
+		 */
+		protected void saveMapsState() {
+			saveRealMapState();
 		}
 
-		
-		/** updates each individual and each cell of the map */
-		void update(){
-			for(int i=0; i<mapSize;i++){
-				for(int j=0; j<mapSize;j++){
+
+		/**
+		 * Saves the state of the real map.
+		 */
+		protected final void saveRealMapState() {
+			String fileName = map.saveState(dataFolderName);
+			String savedAt = dataFolderName + fileName;
+			mlog.say("Saved at " + savedAt);
+		}
+
+
+		/**
+		 * Ensures that the map(s)'s states will be saved at the next update.
+		 */
+		public final void save() {
+			doSave = true;
+		}
+
+
+		/**
+		 * Updates each individual on the map, and perhaps saves the map's deltas.
+		 */
+		protected void update() {
+			for (int i = 0; i < mapSize; i++) {
+				for (int j = 0; j < mapSize; j++) {
 					map.updateCell(i, j);
 				}
 			}
@@ -194,16 +240,18 @@ public class Starter {
 			if (map.getTime() % deltasSavedEvery == 0)
 				realMapDeltasSaver.update();
 		}
-		
-		public void kill(){
+
+
+		public void kill() {
 			run = false;
 		}
 
+
 		public void load(File directory) {
 			// read properties
-			String target = directory.getAbsolutePath()+"/config.properties";
+			String target = directory.getAbsolutePath() + "/config.properties";
 			//copy them
-			Path copyTo = Paths.get(dataFolderName+"config.properties");
+			Path copyTo = Paths.get(dataFolderName + "config.properties");
 			try {
 				Files.copy(Paths.get(target), copyTo, StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
@@ -217,12 +265,12 @@ public class Starter {
 			map.kill();
 			//worldmap
 			String dname = properties.getProperty("sim_name");
-			int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
+			int cst_grid_max = Integer.parseInt(properties.getProperty("grid_max"));
 			Display d = new Display(dname, this, dataFolderName);
-			map = new RealMap(cst_grid_max,d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+			map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
 
 			// read creatures
-			target = directory.getAbsolutePath()+"/"+Constants.SnapshotFileName+".csv";
+			target = directory.getAbsolutePath() + "/" + Constants.SnapshotFileName + ".csv";
 			// save all creatures by id
 			HashMap<Integer, EmbodiedIndividual> individualMap = new HashMap<>();
 			// read line by line
@@ -242,14 +290,14 @@ public class Starter {
 				// x,y,ID,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor,nkids,pgmDeath,matForKids
 				sc.nextLine();
 				// sc.useDelimiter(",");   //sets the delimiter pattern
-				while(sc.hasNextLine()){
+				while (sc.hasNextLine()) {
 					line = sc.nextLine();
 					lineArray = line.split(",");
 					//x and y
-					int x =  Integer.parseInt(lineArray[0]);
+					int x = Integer.parseInt(lineArray[0]);
 					int y = Integer.parseInt(lineArray[1]);
 					int id = Integer.parseInt(lineArray[2]);
-					if (id>maxId){
+					if (id > maxId) {
 						maxId = id;
 					}
 					EmbodiedIndividual individual = new EmbodiedIndividual(id, line);
@@ -263,10 +311,10 @@ public class Starter {
 				throw new RuntimeException(e);
 			}
 
-			map.setGlobalId(maxId+1);
+			map.setGlobalId(maxId + 1);
 			// set sensors
 			// read creatures
-			target = directory.getAbsolutePath()+"/"+Constants.SensorsFileName+".csv";
+			target = directory.getAbsolutePath() + "/" + Constants.SensorsFileName + ".csv";
 			// read line by line
 			try {
 				sc = new Scanner(new File(target));
@@ -279,14 +327,14 @@ public class Starter {
 				//String str = "creatureID,sensorId,sensorValue,action"+"\n";
 				sc.nextLine();
 				line = null;
-				while(sc.hasNextLine()){
+				while (sc.hasNextLine()) {
 					line = sc.nextLine();
 					lineArray = line.split(",");
 					int pos = 0;
 
 					int newCreatureId = Integer.parseInt(lineArray[pos]);
 					pos++;
-					if(newCreatureId != creatureId) {
+					if (newCreatureId != creatureId) {
 						creatureId = newCreatureId;
 						individual = individualMap.get(creatureId);
 					}
@@ -305,24 +353,41 @@ public class Starter {
 		}
 	}
 
-	public static class ShadowLifeRunnable extends LifeRunnable{
+
+
+
+	/**
+	 * Runnable that runs the real map and the shadow map.
+	 */
+	public static class LifeRunnableWithShadow extends LifeRunnable {
+
+		/** The shadow map. */
 		ShadowMap shadowMap;
+		/** An object that serves to save the deltas of the shadow map. */
 		private DeltasSaver shadowMapDeltasSaver;
-		/** Number of time steps between two shadow model resets. */
+		/** The number of time steps between two shadow model resets. */
 		protected int shadowModelResetEvery;
+
 
 		/**
 		 * Builds a runnable that runs the real model and the shadow model.
 		 *
-		 * @param deltasSavedEvery number of time steps between two saves of the deltas
+		 * @param deltasSavedEvery      number of time steps between two saves of the deltas
 		 * @param shadowModelResetEvery number of time steps between two shadow model resets
 		 */
-		public ShadowLifeRunnable(int deltasSavedEvery, int shadowModelResetEvery) {
+		public LifeRunnableWithShadow(int deltasSavedEvery, int shadowModelResetEvery) {
 			super(deltasSavedEvery);
 			this.shadowModelResetEvery = shadowModelResetEvery;
 		}
 
-		public void setMap(RealMap map){
+
+		/**
+		 * Sets this LifeRunnableWithShadow's map and shadow map (initially similar to the real map).
+		 *
+		 * @param map the map to set
+		 */
+		@Override
+		public void setMap(RealMap map) {
 			super.setMap(map);
 			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			if (Constants.Save)
@@ -330,50 +395,57 @@ public class Starter {
 			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
 		}
 
+
+		/**
+		 * Main loop of the program.
+		 */
+		@Override
 		public void run() {
-
 			System.out.println("Shadow map enabled.");
-
-			while(run){
-				// is false after PauseProcedure
-				if(running) {
-					update();
-				} else {
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-
-				if(doSave){
-					String fileName =  map.saveSate(dataFolderName);
-					String savedAt = dataFolderName + fileName;
-					mlog.say("Saved at " + savedAt);
-					fileName =  shadowMap.saveSate(dataFolderName);
-					savedAt = dataFolderName + fileName;
-					mlog.say("Saved at " + savedAt);
-					doSave = false;
-				}
-
-			}
-			mlog.say("dies");
+			super.run();
 		}
 
 
-		/** updates each individual and each cell of the map */
-		void update(){
-			for(int i=0; i<mapSize;i++){
-				for(int j=0; j<mapSize;j++){
+		/**
+		 * Saves the state of the map(s).
+		 */
+		@Override
+		protected void saveMapsState() {
+			saveRealMapState();
+			saveShadowMapState();
+		}
+
+
+		/**
+		 * Saves the state of the shadow map.
+		 */
+		final protected void saveShadowMapState() {
+			String fileName = shadowMap.saveState(dataFolderName);
+			String savedAt = dataFolderName + fileName;
+			mlog.say("Saved at " + savedAt);
+		}
+
+
+		/**
+		 * Updates each individual on the real map and on the shadow map,
+		 * and perhaps saves their respective deltas, and perhaps resets
+		 * the state of the shadow map to that of the real map.
+		 */
+		@Override
+		protected void update() {
+			// compute changes on the real map
+			for (int i = 0; i < mapSize; i++) {
+				for (int j = 0; j < mapSize; j++) {
 					map.updateCell(i, j);
 				}
 			}
+			// compute changes on the shadow map
 			shadowMap.incrementAgeOfAllIndividuals();
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
-			// apply changes and save the deltas
-			Thread realMapThread = new Thread(() -> applyAndMaybeSave(map, realMapDeltasSaver));
-			Thread shadowMapThread = new Thread(() -> applyAndMaybeSave(shadowMap, shadowMapDeltasSaver));
+			// apply the changes, and maybe save the deltas
+			Thread realMapThread = new Thread(() -> applyChangesAndMaybeSaveDeltas(map, realMapDeltasSaver));
+			Thread shadowMapThread = new Thread(() -> applyChangesAndMaybeSaveDeltas(shadowMap, shadowMapDeltasSaver));
 			realMapThread.start();
 			shadowMapThread.start();
 			try {
@@ -382,16 +454,29 @@ public class Starter {
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			// reset the shadow model
+			// maybe reset the shadow model
 			if (map.getTime() % shadowModelResetEvery == 0) {
 				shadowMap.reset();
 			}
 		}
 
-		private void applyAndMaybeSave(Map map, DeltasSaver deltasSaver) {
+
+		/**
+		 * Applies changes for the given map, and perhaps save the map's deltas.
+		 *
+		 * @param map the map of which to apply the changes
+		 * @param deltasSaver the object that serves to save the deltas
+		 */
+		private void applyChangesAndMaybeSaveDeltas(Map map, DeltasSaver deltasSaver) {
 			map.applyChanges();
 			if (map.getTime() % deltasSavedEvery == 0)
 				deltasSaver.update();
+		}
+
+
+		@Override
+		public void load(File directory) {
+			// TODO: this overriding method is probably necessary, because in this class, there there is a shadow model.
 		}
 	}
 

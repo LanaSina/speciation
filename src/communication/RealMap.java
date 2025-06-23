@@ -509,7 +509,7 @@ public class RealMap extends Map {
 	 * @param dataFolderName the directory of the current simulation
 	 * @return the path to the sensors file
 	 */
-	public String saveSate(String dataFolderName) {
+	public String saveState(String dataFolderName) {
 		//snapshot time
 		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
 		Date date = new Date();
