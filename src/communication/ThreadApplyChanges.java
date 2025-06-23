@@ -39,13 +39,13 @@ public abstract class ThreadApplyChanges implements Runnable {
     protected abstract void treatCreature(int i);
 
     public final void run() {
-        // compute bounds of the interval of `removeAsList` to treat
+        // compute bounds of the interval of `creaturesToTreat` to treat
         int total = creaturesToTreat.size();
         int chunk = total / Constants.NB_THREADS;
         int remainder = total % Constants.NB_THREADS;
         int start = threadNumber * chunk + Math.min(threadNumber, remainder);
         int end = start + chunk + (threadNumber < remainder ? 1 : 0);
-        // treat one interval of `remove`
+        // treat one interval of `creaturesToTreat`
         for (int i = start; i < end; i++) {
             treatCreature(i);
         }
