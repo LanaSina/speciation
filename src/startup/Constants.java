@@ -34,6 +34,7 @@ public class Constants {
 	public static String SnapshotFileName = "snapshot";
 	public static String SensorsFileName = "sensors";
 	public static String PredationFileName = "predation";
+	public static String RealMapDeltasFileName = "RealMapDeltas";
 
 	/** Number of threads to use in RealMap.applyChanges() */
 	public static final int NB_THREADS = 16;
@@ -45,6 +46,7 @@ public class Constants {
 	public static final String ShadowModelPredationFileName = "ShadowModel_Predation";
 	public static String ShadowModelSnapshotFileName = "ShadowModel_Snapshot";
 	public static String ShadowModelSensorsFileName = "ShadowModel_Sensors";
+	public static String ShadowMapDeltasFileName = "ShadowMapDeltas";
 
 	/**
      * from <a href="http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java">this page</a>

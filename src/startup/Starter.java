@@ -140,7 +140,7 @@ public class Starter {
 
 		public void setMap(RealMap map){
 			this.map = map;
-			this.realMapDeltasSaver = new DeltasSaver(map, dataFolderName, "RealMapDeltas.csv");
+			this.realMapDeltasSaver = new DeltasSaver(map, dataFolderName, Constants.RealMapDeltasFileName + ".csv");
 		}
 		
 		public void run() {
@@ -310,7 +310,7 @@ public class Starter {
 			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			if (Constants.Save)
 				this.shadowMap.setupLogFiles();
-			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, "ShadowMapDeltas.csv");
+			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
 		}
 
 		public void run() {
