@@ -246,12 +246,15 @@ public abstract class IndividualWithProperties implements Individual {
     }
 
     /**
-     * Copies the fields of the specified individual into this one, except for this individual's energy, which is set to
-     * the value of the specified individual's kidEnergy.
-     * </br>
-     * This process is analogous to genome replication in nature, where the parent (the specified individual) passes its
-     * genes to its offspring (this individual). However, this method does not simulate mutations. These happen after
-     * this method is called.
+     * <p>
+     *      Copies the fields of the specified individual into this one, except for this individual's energy, which is set to
+     *      the value of the specified individual's kidEnergy.
+     * </p>
+     * <p>
+     *      This process is analogous to genome replication in nature, where the parent (the specified individual) passes its
+     *      genes to its offspring (this individual). However, this method does not simulate mutations. These happen after
+     *      this method is called.
+     * </p>
      *
      * @param in the individual to copy
      */

@@ -31,20 +31,23 @@ public class ShadowMap extends Map {
     RealMap realMap;
 
     /**
-     * Creates a shadow version of the provided map.
-     * </br>
-     * This shadow map is initially similar to the provided map :
-     * <ul>
-     *     <li>same dimensions</li>
-     *     <li>same number of individuals</li>
-     *     <li>similar individuals (although they are not identical, see class <code>ShadowIndividual</code>)</li>
-     *     <li>similar <code>babies</code>, <code>remove</code>, <code>moved</code> and <code>newPositions</code>
-     *         (meaning they contain similar individuals)</li>
-     *     <li>same global ID</li>
-     *     <li>same time</li>
-     *     <li>same data folder name</li>
-     *     <li>same constants (e.g. mutation factor, speed factor, max speed, etc.)</li>
-     * </ul>
+     * <p>
+     *      Creates a shadow version of the provided map.
+     * </p>
+     * <p>
+     *      This shadow map is initially similar to the provided map :
+     *      <ul>
+     *          <li>same dimensions</li>
+     *          <li>same number of individuals</li>
+     *          <li>similar individuals (although they are not identical, see class <code>ShadowIndividual</code>)</li>
+     *          <li>similar <code>babies</code>, <code>remove</code>, <code>moved</code> and <code>newPositions</code>
+     *              (meaning they contain similar individuals)</li>
+     *          <li>same global ID</li>
+     *          <li>same time</li>
+     *          <li>same data folder name</li>
+     *          <li>same constants (e.g. mutation factor, speed factor, max speed, etc.)</li>
+     *      </ul>
+     * </p>
      *
      * @param realMap           the real map
      * @param summaryFileName   the name of the individuals summary file

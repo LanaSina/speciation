@@ -182,18 +182,22 @@ public class RealMap extends Map {
 	}
 
 	/**
-	 * Updates the creatures present on the cell specified by the coordinates.
-	 * Creatures may make babies, move, interact with other creatures present on the cell.
-	 * They can lose or gain energy.
-	 * If their energy reaches 0 or less, they die.
-	 * </br>
-	 * Creatures can only interact with one another if they are on the same cell.
-	 * The more creatures there are on the cell, the more likely two given creatures are to interact with each other.
-	 * (If the number of creatures on the cell is sufficiently low, then no interactions will even occur.)
-	 * </br>
-	 * Interactions are limited to predation.
-	 * If a creature detects another creature with at least one similar characteristic (e.g., size), it may attempt to
-	 * eat it.
+	 * <p>
+	 *      Updates the creatures present on the cell specified by the coordinates.
+	 *      Creatures may make babies, move, interact with other creatures present on the cell.
+	 *      They can lose or gain energy.
+	 *      If their energy reaches 0 or less, they die.
+	 * </p>
+	 * <p>
+	 *      Creatures can only interact with one another if they are on the same cell.
+	 *      The more creatures there are on the cell, the more likely two given creatures are to interact with each other.
+	 *      (If the number of creatures on the cell is sufficiently low, then no interactions will even occur.)
+	 * </p>
+	 * <p>
+	 *      Interactions are limited to predation.
+	 *      If a creature detects another creature with at least one similar characteristic (e.g., size), it may attempt to
+	 *      eat it.
+	 * </p>
 	 *
 	 * @param x the abscissa of the cell to update
 	 * @param y the ordinate of the cell to update
@@ -341,11 +345,14 @@ public class RealMap extends Map {
 	}
 
 	/**
-	 * Returns the number of new creatures born during a time step.
-	 * </br>
-	 * This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
-	 * because this is the only moment where the new creatures are gathered in a single data structure (i.e.
-	 * <code>babies</code>) and can be counted.
+	 * <p>
+	 *      Returns the number of new creatures born during a time step.
+	 * </p>
+	 * <p>
+	 *      This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
+	 *      because this is the only moment where the new creatures are gathered in a single data structure (i.e.
+	 *      <code>babies</code>) and can be counted.
+	 * </p>
 	 *
 	 * @return the number of new creatures born during a time step
 	 */
@@ -354,11 +361,14 @@ public class RealMap extends Map {
 	}
 
 	/**
-	 * Returns the number of creatures that died during a time step.
-	 * </br>
-	 * This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
-	 * because this is the only moment where the creatures that just died are gathered in a single data structure (i.e.
-	 * <code>remove</code>) and can be counted.
+	 * <p>
+	 *      Returns the number of creatures that died during a time step.
+	 * </p>
+	 * <p>
+	 *      This method only works between a call to <code>updateCell()</code> and a call to <code>applyChanges()</code>,
+	 *      because this is the only moment where the creatures that just died are gathered in a single data structure (i.e.
+	 *      <code>remove</code>) and can be counted.
+	 * </p>
 	 *
 	 * @return the number of creatures that just died during a time step
 	 */
@@ -484,14 +494,17 @@ public class RealMap extends Map {
 	}
 
 	/**
-	 * Saves the current state of the map.
-	 * </br>
-	 * Creates a new directory of format <code>dd_HH_mm</code> and puts in it :
-	 * <ul>
-	 *     <li>a copy of the config.properties file</li>
-	 *     <li>a snapshot file (which contains information about the creatures)</li>
-	 *     <li>a sensors file</li>
-	 * </ul>
+	 * <p>
+	 *      Saves the current state of the map.
+	 * </p>
+	 * <p>
+	 *      Creates a new directory of format <code>dd_HH_mm</code> and puts in it :
+	 *      <ul>
+	 *          <li>a copy of the config.properties file</li>
+	 *          <li>a snapshot file (which contains information about the creatures)</li>
+	 *          <li>a sensors file</li>
+	 *      </ul>
+	 * </p>
 	 *
 	 * @param dataFolderName the directory of the current simulation
 	 * @return the path to the sensors file

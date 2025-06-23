@@ -12,9 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A class for saving deltas (i.e. activity increments) into a file.
- * <br>
- * It is used for steps 1 to 3 of Channon's procedure to analyze the open-endedness of evolutionary systems.
+ * <p>
+ *      A class for saving deltas (i.e. activity increments) into a file.
+ * </p>
+ * <p>
+ *      It is used for steps 1 to 3 of Channon's procedure to analyze the open-endedness of evolutionary systems.
+ * </p>
  */
 public class DeltasSaver {
 
@@ -93,8 +96,6 @@ public class DeltasSaver {
 
     /**
      * Computes current deltas and write them in the file.
-     * <br>
-     *
      */
     public void update() {
         updateDeltas(currDeltas, map);
@@ -119,10 +120,13 @@ public class DeltasSaver {
     }
 
     /**
-     * Updates the deltas.
-     * <br>
-     * Also stores new components in newComponents and updates columnsIndexes to associate new components to a column
-     * index.
+     * <p>
+     *      Updates the deltas.
+     * </p>
+     * <p>
+     *      Also stores new components in newComponents and updates columnsIndexes to associate new components to a column
+     *      index.
+     * </p>
      *
      * @param deltas the deltas to update
      * @param map the associated map
@@ -165,13 +169,16 @@ public class DeltasSaver {
     }
 
     /**
-     * For each new component, adds a new column, that is:
-     * <ul>
-     *     <li>adds a header</li>
-     *     <li>fills all the cells under it with 0s until the current line is reached</li>
-     * </ul>
-     * <br>
-     * Do so by creating a new file, deleting the old one, then renaming the new file to the name of the old one.
+     * <p>
+     *      For each new component, adds a new column, that is:
+     *      <ul>
+     *          <li>adds a header</li>
+     *          <li>fills all the cells under it with 0s until the current line is reached</li>
+     *      </ul>
+     * </p>
+     * <p>
+     *      Do so by creating a new file, deleting the old one, then renaming the new file to the name of the old one.
+     * </p>
      */
     private void addColumns() {
         File oldFile = new File(dataFolderName, fileName);

@@ -9,9 +9,12 @@ public class ShadowIndividual extends IndividualWithProperties {
 
 
     /**
-     * Creates a shadow version of the given individual.
-     * </br>
-     * All fields of the given individual are copied for creating the ShadowIndividual.
+     * <p>
+     *      Creates a shadow version of the given individual.
+     * </p>
+     * <p>
+     *      All fields of the given individual are copied for creating the ShadowIndividual.
+     * </p>
      *
      * @param in the individual to copy
      */
