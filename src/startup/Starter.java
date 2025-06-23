@@ -77,9 +77,10 @@ public class Starter {
 		Properties properties = loadProperties("src/config.properties");
 		String dname = properties.getProperty("sim_name");
 		int cst_grid_max= Integer.parseInt(properties.getProperty("grid_max"));
-		final int interSnaphshotDuration = Integer.parseInt(properties.getProperty("intersnapshot_duration"));
+		final int shadowModelResetEvery = Integer.parseInt(properties.getProperty("shadow_model_reset_every"));
+		final int deltasSavedEvery = Integer.parseInt(properties.getProperty("deltas_saved_every"));
 
-		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable(interSnaphshotDuration) : new LifeRunnable(interSnaphshotDuration);
+		LifeRunnable life = Constants.RunShadowModel ? new ShadowLifeRunnable(deltasSavedEvery, shadowModelResetEvery) : new LifeRunnable(deltasSavedEvery);
 		Display d = Constants.ENABLE_DISPLAY ? new Display(dname, life, dataFolderName) : null;
 		int lightLimit = 30;//30
 		int of = 10;
@@ -128,14 +129,20 @@ public class Starter {
 		public boolean running = true;
 		boolean doSave = false;
 		DeltasSaver realMapDeltasSaver;
-		int interSnaphshotDuration;
+		/** Number of time steps between two saves of the deltas. */
+		int deltasSavedEvery;
 
 		//map
 		RealMap map = null;
 		int mapSize = Constants.GridMax;
-		
-		public LifeRunnable(int interSnaphshotDuration){
-			this.interSnaphshotDuration = interSnaphshotDuration;
+
+		/**
+		 * Builds a runnable that runs the real model.
+		 *
+		 * @param deltasSavedEvery number of time steps between two saves of the deltas
+		 */
+		public LifeRunnable(int deltasSavedEvery){
+			this.deltasSavedEvery = deltasSavedEvery;
 		}
 
 		public void setMap(RealMap map){
@@ -183,7 +190,7 @@ public class Starter {
 				}
 			}
 			map.applyChanges();
-			if (map.getTime() % interSnaphshotDuration == 0)
+			if (map.getTime() % deltasSavedEvery == 0)
 				realMapDeltasSaver.update();
 		}
 		
@@ -299,10 +306,19 @@ public class Starter {
 
 	public static class ShadowLifeRunnable extends LifeRunnable{
 		ShadowMap shadowMap;
-		DeltasSaver shadowMapDeltasSaver;
+		private DeltasSaver shadowMapDeltasSaver;
+		/** Number of time steps between two shadow model resets. */
+		protected int shadowModelResetEvery;
 
-		public ShadowLifeRunnable(int interSnapshotDuration) {
-			super(interSnapshotDuration);
+		/**
+		 * Builds a runnable that runs the real model and the shadow model.
+		 *
+		 * @param deltasSavedEvery number of time steps between two saves of the deltas
+		 * @param shadowModelResetEvery number of time steps between two shadow model resets
+		 */
+		public ShadowLifeRunnable(int deltasSavedEvery, int shadowModelResetEvery) {
+			super(deltasSavedEvery);
+			this.shadowModelResetEvery = shadowModelResetEvery;
 		}
 
 		public void setMap(RealMap map){
@@ -355,8 +371,8 @@ public class Starter {
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			// apply changes and save the deltas
-			Thread realMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(map, realMapDeltasSaver));
-			Thread shadowMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(shadowMap, shadowMapDeltasSaver));
+			Thread realMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(map, realMapDeltasSaver, deltasSavedEvery, map.getTime()));
+			Thread shadowMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(shadowMap, shadowMapDeltasSaver, deltasSavedEvery, map.getTime()));
 			realMapThread.start();
 			shadowMapThread.start();
 			try {
@@ -366,7 +382,7 @@ public class Starter {
 				throw new RuntimeException(e);
 			}
 			// reset the shadow model
-			if (map.getTime() % interSnaphshotDuration == 0) {
+			if (map.getTime() % shadowModelResetEvery == 0) {
 				shadowMap.reset();
 			}
 		}
