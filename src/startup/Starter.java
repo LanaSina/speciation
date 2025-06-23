@@ -356,9 +356,9 @@ public class Starter {
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			map.applyChanges();
 			shadowMap.applyChanges();
+			realMapDeltasSaver.update();
+			shadowMapDeltasSaver.update();
 			if (map.getTime() % interSnaphshotDuration == 0) {
-				realMapDeltasSaver.update();
-				shadowMapDeltasSaver.update();
 				shadowMap.reset();
 			}
 		}
