@@ -354,10 +354,18 @@ public class Starter {
 			shadowMap.incrementAgeOfAllIndividuals();
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
-			map.applyChanges();
-			shadowMap.applyChanges();
-			realMapDeltasSaver.update();
-			shadowMapDeltasSaver.update();
+			// apply changes and save the deltas
+			Thread realMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(map, realMapDeltasSaver));
+			Thread shadowMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(shadowMap, shadowMapDeltasSaver));
+			realMapThread.start();
+			shadowMapThread.start();
+			try {
+				realMapThread.join();
+				shadowMapThread.join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			// reset the shadow model
 			if (map.getTime() % interSnaphshotDuration == 0) {
 				shadowMap.reset();
 			}

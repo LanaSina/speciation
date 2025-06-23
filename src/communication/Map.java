@@ -114,6 +114,8 @@ public abstract class Map {
 	 */
 	public abstract  List<IndividualWithProperties> getAllEvolvedIndividuals();
 
+	public abstract void applyChanges();
+
 	protected abstract MyLog createMyLog();
 
 }
