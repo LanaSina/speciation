@@ -107,7 +107,11 @@ public abstract class Map {
 		return b;
 	}
 
-
+	/**
+	 * Returns all individuals of this map that are non-light and whose parent is a non-light.
+	 *
+	 * @return all individuals of this map that are non-light and whose parent is a non-light
+	 */
 	public abstract  List<IndividualWithProperties> getAllEvolvedIndividuals();
 
 	protected abstract MyLog createMyLog();
