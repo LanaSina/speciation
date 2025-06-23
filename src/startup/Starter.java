@@ -6,6 +6,7 @@ package startup;
 import animals.EmbodiedIndividual;
 import animals.Node;
 import animals.Tree;
+import communication.Map;
 import communication.MyLog;
 import communication.RealMap;
 import communication.ShadowMap;
@@ -371,8 +372,8 @@ public class Starter {
 			shadowMap.createRandomIndividuals(map.getNbOfBirths());
 			shadowMap.removeRandomIndividuals(map.getNbOfDeaths());
 			// apply changes and save the deltas
-			Thread realMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(map, realMapDeltasSaver, deltasSavedEvery, map.getTime()));
-			Thread shadowMapThread = new Thread(new ThreadApplyChangesAndSaveDeltas(shadowMap, shadowMapDeltasSaver, deltasSavedEvery, map.getTime()));
+			Thread realMapThread = new Thread(() -> applyAndMaybeSave(map, realMapDeltasSaver));
+			Thread shadowMapThread = new Thread(() -> applyAndMaybeSave(shadowMap, shadowMapDeltasSaver));
 			realMapThread.start();
 			shadowMapThread.start();
 			try {
@@ -385,6 +386,12 @@ public class Starter {
 			if (map.getTime() % shadowModelResetEvery == 0) {
 				shadowMap.reset();
 			}
+		}
+
+		private void applyAndMaybeSave(Map map, DeltasSaver deltasSaver) {
+			map.applyChanges();
+			if (map.getTime() % deltasSavedEvery == 0)
+				deltasSaver.update();
 		}
 	}
 
