@@ -196,6 +196,8 @@ public class Starter {
 					saveMapsState();
 					doSave = false;
 				}
+				if (map.getTime() == Constants.RunUntil)
+					this.kill();
 			}
 			mlog.say("dies");
 		}
