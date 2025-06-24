@@ -42,14 +42,13 @@ public class Constants {
 	/** Number of threads to use in RealMap.applyChanges() */
 	public static final int NB_THREADS = 16;
 
-	/** OEE analysis */
-	// Run shadow model in parallel to the real model
+	/** Controls whether to run the shadow model in parallel to the real model. */
 	public static final boolean RunShadowModel = true;
 	public static final String ShadowModelSummaryFileName = "ShadowModel_SummaryIndividuals";
-	public static final String ShadowModelPredationFileName = "ShadowModel_Predation";
 	public static String ShadowModelSnapshotFileName = "ShadowModel_Snapshot";
 	public static String ShadowModelSensorsFileName = "ShadowModel_Sensors";
 	public static String ShadowMapDeltasFileName = "ShadowMapDeltas";
+	// NB: there is no predation recording for the shadow model because there is no predation in it, only random deaths
 
 	/**
      * from <a href="http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java">this page</a>

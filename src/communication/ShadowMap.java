@@ -51,16 +51,14 @@ public class ShadowMap extends Map {
      *
      * @param realMap           the real map
      * @param summaryFileName   the name of the individuals summary file
-     * @param predationFileName the name of the predation file
      * @param snapshotFileName  the name of the snapshot file
      * @param sensorsFileName   the name of the sensors file
      */
     public ShadowMap(RealMap realMap,
                      String summaryFileName,
-                     String predationFileName,
                      String snapshotFileName,
                      String sensorsFileName) {
-        super(realMap.dataFolderName, summaryFileName, predationFileName, snapshotFileName, sensorsFileName);
+        super(realMap.dataFolderName, summaryFileName, snapshotFileName, sensorsFileName);
 
         map = new HashMap<>();
 
@@ -143,34 +141,6 @@ public class ShadowMap extends Map {
         try {
             summaryWriter.append(str);
             summaryWriter.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // predation info
-        FileBuilder fb_predation = new FileBuilder(dataFolderName, predationFileName+ "_" + time);
-        predationWriter = fb_predation.getFileWriter();
-        fb_predation = null;
-
-			/*
-			String description =  ID +","+parentID+","+birthDate+","+life+","
-				+ speed+","+maxEnergy+","+ getKidEnergy()+","
-				+ hasSensors() +","+ getAncestor() + "," + getNKids() + ","
-				+ death + ","+ matForKids ;
-			 */
-        String header_predation = "t, pred_id, pred_isLight," +
-                "pred_parent, pred_created, pred_lifeSpan," +
-                "pred_speed, pred_maxEnergy, pred_kidEnergy, pred_sensors," +
-                "pred_ancestor, pred_nkids, pred_pgmDeath, pred_matForKids, pred_energy, pred_parentIsLight" +
-                "prey_id, prey_isLight," +
-                "prey_parent, prey_created, prey_lifeSpan," +
-                "prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors," +
-                "prey_ancestor, prey_nkids, prey_pgmDeath, prey_matForKids, prey_energy, prey_parentIsLight" +
-                "\n";
-
-        try {
-            predationWriter.append(header_predation);
-            predationWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

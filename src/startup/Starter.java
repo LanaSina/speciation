@@ -391,7 +391,7 @@ public class Starter {
 		@Override
 		public void setMap(RealMap map) {
 			super.setMap(map);
-			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelPredationFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
+			this.shadowMap = new ShadowMap(map, Constants.ShadowModelSummaryFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
 			if (Constants.Save)
 				this.shadowMap.setupLogFiles();
 			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");

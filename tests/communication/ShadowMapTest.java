@@ -30,7 +30,6 @@ public class ShadowMapTest {
 
     // For the shadow map
     private static final String SHADOW_SUMMARY_FILE_NAME = "ShadowModel_SummaryIndividuals";
-    private static final String SHADOW_PREDATION_FILE_NAME = "ShadowModel_Predation";
     private static final String SHADOW_SNAPSHOT_FILE_NAME = "ShadowModel_Snapshot";
     private static final String SHADOW_SENSORS_FILE_NAME = "ShadowModel_Sensors";
 
@@ -43,13 +42,13 @@ public class ShadowMapTest {
     @Test
     public void shadowMapIsSimilarToRealMapAtCreation() {
         fillRealMap();
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         checkIfShadowMapAndRealMapAreSimilar(shadowMap);
     }
 
     @Test
     public void shadowMapIsSimilarToRealMapAfterReset() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         fillRealMap();
         shadowMap.reset();
         checkIfShadowMapAndRealMapAreSimilar(shadowMap);
@@ -57,7 +56,7 @@ public class ShadowMapTest {
 
     @Test
     public void checkWhetherTheNumberOfRandomlyCreatedIndividualsIsCorrect() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         int number = 92;
         ShadowIndividual individual = new ShadowIndividual(64, 1770, 1840, 1936);
         shadowMap.addIndividual(individual);
@@ -68,7 +67,7 @@ public class ShadowMapTest {
 
     @Test
     public void tryingToCreateIndividualsWhileThereIsNoIndividualsThrowsRuntimeException() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         int number = 42;
         assertEquals(0, shadowMap.getAllIndividuals().size());
         assertThrows(RuntimeException.class, () -> shadowMap.createRandomIndividuals(number));
@@ -76,7 +75,7 @@ public class ShadowMapTest {
 
     @Test
     public void checkWhetherTheNumberOfRandomlyRemovedIndividualsIsCorrect() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         int globalID = 30;
         int ancestor = 12;
         int date = 800;
@@ -93,7 +92,7 @@ public class ShadowMapTest {
 
     @Test
     public void tryingToRemoveMoreIndividualsThanThereAreThrowsIllegalArgumentException() {
-        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_PREDATION_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
         int globalID = 30;
         int ancestor = 12;
         int date = 800;

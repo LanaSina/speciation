@@ -18,9 +18,7 @@ public abstract class Map {
 	final AtomicInteger globalID = new AtomicInteger(0);
 	/** data recording*/
 	FileWriter summaryWriter;
-	FileWriter predationWriter;
 	String summaryFileName;
-	String predationFileName;
 	String snapshotFileName;
 	String sensorsFileName;
 	/** simulation time*/
@@ -47,12 +45,10 @@ public abstract class Map {
 
 	public Map(String myDataFolderName,
 			   String summaryFileName,
-			   String predationFileName,
 			   String snapshotFileName,
 			   String sensorsFileName) {
 		this.dataFolderName = myDataFolderName;
 		this.summaryFileName = summaryFileName;
-		this.predationFileName = predationFileName;
 		this.snapshotFileName = snapshotFileName;
 		this.sensorsFileName = sensorsFileName;
 	}

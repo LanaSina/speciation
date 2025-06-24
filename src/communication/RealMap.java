@@ -26,6 +26,10 @@ public class RealMap extends Map {
 	/** Gap between two times the time is printed (in number of time steps). */
 	protected static final int TIME_PRINTING_GAP = 100;
 
+	/** Predation recording. */
+	FileWriter predationWriter;
+	String predationFileName;
+
 	/**graphic panel*/
 	Display d;
 	/** 2D map is made of cells, in each cell there are creatures;*/
@@ -50,7 +54,8 @@ public class RealMap extends Map {
 				   String predationFileName,
 				   String snapshotFileName,
 				   String sensorsFileName) {
-		super(myDataFolderName, summaryFileName, predationFileName, snapshotFileName, sensorsFileName);
+		super(myDataFolderName, summaryFileName, snapshotFileName, sensorsFileName);
+		this.predationFileName = predationFileName;
 		this.d = d;
 		size = mapSize;
 		//create map
