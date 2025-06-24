@@ -376,7 +376,7 @@ plot(not_light$pos_x, not_light$pos_y)
 
 ```
 
-## OEE Analysis
+## Procedure for testing for Tokyo Type 1 Open-Ended Evolution
 
 ```{r}
 folder = "2025_06_20_15_06_jusqu_a_200000"
@@ -394,54 +394,51 @@ library(data.table)
 # load file
 deltas <- fread(realMapDeltasFile, dec = ".")
 
-# components' names
-componentCols <- setdiff(names(deltas), "t")
-# number of components
-nbComponents <- length(componentCols)
+# ------------------------------
+# INITIALIZE TEMPORARY VARIABLES
+# ------------------------------
 # number of lines
 nbLines <- nrow(deltas)
+# the components' names
+components <- setdiff(names(deltas), "t")
+# the number of components
+nbComponents <- length(components)
+# current accumulations of deltas
+currDeltasAccumulations <- setNames(rep(0, nbComponents), components)
+# current cumulative evolutionary activities (a)
+currCumulativeActivities <- numeric(nbComponents)
 
-# initialize matrices
-currCumuls <- setNames(rep(0, nbComponents), componentCols)
-currAs <- numeric(nbComponents)
+# -----------------------------------
+# INITIALIZE THE RESULT DATA STRUCTURE
+# -----------------------------------
+# total cumulative activities (A_cum)
+totalActivities <- data.table(t = integer(nbLines), totalActivity = numeric(nbLines))
 
-# data structure that will store the results
-Acums <- data.table(t = integer(nbLines), Acum = numeric(nbLines))
-
-# to measure the time the computation takes
-start_time <- proc.time()
-
+# -----------------------------------------
+# LOOP THAT FILLS THE RESULT DATA STRUCTURE
+# -----------------------------------------
+start_time <- proc.time() # to measure the time that the computation takes
 for (line in 1:nbLines) {
+  # read the time
   t <- deltas[line, t]
-
-  # print the elapsed computation time
+  # print the elapsed computation time since the start of this loop
   if (t %% 100000 == 0) {
     elapsed <- (proc.time() - start_time)[["elapsed"]]
     cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
   }
-  
-  # === COMPUTE THE CUMULATIVE EVOLUTIONARY ACTIVITIES ===
-
-  # current deltas
-  currDeltas <- as.numeric(deltas[line, ..componentCols])
-  # current accumulations ("cumuls actuels" in French)
-  currCumuls <- currCumuls + currDeltas
-  # current cumulative evolutionary activities
-  currAs <- ifelse(currDeltas == 1, currCumuls, 0)
-  
-  # === COMPUTE FINAL RESULTS ===
-
-  # total cumulative evolutionary activity 
-  Acums[line, ] <- list(t, sum(currAs))
+  # compute and store the results
+  currDeltas <- as.numeric(deltas[line, ..components])
+  currDeltasAccumulations <- currDeltasAccumulations + currDeltas
+  currCumulativeActivities <- ifelse(currDeltas == 1, currDeltasAccumulations, 0)
+  totalActivities[line, ] <- list(t, sum(currCumulativeActivities))
 }
 
 ```
 
 ```{r}
-# DISPLAY A_cums
-
-plot(Acums$t, Acums$Acum, type="l", col="blue", lwd=2,
-     xlab="Time", ylab="A_cum", main="Evolution of total cumulative evolutionary activity")
+# plot total activity
+plot(totalActivities$t, totalActivities$totalActivity, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="Total activity", main="Evolution of total cumulative evolutionary activity")
 grid()
 ```
 
@@ -453,28 +450,46 @@ grid()
 realDeltas <- fread(realMapDeltasFile, dec = ".")
 shadowDeltas <- fread(shadowMapDeltasFile, dec = ".")
 
-# component names
-realComponents <- setdiff(names(realDeltas), "t")
-shadowComponents <- setdiff(names(shadowDeltas), "t")
-allComponents <- union(realComponents, shadowComponents)
 
+# ------------------------------
+# INITIALIZE TEMPORARY VARIABLES
+# ------------------------------
+# the number of lines in each file
 nbLines <- nrow(realDeltas)
+# the real model's components' names
+realComponents <- setdiff(names(realDeltas), "t")
+# the shadow model's components' names
+shadowComponents <- setdiff(names(shadowDeltas), "t")
+# union of real components' names and shadow components' names
+allComponents <- union(realComponents, shadowComponents)
+# current accumulations of normalized deltas (original formula)
+currNormDeltasAccs <- setNames(rep(0, length(allComponents)), allComponents)
+# current accumulations of normalized deltas (alternative formula)
+altCurrNormDeltasAccs <- setNames(rep(0, length(realComponents)), realComponents)
+# indicates which component has already been considered new
+hasBeenNew <- setNames(rep(FALSE, length(realComponents)), realComponents)
 
-# initialize matrices
-currNormCumuls     <- setNames(rep(0, length(allComponents)), allComponents)
-currAltNormCumuls  <- setNames(rep(0, length(realComponents)), realComponents)
+# -------------------------------------
+# INITIALIZE THE RESULT DATA STRUCTURES
+# -------------------------------------
+# total normalized activities (original formula)
+normTotalActivities <- data.table(t = integer(nbLines), normTotalActivity = numeric(nbLines))
+# median normalized activities (original formula)
+normMedianActivities <- data.table(t = integer(nbLines), normMedianActivity = numeric(nbLines))
+# total normalized activities (alternative formula)
+altNormTotalActivities <- data.table(t = integer(nbLines), normTotalActivity = numeric(nbLines))
+# median normalized activities (alternative formula)
+altNormMedianActivities <- data.table(t = integer(nbLines), normMedianActivity = numeric(nbLines))
+# new normlized activities
+normNewActivities <- data.table(t = integer(nbLines), normNewActivity = numeric(nbLines))
 
-# data structures that will store the results
-normAcums      <- data.table(t = integer(nbLines), normAcum = numeric(nbLines))
-normMedians    <- data.table(t = integer(nbLines), normMedian = numeric(nbLines))
-altNormAcums   <- data.table(t = integer(nbLines), normAcum = numeric(nbLines))
-altNormMedians <- data.table(t = integer(nbLines), normMedian = numeric(nbLines))
-
-
-# to measure the time the computation takes
-start_time <- proc.time()
-
+# -----------------------------------------
+# LOOP THAT FILLS THE RESULT DATA STRUCTURES
+# -----------------------------------------
+start_time <- proc.time() # to measure the time the computation takes
 for (line in 1:nbLines) {
+
+  # read the time
   t <- realDeltas[line, t]
 
   # print the elapsed computation time
@@ -483,43 +498,66 @@ for (line in 1:nbLines) {
     cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
   }
 
-  # === COMPUTE THE NORMALIZED CUMULATIVE EVOLUTIONARY ACTIVITIES (original formula) ===
-  
-  currReal <- setNames(rep(0, length(allComponents)), allComponents)
-  currShadow <- setNames(rep(0, length(allComponents)), allComponents)
-  if (length(realComponents) > 0) {
-    currReal[realComponents] <- as.numeric(realDeltas[line, ..realComponents])
-  }
-  if (length(shadowComponents) > 0) {
-    currShadow[shadowComponents] <- as.numeric(shadowDeltas[line, ..shadowComponents])
-  }
-  currNorm <- currReal - currShadow
-  names(currNorm) <- allComponents
-
-  currNormCumuls <- currNormCumuls + currNorm
-  currNormAs <- ifelse(currReal == 1, currNormCumuls, 0)
-
-  # === COMPUTE THE NORMALIZED CUMULATIVE EVOLUTIONARY ACTIVITIES (alternative formula) ===
-
-  for (comp in realComponents) {
-    if (currReal[comp] == 1) {
-      currAltNormCumuls[comp] <- currAltNormCumuls[comp] + currNorm[comp]
-    }
-  }
-  currAltNormAs <- ifelse(currReal[realComponents] == 1, currAltNormCumuls, 0)
-
-  # === COMPUTE FINAL RESULTS ===
-
+  # names of components that currently exist in the real model
   realActiveComps <- realComponents[which(realDeltas[line, ..realComponents] == 1)]
 
-  # normalized total cumulative evolutionary activities (original formula)
-  normAcums[line]      <- list(t, sum(currNormAs))
-  # normalized median cumulative evolutionary activities (original formula)
-  normMedians[line]    <- list(t, if (length(realActiveComps) > 0) median(currNormAs[realActiveComps]) else NA)
-  # normalized total cumulative evolutionary activities (alternative formula)
-  altNormAcums[line]   <- list(t, sum(currAltNormAs))
-  # normalized median cumulative evolutionary activities (alternative formula)
-  altNormMedians[line] <- list(t, if (length(realActiveComps) > 0) median(currAltNormAs[realActiveComps]) else NA)
+
+  # === READ/COMPUTE DELTAS ===
+  
+  currRealDeltas <- setNames(rep(0, length(allComponents)), allComponents)
+  currShadowDeltas <- setNames(rep(0, length(allComponents)), allComponents)
+  if (length(realComponents) > 0) {
+    currRealDeltas[realComponents] <- as.numeric(realDeltas[line, ..realComponents])
+  }
+  if (length(shadowComponents) > 0) {
+    currShadowDeltas[shadowComponents] <- as.numeric(shadowDeltas[line, ..shadowComponents])
+  }
+  currNormDeltas <- currRealDeltas - currShadowDeltas
+  names(currNormDeltas) <- allComponents
+
+
+  # === COMPUTE TOTAL AND MEDIAN ACTIVITIES (ORIGINAL FORMULA) ===
+
+  currNormDeltasAccs <- currNormDeltasAccs + currNormDeltas
+  currNormCumActivities <- ifelse(currRealDeltas == 1, currNormDeltasAccs, 0)
+  normTotalActivities[line] <- list(t, sum(currNormCumActivities))
+  normMedianActivities[line] <- list(t, if (length(realActiveComps) > 0) median(currNormCumActivities[realActiveComps]) else NA)
+
+
+  # === COMPUTE TOTAL AND MEDIAN ACTIVITIES (ALTERNATIVE FORMULA) ===
+
+  for (i in realComponents) {
+    if (currRealDeltas[i] == 1) {
+      altCurrNormDeltasAccs[i] <- altCurrNormDeltasAccs[i] + currNormDeltas[i]
+    }
+  }
+  altCurrNormCumActivities <- ifelse(currRealDeltas[realComponents] == 1, altCurrNormDeltasAccs, 0)
+  altNormTotalActivities[line]   <- list(t, sum(altCurrNormCumActivities))
+  altNormMedianActivities[line] <- list(t, if (length(realActiveComps) > 0) median(altCurrNormCumActivities[realActiveComps]) else NA)
+
+
+  # === COMPUTE NEW ACTIVITIES ===
+  
+  # compute minimum cumulative activity of the real components
+  currNormCumActivitiesOfRealComps <- currNormCumActivities[realComponents]
+  minNormCumulativeActivity <- min(currNormCumActivitiesOfRealComps)
+  # compute current diversity in the real model
+  realDiversity <- sum(currRealDeltas[realComponents])
+  # initialize the sum of normalized cumulative activities of new components
+  sumOfNormCumActivitiesOfNewComps <- 0
+  # determine new components then add their normalized cumulative activities to the previous sum
+  if (minNormCumulativeActivity < 0) {
+    # threshold beyond which a component is considered adaptively significant
+    aN0 <- abs(minNormCumulativeActivity)
+    # determine components that are new (or "newly adaptively significant")
+    isNewComponent <- currNormCumActivitiesOfRealComps > aN0 & !hasBeenNew[realComponents]
+    newComponents <- names(currNormCumActivitiesOfRealComps)[isNewComponent]
+    hasBeenNew[newComponents] <- TRUE
+    # update the sum
+    sumOfNormCumActivitiesOfNewComps <- sum(currNormCumActivitiesOfRealComps[newComponents])
+  }
+  # compute new activities
+  normNewActivities[line] <- list(t, if (realDiversity > 0) sumOfNormCumActivitiesOfNewComps/realDiversity else NA)
 
 }
 
@@ -527,35 +565,36 @@ for (line in 1:nbLines) {
 
 ```{r}
 
-# DISPLAY NORMALIZED A_cums AND MEDIANS
+# === PLOT STATISTICS (ORIGINAL FORMULA) ===
 
-# display A_cums
-plot(normAcums$t, normAcums$normAcum, type="l", col="blue", lwd=2,
-     xlab="Time", ylab="normalized A_cum", main="Evolution of adaptive total cumulative evolutionary activity")
+# plot total activity (original formula)
+plot(normTotalActivities$t, normTotalActivities$normTotalActivity, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="Total normalized activity", main="Evolution of total normalized cumulative evolutionary activity")
 grid()
 
-# display medians
-plot(normMedians$t, normMedians$normMedian, type="l", col="blue", lwd=2,
-     xlab="Time", ylab="Median normalized A_cum", main="Evolution of adaptive median cumulative evolutionary activity")
+# plot median activity (original formula)
+plot(normMedianActivities$t, normMedianActivities$normMedianActivity, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="Median normalized activity", main="Evolution of median normalized cumulative evolutionary activity")
 grid()
 
-# display A_new
-# TODO
-
-
-
-# DISPLAY ALTERNATIVE NORMALIZED A_cums AND MEDIANS
-
-# display alternative A_cums
-plot(altNormAcums$t, altNormAcums$normAcum, type="l", col="red", lwd=2,
-     xlab="Time", ylab="Alternative normalized A_cum", main="Evolution of adaptive total cumulative evolutionary activity\r\n(alternative formula)")
+# plot new activity (original formula)
+plot(normNewActivities$t, normNewActivities$normNewActivity, type="l", col="blue", lwd=2,
+     xlab="Time", ylab="New activity", main="Evolution of new evolutionary activity")
 grid()
 
-# display alternative medians
-plot(altNormMedians$t, altNormMedians$normMedian, type="l", col="red", lwd=2,
-     xlab="Time", ylab="Alternative median normalized A_cum", main="Evolution of adaptive median cumulative evolutionary activity\r\n(alternative formula)")
+
+# === PLOT STATISTICS (ALTERNATIVE FORMULA) ===
+
+# plot total activity (alternative formula)
+plot(altNormTotalActivities$t, altNormTotalActivities$normTotalActivity, type="l", col="red", lwd=2,
+     xlab="Time", ylab="Total normalized activity", main="Evolution of total normalized cumulative evolutionary activity\r\n(alternative formula)")
 grid()
 
-# display alternative A_new
+# plot median activity (alternative formula)
+plot(altNormMedianActivities$t, altNormMedianActivities$normMedianActivity, type="l", col="red", lwd=2,
+     xlab="Time", ylab="Median normalized activity", main="Evolution of median normalized cumulative evolutionary activity\r\n(alternative formula)")
+grid()
+
+# plot new activity (alternative formula)
 # TODO
 ```
