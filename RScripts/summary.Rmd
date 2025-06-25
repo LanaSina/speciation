@@ -424,7 +424,7 @@ for (line in 1:nbLines) {
   # print the elapsed computation time since the start of this loop
   if (t %% 100000 == 0) {
     elapsed <- (proc.time() - start_time)[["elapsed"]]
-    cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
+    cat(sprintf("\rt = %d ; elapsed time = %.1f seconds", t, elapsed))
   }
   # compute and store the results
   currDeltas <- as.numeric(deltas[line, ..components])
@@ -495,7 +495,7 @@ for (line in 1:nbLines) {
   # print the elapsed computation time
   if (t %% 10000 == 0) {
     elapsed <- (proc.time() - start_time)[["elapsed"]]
-    cat("t =", t, "; elapsed time =", elapsed, "seconds\n")
+    cat(sprintf("\rt = %d ; elapsed time = %.1f seconds", t, elapsed))
   }
 
   # names of components that currently exist in the real model
@@ -558,6 +558,8 @@ for (line in 1:nbLines) {
   normNewActivities[line] <- list(t, if (realDiversity > 0) sumOfNormCumActivitiesOfNewComps/realDiversity else NA)
 
 }
+
+cat("\n")
 
 ```
 
