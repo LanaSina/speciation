@@ -12,9 +12,6 @@ import java.util.Random;
 public class Constants {
 	public static Random rand = new Random(5);
 
-	/** Time step at which to stop the program. -1 means infinite, i.e. never stop. */
-	public static final int RunUntil = 1000000;
-
 	/** Controls whether the RealMap is displayed. (NB: the ShadowMap is never displayed.) */
 	public static final boolean ENABLE_DISPLAY = false;
 	/** percentage of elements drawn*/

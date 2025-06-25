@@ -11,6 +11,7 @@ import communication.MyLog;
 import communication.RealMap;
 import communication.ShadowMap;
 import oee_analysis.DeltasSaver;
+import org.apache.commons.cli.*;
 import visualization.Display;
 
 import java.io.*;
@@ -36,12 +37,13 @@ import java.util.Scanner;
 public class Starter {
 
 	static String dataFolderName;
+	/** Time step at which to stop the program. -1 means infinite, i.e. never stop. */
+	private static int stopAt = -1;
 
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
+		if (handleArguments(args)) return;
+
 		MyLog mlog = new MyLog("starter",true);
 
 		//get current date
@@ -112,9 +114,50 @@ public class Starter {
 		System.out.println("Saving of information about individuals" + (Constants.Save ? "enabled" : " DISABLED") + ".");
 		life.setMap(map);
 		new Thread(life).start();
-	}	
+	}
 
+	private static boolean handleArguments(String[] args) {
+		// define options
+		Option optionStopAt = Option.builder("s")
+				.longOpt("stop-at")
+				.desc("Specifies at which time step to stop the program (a null or negative value implies that the program will never stop). If this option is not provided, the program will run forever.")
+				.hasArg()
+				.argName("time-step")
+				.type(Integer.class)
+				.build();
+		Options options = new Options();
+		options.addOption(optionStopAt);
 
+		// define usage
+		String header = "Simulates the tree of life.\r\n\r\n";
+		HelpFormatter formatter = new HelpFormatter();
+
+		// parse options
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd;
+		try {
+			cmd = parser.parse(options, args);
+		} catch (ParseException e) {
+			System.err.println("Error : " + e.getMessage());
+			formatter.printHelp("tolsim", header, options, "", true);
+			System.exit(1);
+			return true;
+		}
+
+		// handle options
+		if (cmd.hasOption(optionStopAt)) {
+			try {
+				stopAt = cmd.getParsedOptionValue(optionStopAt);
+			} catch (ParseException e) {
+				System.err.println("Error : " + e.getMessage());
+				formatter.printHelp("tolsim", header, options, "", true);
+				System.exit(1);
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 
 	public static Properties loadProperties(String path){
@@ -196,7 +239,7 @@ public class Starter {
 					saveMapsState();
 					doSave = false;
 				}
-				if (map.getTime() == Constants.RunUntil)
+				if (map.getTime() == stopAt)
 					this.kill();
 			}
 			mlog.say("dies");
