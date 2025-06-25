@@ -520,7 +520,7 @@ for (line in 1:nbLines) {
 
   currNormDeltasAccs <- currNormDeltasAccs + currNormDeltas
   currNormCumActivities <- ifelse(currRealDeltas == 1, currNormDeltasAccs, 0)
-  normTotalActivities[line] <- list(t, sum(currNormCumActivities))
+  normTotalActivities[line] <- list(t, sum(currNormCumActivities[realActiveComps]))
   normMedianActivities[line] <- list(t, if (length(realActiveComps) > 0) median(currNormCumActivities[realActiveComps]) else NA)
 
 
@@ -532,7 +532,7 @@ for (line in 1:nbLines) {
     }
   }
   altCurrNormCumActivities <- ifelse(currRealDeltas[realComponents] == 1, altCurrNormDeltasAccs, 0)
-  altNormTotalActivities[line]   <- list(t, sum(altCurrNormCumActivities))
+  altNormTotalActivities[line]   <- list(t, sum(altCurrNormCumActivities[realActiveComps]))
   altNormMedianActivities[line] <- list(t, if (length(realActiveComps) > 0) median(altCurrNormCumActivities[realActiveComps]) else NA)
 
 
