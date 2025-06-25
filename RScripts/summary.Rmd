@@ -526,10 +526,8 @@ for (line in 1:nbLines) {
 
   # === COMPUTE TOTAL AND MEDIAN ACTIVITIES (ALTERNATIVE FORMULA) ===
 
-  for (i in realComponents) {
-    if (currRealDeltas[i] == 1) {
+  for (i in realActiveComps) {
       altCurrNormDeltasAccs[i] <- altCurrNormDeltasAccs[i] + currNormDeltas[i]
-    }
   }
   altCurrNormCumActivities <- ifelse(currRealDeltas[realComponents] == 1, altCurrNormDeltasAccs, 0)
   altNormTotalActivities[line]   <- list(t, sum(altCurrNormCumActivities[realActiveComps]))
