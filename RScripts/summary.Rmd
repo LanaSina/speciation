@@ -15,14 +15,14 @@ options(rgl.useNULL = TRUE)
 library(rgl)
 
 # replace with your base folder
-base_folder = "../../new_data/"
+base_folder = "../../new_data"
 ```
 
 ## Read agents data
 
 ```{r}
 folder = "2025_02_15_19_29" #"trees/best-2024_11_05_20_37"
-fileName = paste(base_folder, folder,"SummaryIndividuals_0.csv",sep="/")
+fileName = file.path(base_folder, folder,"SummaryIndividuals_0.csv")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world
@@ -204,7 +204,7 @@ for (cid in c(4:8, 10:12)){
 ```{r}
 
 # folder = "2025_01_06_16_36" 
-fileName = paste(base_folder, folder,"predation.csv",sep="/")
+fileName = file.path(base_folder, folder,"predation.csv")
 
 interactions <- read.csv(fileName, stringsAsFactors=F, dec =".", header=TRUE, row.names=NULL)
 
@@ -359,10 +359,10 @@ Debug saved data
 
 ```{r}
 folder = "2024_12_28_06_57/28_06_57"   
-fileName = paste(base_folder, folder,"sensors.csv",sep="/")
+fileName = file.path(base_folder, folder,"sensors.csv")
 sensors <- read.csv(fileName, header=TRUE)
 
-fileName = paste(base_folder, folder,"snapshot.csv",sep="/")
+fileName = file.path(base_folder, folder,"snapshot.csv")
 snapshot <- read.csv(fileName, header=TRUE)
 ```
 
@@ -379,9 +379,30 @@ plot(not_light$pos_x, not_light$pos_y)
 ## Procedure for testing for Tokyo Type 1 Open-Ended Evolution
 
 ```{r}
-folder = "2025_06_20_15_06_jusqu_a_200000"
-realMapDeltasFile <- paste(base_folder, folder,"RealMapDeltas.csv",sep="/")
-shadowMapDeltasFile <- paste(base_folder, folder,"ShadowMapDeltas.csv",sep="/")
+# replace with a run's folder :
+folder = file.path(base_folder, "2025_06_25_11_36_jusqu_a_1000000")
+
+# paths of the deltas files
+realMapDeltasFile <- file.path(folder,"RealMapDeltas.csv")
+shadowMapDeltasFile <- file.path(folder,"ShadowMapDeltas.csv")
+
+
+# folder where to save the plots
+plot_folder <- file.path(folder, "evolutionary_activity_stats")
+
+#' Saves a plot as a PDF file.
+#' 
+#' @param filename the name of the PDF file to generate (without the extension)
+#' @param plot_function the function that creates the plot
+save_plot <- function(filename, plot_function) {
+  filepath <- file.path(plot_folder, paste0(filename, ".pdf"))
+  pdf(filepath)
+  plot_function()
+  grid()
+  invisible(dev.off())
+  cat("Saved", filepath, "\r\n")
+}
+
 ```
 
 ### Step 1: Compute basic evolutionary activity statistics
@@ -436,10 +457,24 @@ for (line in 1:nbLines) {
 ```
 
 ```{r}
-# plot total activity
-plot(totalActivities$t, totalActivities$totalActivity, type="l", col="blue", lwd=2,
+
+# ---------------
+# PLOT STATISTICS
+# ---------------
+
+dir.create(plot_folder, showWarnings = FALSE)
+
+
+# === TOTAL ACTIVITY ===
+
+plot_total_activity <- function() {
+  plot(totalActivities$t, totalActivities$totalActivity, type="l", col="blue", lwd=2,
      xlab="Time", ylab="Total activity", main="Evolution of total cumulative evolutionary activity")
-grid()
+  grid()
+}
+
+plot_total_activity()
+save_plot("total_activity", plot_total_activity)
 ```
 
 ### Step 2: Compute component-normalized evolutionary activity statistics
@@ -565,36 +600,69 @@ cat("\n")
 
 ```{r}
 
-# === PLOT STATISTICS (ORIGINAL FORMULA) ===
+# ---------------
+# PLOT STATISTICS
+# ---------------
 
-# plot total activity (original formula)
-plot(normTotalActivities$t, normTotalActivities$normTotalActivity, type="l", col="blue", lwd=2,
+dir.create(plot_folder, showWarnings = FALSE)
+
+
+# === TOTAL NORMALIZED ACTIVITY (ORIGINAL FORMULA) ===
+
+plot_total_normalized_activity <- function() {
+  plot(normTotalActivities$t, normTotalActivities$normTotalActivity, type="l", col="blue", lwd=2,
      xlab="Time", ylab="Total normalized activity", main="Evolution of total normalized cumulative evolutionary activity")
-grid()
+}
 
-# plot median activity (original formula)
-plot(normMedianActivities$t, normMedianActivities$normMedianActivity, type="l", col="blue", lwd=2,
+plot_total_normalized_activity()
+save_plot("total_normalized_activity", plot_total_normalized_activity)
+
+
+# === MEDIAN NORMALIZED ACTIVITY (ORIGINAL FORMULA) ===
+
+plot_median_normalized_activity <- function() {
+  plot(normMedianActivities$t, normMedianActivities$normMedianActivity, type="l", col="blue", lwd=2,
      xlab="Time", ylab="Median normalized activity", main="Evolution of median normalized cumulative evolutionary activity")
-grid()
+}
 
-# plot new activity (original formula)
-plot(normNewActivities$t, normNewActivities$normNewActivity, type="l", col="blue", lwd=2,
+plot_median_normalized_activity()
+save_plot("median_normalized_activity", plot_median_normalized_activity)
+
+
+# === NEW ACTIVITY (ORIGINAL FORMULA) ===
+
+plot_new_activity <- function() {
+  plot(normNewActivities$t, normNewActivities$normNewActivity, type="l", col="blue", lwd=2,
      xlab="Time", ylab="New activity", main="Evolution of new evolutionary activity")
-grid()
+}
+
+plot_new_activity()
+save_plot("new_activity", plot_new_activity)
 
 
-# === PLOT STATISTICS (ALTERNATIVE FORMULA) ===
+# === TOTAL NORMALIZED ACTIVITY (ALTERNATIVE FORMULA) ===
 
-# plot total activity (alternative formula)
-plot(altNormTotalActivities$t, altNormTotalActivities$normTotalActivity, type="l", col="red", lwd=2,
+plot_total_normalized_activity_alt <- function() {
+  plot(altNormTotalActivities$t, altNormTotalActivities$normTotalActivity, type="l", col="red", lwd=2,
      xlab="Time", ylab="Total normalized activity", main="Evolution of total normalized cumulative evolutionary activity\r\n(alternative formula)")
-grid()
+}
 
-# plot median activity (alternative formula)
-plot(altNormMedianActivities$t, altNormMedianActivities$normMedianActivity, type="l", col="red", lwd=2,
+plot_total_normalized_activity_alt()
+save_plot("total_normalized_activity_alt", plot_total_normalized_activity_alt)
+
+
+# === MEDIAN NORMALIZED ACTIVITY (ALTERNATIVE FORMULA) ===
+
+plot_median_normalized_activity_alt <- function() {
+  plot(altNormMedianActivities$t, altNormMedianActivities$normMedianActivity, type="l", col="red", lwd=2,
      xlab="Time", ylab="Median normalized activity", main="Evolution of median normalized cumulative evolutionary activity\r\n(alternative formula)")
-grid()
+}
 
-# plot new activity (alternative formula)
+plot_median_normalized_activity_alt()
+save_plot("median_normalized_activity_alt", plot_median_normalized_activity_alt)
+
+
+# === NEW ACTIVITY (ALTERNATIVE FORMULA) ===
 # TODO
+
 ```
