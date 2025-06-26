@@ -481,6 +481,9 @@ save_plot("total_activity", plot_total_activity)
 
 ```{r}
 
+# this library allows super fast reading of CSV files!
+library(data.table)
+
 # load files
 realDeltas <- fread(realMapDeltasFile, dec = ".")
 shadowDeltas <- fread(shadowMapDeltasFile, dec = ".")
