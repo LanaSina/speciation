@@ -134,7 +134,9 @@ public class DeltasSaver {
         deltas.forEach((property, values) -> values.replaceAll((k, v) -> 0));
 
         List<String> properties = List.of("speed", "maxEnergy", "kidEnergy", "nKids", "death", "matForKids");
-        for (IndividualWithProperties individual : map.getAllEvolvedIndividuals()) {
+        Iterator<IndividualWithProperties> it = map.iteratorOnEvolvedIndividuals();
+        while (it.hasNext()) {
+            IndividualWithProperties individual = it.next();
             for (String property : properties) {
                 int value = getPropertyValue(individual, property);
                 if (!deltas.get(property).containsKey(value)) {
