@@ -3,7 +3,12 @@
  */
 package com.alife.tolsim.startup;
 
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 /**
  * @author lana
@@ -72,6 +77,20 @@ public class Constants {
 	 */
 	public static double uniformDouble() {
 	    return rand.nextDouble();
+	}
+
+	/**
+	 * Filters an iterator.
+	 *
+	 * @param iterator the iterator to filter
+	 * @param filter the filter to apply
+	 * @return the filtered iterator
+	 * @param <E> the type parameter of the iterator and of the filter
+	 */
+	public static <E> Iterator<E> filterIterator(Iterator<E> iterator, Predicate<E> filter) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
+				.filter(filter)
+				.iterator();
 	}
 }
 

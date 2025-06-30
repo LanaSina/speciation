@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.abs;
 
 
-public abstract class Map {
+public abstract class Map implements Iterable<IndividualWithProperties> {
 	MyLog mlog = createMyLog();
 
 
@@ -110,6 +110,15 @@ public abstract class Map {
 	 * @return all individuals of this map that are non-light and whose parent is a non-light
 	 */
 	public abstract  List<IndividualWithProperties> getAllEvolvedIndividuals();
+
+	/**
+	 * Iterates on evolved individuals on this map, i.e. individuals on this map that are non-light and whose parent is a non-light.
+	 *
+	 * @return an iterator on evolved individuals on this map
+	 */
+	public Iterator<IndividualWithProperties> iteratorOnEvolvedIndividuals() {
+		return Constants.filterIterator(iterator(), ind -> !ind.isLight() && !ind.parentIsLight());
+	}
 
 	public abstract void applyChanges();
 

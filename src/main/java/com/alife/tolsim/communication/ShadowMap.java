@@ -323,6 +323,16 @@ public class ShadowMap extends Map {
                 .toList();
     }
 
+
+    @Override
+    public Iterator<IndividualWithProperties> iterator() {
+        return map.values()
+                  .stream()
+                  .map(ind -> (IndividualWithProperties) ind)
+                  .iterator();
+    }
+
+
     /**
      * <p>
      *      Makes <code>number</code> random individuals have a baby.

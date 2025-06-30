@@ -648,4 +648,66 @@ public class RealMap extends Map {
 	protected MyLog createMyLog() {
 		return new MyLog("map", true);
 	}
+
+
+	/**
+	 * Iterates on all individuals on this map.
+	 *
+	 * @return an iterator on all individuals in this map
+	 */
+	@Override
+	public Iterator<IndividualWithProperties> iterator() {
+		return new Itr();
+	}
+
+
+	private class Itr implements Iterator<IndividualWithProperties> {
+		/** The x index of the current cell. */
+		private int x = 0;
+		/** The y index of the current cell. */
+		private int y = 0;
+		/** The index of the current individual in the current cell. */
+		private int cellIndex = 0;
+		/** A list that contains the individuals of the current cell. */
+		private List<EmbodiedIndividual> creaturesOnCurrentCell;
+		/** This field prevents to unnecessarily recompute <code>creaturesOnCurrentCell</code>. */
+		private boolean creaturesOnCurrentCellAreCached = false;
+		/** The next element to consume. */
+		private EmbodiedIndividual nextElement;
+
+		@Override
+		public boolean hasNext() {
+			while (x < RealMap.this.map.length) {
+				while (y < RealMap.this.map[0].length) { // by using 0 as the index, we assume that the map is a rectangle
+					if (!creaturesOnCurrentCellAreCached) {
+						creaturesOnCurrentCell = getListOfCreaturesOnCell(x, y);
+						creaturesOnCurrentCellAreCached = true;
+					}
+					if (cellIndex < creaturesOnCurrentCell.size()) {
+						nextElement = creaturesOnCurrentCell.get(cellIndex);
+						return true;
+					}
+					creaturesOnCurrentCellAreCached = false;
+					cellIndex = 0;
+					y++;
+				}
+				y = 0;
+				x++;
+			}
+			return false;
+		}
+
+		@Override
+		public EmbodiedIndividual next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			cellIndex++;
+			return nextElement;
+		}
+
+		private List<EmbodiedIndividual> getListOfCreaturesOnCell(int x, int y) {
+			return RealMap.this.map[x][y].creatures.values().stream().toList();
+		}
+	}
 }
