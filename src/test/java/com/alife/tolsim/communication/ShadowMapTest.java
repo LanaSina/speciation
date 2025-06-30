@@ -2,14 +2,17 @@ package com.alife.tolsim.communication;
 
 import com.alife.tolsim.animals.EmbodiedIndividual;
 import com.alife.tolsim.animals.Individual;
+import com.alife.tolsim.animals.IndividualWithProperties;
 import com.alife.tolsim.animals.ShadowIndividual;
 import com.alife.tolsim.visualization.Display;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -105,6 +108,47 @@ public class ShadowMapTest {
         }
         assertEquals(0, shadowMap.remove.size());
         assertThrows(IllegalArgumentException.class, () -> shadowMap.removeRandomIndividuals(number));
+    }
+
+    @Test
+    public void shadowMapIteratorHasNotNextWhenItIsEmpty() {
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+
+        Iterator<IndividualWithProperties> it = shadowMap.iterator();
+
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void shadowMapIteratorHasNextWhileThereAreIndividualsToIterateOn() {
+        // add two individuals on the map
+        double x1 = 0;
+        double y1 = 0;
+        EmbodiedIndividual individual1 = new EmbodiedIndividual(x1, y1, 64, 1770, 1840, 1936);
+        realMap.addIndividual((int) x1, (int) y1, individual1);
+        double x2 = realMap.map.length - 1;
+        double y2 = realMap.map[0].length - 1; // by using 0 as an index, we assume the map has at least one cell
+        EmbodiedIndividual individual2 = new EmbodiedIndividual(x2, y2, 18, 666, 102, 776);
+        realMap.addIndividual((int) x2, (int) y2, individual2);
+
+        ShadowMap shadowMap = new ShadowMap(realMap, SHADOW_SUMMARY_FILE_NAME, SHADOW_SNAPSHOT_FILE_NAME, SHADOW_SENSORS_FILE_NAME);
+
+        Iterator<IndividualWithProperties> it = shadowMap.iterator();
+
+        // should iterate through two individuals
+        assertTrue(it.hasNext());
+        assertEquals(individual1, it.next()); // assertEquals() instead of assertSame() because we compare an EmbodiedIndividual to a ShadowIndividual
+        assertTrue(it.hasNext());
+        assertEquals(individual2, it.next()); // assertEquals() instead of assertSame() because we compare an EmbodiedIndividual to a ShadowIndividual
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void realMapIteratorRemoveMethodThrowsUnsupportedOperationException() {
+        Iterator<IndividualWithProperties> it = realMap.iterator();
+        assertThrows(UnsupportedOperationException.class, it::remove);
     }
 
 
