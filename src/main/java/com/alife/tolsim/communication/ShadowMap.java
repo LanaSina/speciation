@@ -111,7 +111,7 @@ public class ShadowMap extends Map {
         map.clear();
         babies.clear();
         remove.clear();
-        for (IndividualWithProperties realInd : realMap.getAllIndividuals()) {
+        for (IndividualWithProperties realInd : realMap) {
             ShadowIndividual shadowInd = new ShadowIndividual(realInd);
             addIndividual(shadowInd);
             if (realMap.remove.containsKey(realInd.getID()))
