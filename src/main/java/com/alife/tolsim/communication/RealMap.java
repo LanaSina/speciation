@@ -242,7 +242,7 @@ public class RealMap extends Map {
 
             if(!alive){
             	remove.put(creature.getID(), creature);
-				return;
+				continue;
             }
 
             double[] position = creature.getPosition();
