@@ -23,6 +23,8 @@ public class Constants {
 	public static String SensorsFileName = "sensors";
 	public static String PredationFileName = "predation";
 	public static String RealMapDeltasFileName = "RealMapDeltas";
+	/** File where the population (i.e. number of individuals) of the real model will be recorded. */
+	public static String PopulationFilename = "Population";
 	public static final String ShadowModelSummaryFileName = "ShadowModel_SummaryIndividuals";
 	public static String ShadowModelSnapshotFileName = "ShadowModel_Snapshot";
 	public static String ShadowModelSensorsFileName = "ShadowModel_Sensors";

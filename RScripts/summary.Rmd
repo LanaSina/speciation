@@ -82,21 +82,13 @@ plot(x = world$created, y=world$pgmDeath, main = folder)
 
 ```{r}
 #  Plot number of agents
-t = 0
-max_t = max(world$created)
-step_size = 100
-n_agents_t <- data.frame(Ints=integer(), Ints=integer())
-colnames(n_agents_t) = c("t", "n")
 
-while (t < max_t) {
-  part_world = subset(world, (world$created>=t) & (world$created<t+step_size))
-  n_agents_t = rbind(n_agents_t, c(t, length(part_world$created)))
-  t = t + step_size
-} 
+library(data.table)
 
-colnames(n_agents_t) = c("t", "n")
+populationFileName = file.path(base_folder, folder,"Population.csv")
+population <- fread(populationFileName, dec =".")
 
-plot(n_agents_t, type = "l", main="Number of agents")
+plot(population, type = "l", main="Number of agents")
 
 ```
 

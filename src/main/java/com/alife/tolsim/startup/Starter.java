@@ -104,7 +104,7 @@ public class Starter {
 		int of = 10;
 
 		//worldmap		
-		RealMap map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+		RealMap map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName, Constants.PopulationFilename);
 		if (Constants.Save)
 			map.setupLogFiles();
 
@@ -323,7 +323,7 @@ public class Starter {
 			String dname = properties.getProperty("sim_name");
 			int cst_grid_max = Integer.parseInt(properties.getProperty("grid_max"));
 			Display d = new Display(dname, this, dataFolderName);
-			map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName);
+			map = new RealMap(cst_grid_max, d, dataFolderName, Constants.SummaryFileName, Constants.PredationFileName, Constants.SnapshotFileName, Constants.SensorsFileName, Constants.PopulationFilename);
 
 			// read creatures
 			target = directory.getAbsolutePath() + "/" + Constants.SnapshotFileName + ".csv";

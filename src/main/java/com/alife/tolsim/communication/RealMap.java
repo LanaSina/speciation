@@ -28,6 +28,10 @@ public class RealMap extends Map {
 	FileWriter predationWriter;
 	String predationFileName;
 
+	/** Population recording */
+	FileWriter populationWriter;
+	String populationFileName;
+
 	/**graphic panel*/
 	Display d;
 	/** 2D map is made of cells, in each cell there are creatures;*/
@@ -51,9 +55,11 @@ public class RealMap extends Map {
 				   String summaryFileName,
 				   String predationFileName,
 				   String snapshotFileName,
-				   String sensorsFileName) {
+				   String sensorsFileName,
+				   String populationFileName) {
 		super(myDataFolderName, summaryFileName, snapshotFileName, sensorsFileName);
 		this.predationFileName = predationFileName;
+		this.populationFileName = populationFileName;
 		this.d = d;
 		size = mapSize;
 		//create map
@@ -147,6 +153,19 @@ public class RealMap extends Map {
 			predationWriter.flush();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
+
+		// population count (we use one single file during the whole run)
+		if (populationWriter == null) {
+			FileBuilder fb_population = new FileBuilder(dataFolderName, populationFileName);
+			populationWriter = fb_population.getFileWriter();
+			String headerPopulation = "t,population\r\n";
+			try {
+				populationWriter.append(headerPopulation);
+				populationWriter.flush();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -449,6 +468,14 @@ public class RealMap extends Map {
 		//for moved ones
 		moving.clear();
 		newPositions.clear();
+
+		try {
+			String str = time + "," + getAllIndividuals().size() + "\r\n";
+			populationWriter.append(str);
+			populationWriter.flush();
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to write the population", e);
+		}
 	}
 
 	void saveCreatures(String dataFolderName, String filePath){

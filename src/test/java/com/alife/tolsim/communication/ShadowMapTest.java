@@ -31,6 +31,7 @@ public class ShadowMapTest {
     private static final String PREDATION_FILE_NAME = "Predation";
     private static final String SNAPSHOT_FILE_NAME = "Snapshot";
     private static final String SENSORS_FILE_NAME = "Sensors";
+    private static final String POPULATION_FILE_NAME = "Population";
 
     // For the shadow map
     private static final String SHADOW_SUMMARY_FILE_NAME = "ShadowModel_SummaryIndividuals";
@@ -40,7 +41,7 @@ public class ShadowMapTest {
 
     @BeforeEach
     public void init() {
-        realMap = new RealMap(MAP_SIZE, DISPLAY, DATA_FOLDER_NAME, SUMMARY_FILE_NAME, PREDATION_FILE_NAME, SNAPSHOT_FILE_NAME, SENSORS_FILE_NAME);
+        realMap = new RealMap(MAP_SIZE, DISPLAY, DATA_FOLDER_NAME, SUMMARY_FILE_NAME, PREDATION_FILE_NAME, SNAPSHOT_FILE_NAME, SENSORS_FILE_NAME, POPULATION_FILE_NAME);
     }
 
     @Test
