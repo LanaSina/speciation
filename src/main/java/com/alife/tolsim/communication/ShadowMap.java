@@ -147,17 +147,15 @@ public class ShadowMap extends Map {
     public void applyChanges() {
         //update dead
         for (ShadowIndividual creature : remove) {
-            if (Constants.Save) {
-                if (Constants.uniformDouble() < 1) { //0.01
-                    if (!creature.isLight() & !creature.parentIsLight()) {
-                        //write down info
-                        String str = creature.stringDesc() + "\n";
-                        try {
-                            summaryWriter.append(str);
-                            summaryWriter.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+            if (Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse) {
+                if (!creature.isLight() & !creature.parentIsLight()) {
+                    //write down info
+                    String str = creature.stringDesc() + "\n";
+                    try {
+                        summaryWriter.append(str);
+                        summaryWriter.flush();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -254,9 +252,8 @@ public class ShadowMap extends Map {
             stateWriter.flush();
 
             for (ShadowIndividual creature : map.values()){
-                if (creature.hasSensors()==0){
+                if (creature.hasSensors() == 0)
                     continue;
-                }
 
                 str = new StringBuilder();
                 //tree nodes: root-> n properties -> detectionValue -> action

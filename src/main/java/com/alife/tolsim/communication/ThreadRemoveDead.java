@@ -23,20 +23,18 @@ public class ThreadRemoveDead extends ThreadApplyChanges {
      */
     protected void treatCreature(int i) {
         EmbodiedIndividual creature = creaturesToTreat.get(i);
-        if (Constants.Save) {
-            if (Constants.uniformDouble() < 1) { //0.01
-                if (!creature.isLight() & !creature.parentIsLight()) {
-                    //write down info
-                    // "ID,pred_pos_x, pred_pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor, parentIsLight\n";
-                    String str = creature.stringDesc() + "\n";
-                    try {
-                        synchronized (realMap.summaryWriter) {
-                            realMap.summaryWriter.append(str);
-                            realMap.summaryWriter.flush();
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+        if (Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse) {
+            if (!creature.isLight() & !creature.parentIsLight()) {
+                //write down info
+                // "ID,pred_pos_x, pred_pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor, parentIsLight\n";
+                String str = creature.stringDesc() + "\n";
+                try {
+                    synchronized (realMap.summaryWriter) {
+                        realMap.summaryWriter.append(str);
+                        realMap.summaryWriter.flush();
                     }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

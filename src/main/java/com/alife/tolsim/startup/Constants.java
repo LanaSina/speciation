@@ -33,12 +33,14 @@ public class Constants {
 
 	/** Controls whether to save the data about individuals and predation. */
 	public static boolean Save = false;
-	/** This field is both:
-	 * <ul>
-	 *     <li>the number of time steps during which to save information about dead individuals and predation before switching to a new file;</li>
-	 *     <li>the number of time steps between two saves of the alive individuals and of the sensors.</li>
-	 * </ul> */
-	public static int SaveEvery = 5000;
+    /** Percentage of individuals/predations saved. */
+    public static double SaveCoarse = 0.01;
+    /** This field is both:
+     * <ul>
+     *     <li>the number of time steps during which to save information about dead individuals and predation before switching to a new file;</li>
+     *     <li>the number of time steps between two saves of the alive individuals and of the sensors.</li>
+     * </ul> */
+    public static int SaveEvery = 5000;
 
 	/** Controls whether the RealMap is displayed. (NB: the ShadowMap is never displayed.) */
 	public static final boolean EnableDisplay = false;

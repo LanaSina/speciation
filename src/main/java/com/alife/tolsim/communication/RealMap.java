@@ -329,24 +329,21 @@ public class RealMap extends Map {
 				predator.setBorderColor(Color.black);
 			}
 			// only save successful predation
-			if(Constants.Save){
-				// reduce file size
-				if(Constants.uniformDouble()<1){ //0.01
-                    /*
-						String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
-						"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
-						"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids,energy, parentIsLight " +
-						 prey_id +  pos[0], pos[1] +prey_islight +
-						"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
-						"prey_pgmDeath, prey_matForKids, energy, parentIsLight\n";
-					 */
-					String str = time + "," + predator.stringDesc() + "," + prey.stringDesc() + "\n";
-					try {
-						predationWriter.append(str);
-						predationWriter.flush();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+			if(Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse){
+				/*
+					String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
+					"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +
+					"pred_sensors, pred_nkids, pred_pgmDeath, pred_matForKids,energy, parentIsLight " +
+					 prey_id +  pos[0], pos[1] +prey_islight +
+					"prey_lifeSpan, prey_speed, prey_maxEnergy, prey_kidEnergy, prey_sensors, prey_ancestor, prey_nkids," +
+					"prey_pgmDeath, prey_matForKids, energy, parentIsLight\n";
+				 */
+				String str = time + "," + predator.stringDesc() + "," + prey.stringDesc() + "\n";
+				try {
+					predationWriter.append(str);
+					predationWriter.flush();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			}
 		} else if(ok<=0){
@@ -579,9 +576,8 @@ public class RealMap extends Map {
                     }
 
                     for (IndividualWithProperties creature : c.creatures.values()) {
-                        if (creature.hasSensors() == 0) {
+                        if (creature.hasSensors() == 0)
                             continue;
-                        }
 
                         str = new StringBuilder();
                         //tree nodes: root-> n properties -> detectionValue -> action
