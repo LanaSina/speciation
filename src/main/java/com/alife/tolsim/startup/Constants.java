@@ -33,6 +33,12 @@ public class Constants {
 
 	/** Controls whether to save the data about individuals and predation. */
 	public static boolean Save = false;
+	/** This field is both:
+	 * <ul>
+	 *     <li>the number of time steps during which to save information about dead individuals and predation before switching to a new file;</li>
+	 *     <li>the number of time steps between two saves of the alive individuals and of the sensors.</li>
+	 * </ul> */
+	public static int SaveEvery = 5000;
 
 	/** Controls whether the RealMap is displayed. (NB: the ShadowMap is never displayed.) */
 	public static final boolean EnableDisplay = false;
@@ -56,7 +62,7 @@ public class Constants {
 	public static final int NbThreads = 16;
 
 
-	/**
+    /**
      * from <a href="http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java">this page</a>
      * and <a href="http://stackoverflow.com/questions/3680637/how-to-generate-a-random-double-in-a-given-range">this page</a>
      * Returns a pseudo-random number between min and max, exclusive.

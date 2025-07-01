@@ -21,9 +21,6 @@ import static java.lang.Math.abs;
 
 public class RealMap extends Map {
 
-	/** Gap between two times the time is printed (in number of time steps). */
-	protected static final int TIME_PRINTING_GAP = 100;
-
 	/** Predation recording. */
 	FileWriter predationWriter;
 	String predationFileName;
@@ -400,24 +397,6 @@ public class RealMap extends Map {
 
 
 	public void applyChanges(){
-		time++;
-		if (time % TIME_PRINTING_GAP == 0) {
-			mlog.say("time = " + time);
-		}
-
-		if(Constants.Save && (time%5000 == 0)){
-			mlog.say("backup all logs");
-			if (d != null) {
-				d.pauseProcedure(true);
-				d.screenshot();
-			}
-			setupLogFiles();
-			if (d != null) {
-				d.saveProcedure();
-				d.pauseProcedure(false);
-			}
-		}
-
 		Thread[] theThreads = new Thread[Constants.NbThreads];
 
 		// remove dead
@@ -468,7 +447,17 @@ public class RealMap extends Map {
 		//for moved ones
 		moving.clear();
 		newPositions.clear();
+	}
 
+	/**
+	 * <p>
+	 *     Saves the number of agents currently alive in this map.
+	 * </p>
+	 * <p>
+	 *     Time complexity: &Theta;(n) where n is the population.
+	 * </p>
+	 */
+	public void savePopulation() {
 		try {
 			String str = time + "," + getAllIndividuals().size() + "\r\n";
 			populationWriter.append(str);
@@ -537,9 +526,8 @@ public class RealMap extends Map {
 	 * </p>
 	 *
 	 * @param dataFolderName the directory of the current simulation
-	 * @return the path to the sensors file
 	 */
-	public String saveState(String dataFolderName) {
+	public void saveState(String dataFolderName) {
 		//snapshot time
 		DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
 		Date date = new Date();
@@ -578,7 +566,8 @@ public class RealMap extends Map {
 		filePath = strDate + "/" + sensorsFileName;
 		saveSensors(dataFolderName, filePath);
 
-		return filePath;
+		String savedAt = dataFolderName + filePath;
+		mlog.say("Saved at " + savedAt);
 	}
 
 	void saveSensors(String dataFolderName, String filePath){
@@ -736,5 +725,9 @@ public class RealMap extends Map {
 		private List<EmbodiedIndividual> getListOfCreaturesOnCell(int x, int y) {
 			return RealMap.this.map[x][y].creatures.values().stream().toList();
 		}
+	}
+
+	public Display getDisplay() {
+		return d;
 	}
 }

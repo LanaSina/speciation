@@ -87,6 +87,10 @@ public class Display extends JFrame {
 		return s;
 	}
 
+	public JButton getSaveButton() {
+		return s.saveButton;
+	}
+
 	public synchronized void removeComponent(GraphicalComponent c) {
 		//int i = s.components.indexOf(c);
 		//s.components.remove(i);
@@ -224,7 +228,7 @@ public class Display extends JFrame {
 			pauseProcedure(true);
 			saveButton.setText("Saving...");
 			//save
-			lifeRunnable.save();
+			lifeRunnable.saveMapsStates();
 			// this should actually be delayed...
 			saveButton.setText("Save");
 		}
@@ -339,7 +343,7 @@ public class Display extends JFrame {
 	    public int getStep(){
 	    	return step;
 	    }
-		   
+
 	}
 	
 	

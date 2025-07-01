@@ -54,6 +54,10 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 		this.sensorsFileName = sensorsFileName;
 	}
 
+	public abstract void setupLogFiles();
+
+	public abstract void saveState(String dataFolderName);
+
 	public int incrementAndGetGlobalID(){
 		return globalID.incrementAndGet();
 	}
@@ -68,6 +72,10 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 
 	public void setTime(int t) {
 		time = t;
+	}
+
+	public void incrementTime() {
+		time++;
 	}
 	
 	/**

@@ -145,13 +145,6 @@ public class ShadowMap extends Map {
     }
 
     public void applyChanges() {
-        time++;
-
-        if(Constants.Save && (time%5000 == 0)){
-            mlog.say("backup all logs");
-            setupLogFiles();
-        }
-
         //update dead
         for (ShadowIndividual creature : remove) {
             if (Constants.Save) {
@@ -217,7 +210,7 @@ public class ShadowMap extends Map {
         }
     }
 
-    public String saveState(String dataFolderName) {
+    public void saveState(String dataFolderName) {
         //snapshot time
         DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
         Date date = new Date();
@@ -255,7 +248,8 @@ public class ShadowMap extends Map {
         filePath = strDate + "/" + sensorsFileName;
         saveSensors(dataFolderName, filePath);
 
-        return filePath;
+        String savedAt = dataFolderName + filePath;
+        mlog.say("Saved at " + savedAt);
     }
 
     void saveSensors(String dataFolderName, String filePath) {
