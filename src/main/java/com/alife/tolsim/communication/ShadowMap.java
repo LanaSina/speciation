@@ -212,7 +212,7 @@ public class ShadowMap extends Map {
 
     public void saveState(String dataFolderName) {
         //snapshot time
-        DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm");
+        DateFormat dateFormat = new SimpleDateFormat("dd_HH_mm_ss");
         Date date = new Date();
         String strDate = dateFormat.format(date);
 
