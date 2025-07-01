@@ -255,7 +255,7 @@ public class Starter {
 						throw new RuntimeException(e);
 					}
 				}
-				if (realMap.getTime() == stopAt)
+				if (realMap.getTime() == stopAt + 1) // '+ 1' in order to save the last time step
 					this.kill();
 			}
 			mlog.say("dies");
