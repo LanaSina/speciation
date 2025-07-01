@@ -519,7 +519,6 @@ public class RealMap extends Map {
 	 * <p>
 	 *      Creates a new directory of format <code>dd_HH_mm</code> and puts in it :
 	 *      <ul>
-	 *          <li>a copy of the config.properties file</li>
 	 *          <li>a snapshot file (which contains information about the creatures)</li>
 	 *          <li>a sensors file</li>
 	 *      </ul>
@@ -544,19 +543,6 @@ public class RealMap extends Map {
 			catch(SecurityException e){
 				throw new RuntimeException(e);
 			}
-		}
-
-		// move config file (todo: path in constants)
-		try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.properties")) {
-			if (in == null) {
-				throw new FileNotFoundException("config.properties not found in classpath");
-			}
-			Path target = Paths.get(dataFolderName, strDate, "config.properties");
-			Files.createDirectories(target.getParent());
-			Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-			mlog.say("properties copied to " + dataFolderName + "/" + strDate);
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to copy config.properties", e);
 		}
 
 

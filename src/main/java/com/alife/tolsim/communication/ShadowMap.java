@@ -229,18 +229,6 @@ public class ShadowMap extends Map {
             }
         }
 
-        // move config file (todo: path in constants)
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.properties")) {
-            if (in == null) {
-                throw new FileNotFoundException("config.properties not found in classpath");
-            }
-            Path target = Paths.get(dataFolderName+"/"+strDate+"/config.properties");
-            Files.createDirectories(target.getParent());
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-            mlog.say("properties copied to " + dataFolderName + "/" + strDate);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to copy config.properties", e);
-        }
 
         String filePath = strDate + "/" + snapshotFileName;
         saveCreatures(dataFolderName, filePath);
