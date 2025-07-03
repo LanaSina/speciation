@@ -1,8 +1,6 @@
 package com.alife.tolsim.visualization;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serial;
@@ -45,7 +43,6 @@ public class Display extends JFrame {
 	}
 
 	private void initUI(Starter.LifeRunnable lifeRunnable, String dataFolder) {
-
 		setTitle(name);
 		s = new Surface(lifeRunnable, dataFolder);
 		add(s);
@@ -54,20 +51,11 @@ public class Display extends JFrame {
 		setSize(width,length);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
+	}
 
-		//refresh
-		int delay = Constants.RefreshRate; //milliseconds
-
-		ActionListener taskPerformer = evt -> {
-          Thread t = new Thread(new Runnable() {
-              public void run() {
-                    s.repaint();
-              }
-          });
-          t.start();
-        };
-
-		new Timer(delay, taskPerformer).start();
+	/** Repaints the image. */
+	public void repaint() {
+		s.repaint();
 	}
 
 	/**

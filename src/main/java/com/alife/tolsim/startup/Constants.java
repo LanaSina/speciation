@@ -46,8 +46,8 @@ public class Constants {
 	public static final boolean EnableDisplay = false;
 	/** Percentage of elements drawn. */
 	public static double DrawCoarse = 1;
-	/** Equivalent to refresh rate. */
-	public static int RefreshRate = 20;//500
+	/** Number of time steps between two image repaints. */
+	public static int RefreshImageEvery = 1;
 
 	/** Controls whether to run the shadow model in parallel to the real model. */
 	public static final boolean RunShadowModel = true;

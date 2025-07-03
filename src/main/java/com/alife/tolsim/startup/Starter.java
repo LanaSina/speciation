@@ -261,7 +261,7 @@ public class Starter {
 			mlog.say("dies");
 		}
 
-		protected void update() {
+		protected final void update() {
 			// log time
 			if (realMap.getTime() % TIME_PRINTING_GAP == 0)
 				mlog.say("time = " + realMap.getTime());
@@ -271,6 +271,11 @@ public class Starter {
 			updateMaps();
 			// increment time
 			for (Map map : theMaps) map.incrementTime();
+			// refresh image
+			if (realMap.getTime() % Constants.RefreshImageEvery == 0) {
+				if (realMap.getDisplay() != null)
+					realMap.getDisplay().repaint();
+			}
 		}
 
 		/**
