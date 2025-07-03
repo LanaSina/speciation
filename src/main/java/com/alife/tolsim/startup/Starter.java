@@ -112,7 +112,7 @@ public class Starter {
 				int x = i+of;
 				int y = j+of;
 
-				int id = map.incrementAndGetGlobalID();
+				long id = map.incrementAndGetGlobalID();
 				EmbodiedIndividual l = new EmbodiedIndividual(x,y,id,0,0, -1);
 				map.addIndividual(x, y, l);
 				if (d != null)

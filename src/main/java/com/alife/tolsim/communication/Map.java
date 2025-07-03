@@ -5,7 +5,7 @@ import com.alife.tolsim.startup.Constants;
 
 import java.io.FileWriter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.Math.abs;
 
@@ -16,7 +16,7 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 
 
 	/** global var: id & number of animals until now*/
-	final AtomicInteger globalID = new AtomicInteger(0);
+	final AtomicLong globalID = new AtomicLong(0);
 	/** data recording*/
 	FileWriter summaryWriter;
 	String summaryFileName;
@@ -58,11 +58,11 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 
 	public abstract void saveState(String dataFolderName);
 
-	public int incrementAndGetGlobalID(){
+	public long incrementAndGetGlobalID(){
 		return globalID.incrementAndGet();
 	}
 
-	public void setGlobalId(int i) {
+	public void setGlobalId(long i) {
 		globalID.set(i);
 	}
 

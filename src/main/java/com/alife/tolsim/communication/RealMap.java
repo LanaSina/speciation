@@ -41,7 +41,7 @@ public class RealMap extends Map {
 	//for new ones
 	ArrayList<EmbodiedIndividual> babies;
 	//for dead ones
-	java.util.Map<Integer, EmbodiedIndividual> remove;
+	java.util.Map<Long, EmbodiedIndividual> remove;
 	//for moved ones
 	ArrayList<EmbodiedIndividual> moving;
 	ArrayList<Double> newPositions;

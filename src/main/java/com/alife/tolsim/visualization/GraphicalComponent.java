@@ -10,7 +10,7 @@ import java.awt.Graphics;
  */
 public interface GraphicalComponent {
 
-	int getID();
+	long getID();
 	void draw(Graphics g, int gridStep);
 
 	//public boolean onTop = false;

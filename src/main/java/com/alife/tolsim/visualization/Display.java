@@ -142,7 +142,7 @@ public class Display extends JFrame {
 		String dataFolder = null;
 
 		/** The things to draw. Associates the GraphicalComponents' IDs to the GraphicalComponents themselves*/
-		public java.util.Map<Integer, GraphicalComponent> components = new HashMap<>();
+		public java.util.Map<Long, GraphicalComponent> components = new HashMap<>();
 
 		public Surface(Starter.LifeRunnable myLifeRunnable, String myDataFolder){
 			super();

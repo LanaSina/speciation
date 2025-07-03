@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class ShadowMap extends Map {
 
-    java.util.Map<Integer, ShadowIndividual> map;
+    java.util.Map<Long, ShadowIndividual> map;
     //for updates
     //for new ones
     LinkedList<ShadowIndividual> babies;

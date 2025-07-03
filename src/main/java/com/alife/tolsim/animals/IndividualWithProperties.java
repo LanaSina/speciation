@@ -11,7 +11,7 @@ public abstract class IndividualWithProperties implements Individual {
     MyLog mlog = createMyLog();
 
 
-    int eaten_by = -1;//1 = true;
+    long eaten_by = -1;//1 = true;
 
     //general
     public int speed = 0;
@@ -35,9 +35,9 @@ public abstract class IndividualWithProperties implements Individual {
 
     int nProperties = 6;//sum of above
     public int[] properties = new int[nProperties];
-    int ID;
-    int parentID;
-    protected int firstAncestorID;
+    long ID;
+    long parentID;
+    protected long firstAncestorID;
     //if parent is light, won't be written down (data too big)
     public boolean parentIsLight = false;
     int birthDate;
@@ -60,7 +60,7 @@ public abstract class IndividualWithProperties implements Individual {
      * @param date     in-simulation time
      * @param parent   parent id
      */
-    public IndividualWithProperties(int glID, int ancestor, int date, int parent) {
+    public IndividualWithProperties(long glID, long ancestor, int date, long parent) {
         super();
 
         ID = glID;
@@ -92,7 +92,7 @@ public abstract class IndividualWithProperties implements Individual {
      * @param in   individual to be cloned
      * @param glID id of this one
      */
-    IndividualWithProperties(IndividualWithProperties in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+    IndividualWithProperties(IndividualWithProperties in, long glID, int date, double cst_mut_factor, int cst_speed_max,
                              double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
     ) {
         copy(in);
@@ -102,7 +102,7 @@ public abstract class IndividualWithProperties implements Individual {
         firstAncestorID = in.getAncestor();
         //if your ancestor is the sun, then ou're the new first ancestor
         if (firstAncestorID < 0) {
-            mlog.say("EEEEERRRROOOR");
+            mlog.say("Error: negative ancestor ID; consider checking whether the maximum value for a long integer has been reached.");
         }
 
         if ((firstAncestorID == 0) && (ID != -1)) {
@@ -295,16 +295,16 @@ public abstract class IndividualWithProperties implements Individual {
         return b;
     }
 
-    public int getID() {
+    public long getID() {
         return ID;
     }
 
-    public void setID(int id) {
+    public void setID(long id) {
         ID = id;
         if (firstAncestorID == 0) firstAncestorID = id;
     }
 
-    public int getParentID() {
+    public long getParentID() {
         return parentID;
     }
 
@@ -328,7 +328,7 @@ public abstract class IndividualWithProperties implements Individual {
         return kidEnergy;
     }
 
-    public int getAncestor() {
+    public long getAncestor() {
         return firstAncestorID;
     }
 
@@ -400,11 +400,11 @@ public abstract class IndividualWithProperties implements Individual {
         this.speed = speed;
     }
 
-    public void setEatenBy(int eaten) {
+    public void setEatenBy(long eaten) {
         this.eaten_by = eaten;
     }
 
-    public void setParentID(int parentID) {
+    public void setParentID(long parentID) {
         this.parentID = parentID;
     }
 
@@ -433,11 +433,11 @@ public abstract class IndividualWithProperties implements Individual {
         this.properties = new int[nProperties];
     }
 
-    public int getFirstAncestorID() {
+    public long getFirstAncestorID() {
         return firstAncestorID;
     }
 
-    public void setFirstAncestorID(int firstAncestorID) {
+    public void setFirstAncestorID(long firstAncestorID) {
         this.firstAncestorID = firstAncestorID;
     }
 

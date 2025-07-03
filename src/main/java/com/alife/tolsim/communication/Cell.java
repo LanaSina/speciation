@@ -32,7 +32,7 @@ public class Cell {
     /**
      * All creatures on this cell. Associates the creatures' IDs to the creatures themselves.
      */
-    java.util.Map<Integer, EmbodiedIndividual> creatures;
+    java.util.Map<Long, EmbodiedIndividual> creatures;
 
     public Cell() {
         creatures = new java.util.HashMap<>();

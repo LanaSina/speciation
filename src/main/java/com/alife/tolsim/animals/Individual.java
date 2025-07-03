@@ -12,8 +12,8 @@ public interface Individual {
 	void setEnergy(double energy);
 	boolean parentIsLight();
 	String stringDesc();
-	void setID(int globalID);
+	void setID(long globalID);
 	int[] getProperties();
-	void setEatenBy(int i);
-	int getID();
+	void setEatenBy(long i);
+	long getID();
 }

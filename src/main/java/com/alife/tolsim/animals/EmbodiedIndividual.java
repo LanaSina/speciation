@@ -35,14 +35,14 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
      * @param date     in-simulation time
      * @param parent   parent id
      */
-    public EmbodiedIndividual(double x, double y, int glID, int ancestor, int date, int parent) {
+    public EmbodiedIndividual(double x, double y, long glID, long ancestor, int date, long parent) {
         super(glID, ancestor, date, parent);
         position[0] = x;
         position[1] = y;
         makeColor();
     }
 
-    public EmbodiedIndividual(int myId, String line) {
+    public EmbodiedIndividual(long myId, String line) {
         String[] lineArray = line.split(",");
         ID = myId;
 
@@ -90,7 +90,7 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
      * @param in   individual to be cloned
      * @param glID id of this one
      */
-    EmbodiedIndividual(EmbodiedIndividual in, int glID, int date, double cst_mut_factor, int cst_speed_max,
+    EmbodiedIndividual(EmbodiedIndividual in, long glID, int date, double cst_mut_factor, int cst_speed_max,
                        double cst_light_birth_dst, double birth_dst, int cst_grid_max, int cst_energy_max
     ) {
         super(in, glID, date, cst_mut_factor, cst_speed_max, cst_light_birth_dst, birth_dst, cst_grid_max, cst_energy_max);
