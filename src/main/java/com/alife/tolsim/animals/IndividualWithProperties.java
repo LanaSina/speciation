@@ -275,24 +275,14 @@ public abstract class IndividualWithProperties implements Individual {
 
     /**
      * @param bias between 0 and 1; probability to return true.
-     * @return
+     * @return a boolean, with a probability of <code>bias</code> to be true
      */
     protected boolean generateBool(double bias) {
-        boolean b = false;
-        if (Constants.uniformDouble() < bias) {
-            b = true;
-        }
-
-        return b;
+        return Constants.uniformDouble() < bias;
     }
 
     protected boolean generateBool() {
-        boolean b = false;
-        if (Constants.uniformDouble() > 0.5) {
-            b = true;
-        }
-
-        return b;
+        return Constants.uniformDouble() > 0.5;
     }
 
     public long getID() {
@@ -358,11 +348,10 @@ public abstract class IndividualWithProperties implements Individual {
      */
     public String stringDesc() {
 
-        String description = ID + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
+        return ID + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
                 + speed + "," + maxEnergy + "," + getKidEnergy() + ","
                 + hasSensors() + "," + getAncestor() + "," + getNKids() + ","
                 + death + "," + matForKids + "," + energy + "," + parentIsLight;
-        return description;
     }
 
     public int[] getProperties() {
@@ -460,9 +449,8 @@ public abstract class IndividualWithProperties implements Individual {
     protected abstract MyLog createMyLog();
 
     public boolean equals(Object o) {
-        if (!(o instanceof IndividualWithProperties))
+        if (!(o instanceof IndividualWithProperties other))
             return false;
-        IndividualWithProperties other = (IndividualWithProperties) o;
         return this.speed == other.speed &&
                 this.maxEnergy == other.maxEnergy &&
                 this.kidEnergy == other.kidEnergy &&

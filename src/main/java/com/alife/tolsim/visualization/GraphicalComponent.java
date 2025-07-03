@@ -1,6 +1,5 @@
 package com.alife.tolsim.visualization;
 
-import java.awt.Color;
 import java.awt.Graphics;
 
 /**

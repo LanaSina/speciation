@@ -386,9 +386,9 @@ public class Starter {
 			// save all creatures by id
 			HashMap<Integer, EmbodiedIndividual> individualMap = new HashMap<>();
 			// read line by line
-			Scanner sc = null;
+			Scanner sc;
 			String[] lineArray;
-			String line = null;
+			String line;
 			int maxId = -1;
 			try {
 				sc = new Scanner(new File(target));

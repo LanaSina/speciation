@@ -3,8 +3,6 @@ package com.alife.tolsim.animals;
 
 public interface Individual {
 
-	double[] position = null;
-
 	boolean isLight();
 	double getSpeed();
 	Tree getSensors();

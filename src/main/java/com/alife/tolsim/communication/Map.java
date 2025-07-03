@@ -102,14 +102,9 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 		if(val>high) val = high;
 		return val;
 	}
-	
-	protected boolean generateBool(){
-		boolean b = false;
-		if(Constants.uniformDouble()>0.5){
-			b = true;
-		}
-		
-		return b;
+
+	protected boolean generateBool() {
+		return Constants.uniformDouble() > 0.5;
 	}
 
 	/**

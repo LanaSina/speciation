@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.Serial;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,6 +27,7 @@ import com.alife.tolsim.startup.Starter;
 public class Display extends JFrame {
 	MyLog mlog = new MyLog("Display",true);
 
+	@Serial
 	private static final long serialVersionUID = 1579747902278268747L;
 
 	//surface to be drawn on
@@ -56,16 +58,14 @@ public class Display extends JFrame {
 		//refresh
 		int delay = Constants.RefreshRate; //milliseconds
 
-		ActionListener taskPerformer = new ActionListener() {
-		  public void actionPerformed(ActionEvent evt) {
-			Thread t = new Thread(new Runnable() {
-				public void run() {
-					  s.repaint();
-				}
-			});
-			t.start();
-		  }
-		};
+		ActionListener taskPerformer = evt -> {
+          Thread t = new Thread(new Runnable() {
+              public void run() {
+                    s.repaint();
+              }
+          });
+          t.start();
+        };
 
 		new Timer(delay, taskPerformer).start();
 	}
@@ -151,11 +151,7 @@ public class Display extends JFrame {
 
 			// add pause button
 			pauseButton = new JButton("Pause");
-			pauseButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					pauseProcedure(!pauseLife);
-				}
-			});
+			pauseButton.addActionListener(e -> pauseProcedure(!pauseLife));
 			this.add(pauseButton);
 			pauseButton.setVisible(true);
 			int x = this.getWidth()*2-200; // no effect??
@@ -163,11 +159,7 @@ public class Display extends JFrame {
 
 			// add save button
 			saveButton = new JButton("Save");
-			saveButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					saveProcedure();
-				}
-			});
+			saveButton.addActionListener(e -> saveProcedure());
 			this.add(saveButton);
 			saveButton.setVisible(true);
 			x = this.getWidth()*2+200; // no effect??
@@ -175,23 +167,21 @@ public class Display extends JFrame {
 
 			// add load button
 			JButton loadButton = new JButton("Load file");
-			loadButton.addActionListener(new ActionListener() {
-				 public void actionPerformed(ActionEvent e) {
-					 pauseProcedure(true);
-					 File workingDirectory = new File(System.getProperty("user.dir"));
-					 UIManager.put("FileChooser.saveButtonText","Load");
+			loadButton.addActionListener(e -> {
+                pauseProcedure(true);
+                File workingDirectory = new File(System.getProperty("user.dir"));
+                UIManager.put("FileChooser.saveButtonText","Load");
 
-					 JFileChooser fileChooser = new JFileChooser();
-					 fileChooser.setCurrentDirectory(workingDirectory);
-					 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					 fileChooser.showSaveDialog(null);
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(workingDirectory);
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.showSaveDialog(null);
 
-					 System.out.println(fileChooser.getCurrentDirectory());
-					 File directory = fileChooser.getCurrentDirectory();
-					 lifeRunnable.load(directory);
-					 pauseProcedure(false);
-				 }
-			});
+                System.out.println(fileChooser.getCurrentDirectory());
+                File directory = fileChooser.getCurrentDirectory();
+                lifeRunnable.load(directory);
+                pauseProcedure(false);
+            });
 
 			this.add(loadButton);
 			loadButton.setVisible(true);
@@ -200,13 +190,11 @@ public class Display extends JFrame {
 
 			// add screenshot button
 			JButton shotButton = new JButton("Screenshot");
-			shotButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					pauseProcedure(true);
-					screenshot();
-					pauseProcedure(false);
-				}
-			});
+			shotButton.addActionListener(e -> {
+                pauseProcedure(true);
+                screenshot();
+                pauseProcedure(false);
+            });
 
 			this.add(shotButton);
 			shotButton.setVisible(true);
@@ -248,6 +236,7 @@ public class Display extends JFrame {
 				imageFile.createNewFile();
 				ImageIO.write(bufImage, "jpeg", imageFile);
 			}catch(Exception ex){
+				throw new RuntimeException("Unable to take a screenshot", ex);
 			}
 		}
 		
@@ -260,8 +249,7 @@ public class Display extends JFrame {
 	    		try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					throw new RuntimeException("Failed to sleep");
 				}
 	    	}
 	    	pause = true;
@@ -274,8 +262,7 @@ public class Display extends JFrame {
 	    		try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					throw new RuntimeException("Failed to sleep");
 				}
 	    	}
 	    	pause = true;
@@ -283,11 +270,12 @@ public class Display extends JFrame {
 			pause = false;
 		}
 	    
+		@Serial
 		private static final long serialVersionUID = 6523850037367826272L;
 
 		/**
 		 * Sets the background grid.
-		 * @param g
+		 * @param g the Graphics
 		 */
 		private void init(Graphics g) {
 			this.setOpaque(true);
@@ -316,8 +304,7 @@ public class Display extends JFrame {
 				try {
 					Thread.sleep(1);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					throw new RuntimeException("Failed to sleep");
 				}
 			}
 

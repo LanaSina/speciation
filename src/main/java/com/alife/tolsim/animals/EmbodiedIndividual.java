@@ -28,8 +28,8 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
     /**
      * creates "light" at specified postion
      *
-     * @param x
-     * @param y
+     * @param x the abscissa at which to create the light individual
+     * @param y the ordinate at which to create the light individual
      * @param glID     id to give to this individual
      * @param ancestor id of the 1st ancestor
      * @param date     in-simulation time
@@ -200,12 +200,10 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
      * @return a csv string description of this creature
      */
     public String stringDesc() {
-
-        String description = ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
+        return ID + "," + position[0] + "," + position[1] + "," + isLight + "," + parentID + "," + birthDate + "," + life + ","
                 + speed + "," + maxEnergy + "," + getKidEnergy() + ","
                 + hasSensors() + "," + getAncestor() + "," + getNKids() + ","
                 + death + "," + matForKids + "," + energy + "," + parentIsLight;
-        return description;
     }
 
     public void setCellTransparency(double cellTransparency) {
@@ -289,11 +287,7 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
             borderColor = Color.BLUE;
         }
 
-        if (energy <= 0) {
-            return false;
-        }
-
-        return true;
+        return energy > 0;
     }
 
 

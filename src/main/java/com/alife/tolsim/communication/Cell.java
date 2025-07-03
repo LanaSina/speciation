@@ -59,28 +59,15 @@ public class Cell {
      * return a property of the cell
      */
     public double getProp(int k) {
-        double r;
+        double r = switch (k) {
+            case 0 -> luminosity;
+            case 1 -> sound;
+            case 2 -> smell;
+            case 3 -> temperature;
+            case 4 -> electric;
+            default -> 0;
+        };
         //todo put all in an array
-        switch (k) {
-            case 0:
-                r = luminosity;
-                break;
-            case 1:
-                r = sound;
-                break;
-            case 2:
-                r = smell;
-                break;
-            case 3:
-                r = temperature;
-                break;
-            case 4:
-                r = electric;
-                break;
-            default:
-                r = 0;
-                break;
-        }
         return r;
     }
 }
