@@ -9,8 +9,10 @@ import static java.lang.Math.max;
 
 public abstract class IndividualWithProperties implements Individual {
 
-    MyLog mlog = createMyLog();
+    /** Lower bound for <code>kidEnergy</code>. */
+    protected static final int MIN_KID_ENERGY = 1;
 
+    MyLog mlog = createMyLog();
 
     long eaten_by = -1;//1 = true;
 
@@ -158,8 +160,7 @@ public abstract class IndividualWithProperties implements Individual {
             // mutate kidEnergy
             if (generateBool(bias)) {
                 // double minMut = Utils.uniformDouble(-2, 2);
-                kidEnergy = (int) (kidEnergy + minMut);
-                if (kidEnergy < 0) kidEnergy = 0;
+                kidEnergy = Math.max(MIN_KID_ENERGY, (int) (kidEnergy + minMut));
             }
             // mutate matForKids
             if (generateBool(bias)) {
