@@ -2,6 +2,7 @@ package com.alife.tolsim.communication;
 
 import com.alife.tolsim.animals.*;
 import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -143,7 +144,7 @@ public class ShadowMap extends Map {
     public void applyChanges() {
         //update dead
         for (ShadowIndividual creature : remove) {
-            if (Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse) {
+            if (Constants.Save && Utils.uniformDouble() <= Constants.SaveCoarse) {
                 if (!creature.isLight() & !creature.parentIsLight()) {
                     //write down info
                     String str = creature.stringDesc() + "\n";

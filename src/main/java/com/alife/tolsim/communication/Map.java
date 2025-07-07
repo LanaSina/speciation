@@ -1,7 +1,7 @@
 package com.alife.tolsim.communication;
 
 import com.alife.tolsim.animals.IndividualWithProperties;
-import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 
 import java.io.FileWriter;
 import java.util.*;
@@ -104,7 +104,7 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 	}
 
 	protected boolean generateBool() {
-		return Constants.uniformDouble() > 0.5;
+		return Utils.uniformDouble() > 0.5;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public abstract class Map implements Iterable<IndividualWithProperties> {
 	 * @return an iterator on evolved individuals on this map
 	 */
 	public Iterator<IndividualWithProperties> iteratorOnEvolvedIndividuals() {
-		return Constants.filterIterator(iterator(), ind -> !ind.isLight() && !ind.parentIsLight());
+		return Utils.filterIterator(iterator(), ind -> !ind.isLight() && !ind.parentIsLight());
 	}
 
 	public abstract void applyChanges();

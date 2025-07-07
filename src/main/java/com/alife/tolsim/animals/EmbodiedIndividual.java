@@ -1,14 +1,13 @@
 package com.alife.tolsim.animals;
 
 import com.alife.tolsim.communication.MyLog;
-import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 import com.alife.tolsim.visualization.GraphicalComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 import static java.lang.Math.*;
-import static java.lang.Math.abs;
 
 
 public class EmbodiedIndividual extends IndividualWithProperties implements GraphicalComponent {
@@ -104,11 +103,11 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
             j = -1;
         }
         if (parentIsLight) {
-            position[0] = (in.position[0] + i * cst_light_birth_dst * Constants.uniformDouble());
-            position[1] = (in.position[1] + j * cst_light_birth_dst * Constants.uniformDouble());
+            position[0] = (in.position[0] + i * cst_light_birth_dst * Utils.uniformDouble());
+            position[1] = (in.position[1] + j * cst_light_birth_dst * Utils.uniformDouble());
         } else {
-            position[0] = (in.position[0] + i * birth_dst * Constants.uniformDouble());
-            position[1] = (in.position[1] + j * birth_dst * Constants.uniformDouble());
+            position[0] = (in.position[0] + i * birth_dst * Utils.uniformDouble());
+            position[1] = (in.position[1] + j * birth_dst * Utils.uniformDouble());
         }
 
         for (int k = 0; k < 2; k++) {

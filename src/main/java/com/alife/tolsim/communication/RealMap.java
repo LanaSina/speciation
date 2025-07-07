@@ -2,6 +2,7 @@ package com.alife.tolsim.communication;
 
 import com.alife.tolsim.animals.*;
 import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 import com.alife.tolsim.visualization.Display;
 
 import java.awt.*;
@@ -227,7 +228,7 @@ public class RealMap extends Map {
 		}
 
 		List<EmbodiedIndividual> shuffledCreatures = new LinkedList<>(c.creatures.values());
-		Collections.shuffle(shuffledCreatures, Constants.rand);
+		Collections.shuffle(shuffledCreatures, Utils.rand);
 
 		for (EmbodiedIndividual creature : shuffledCreatures) {
 
@@ -277,7 +278,7 @@ public class RealMap extends Map {
 						//iterate creatures on this cell
 						for (EmbodiedIndividual otherCreature : c.creatures.values()) {
 							double p = 1 * 3 / (double) c.creatures.size();
-							if (Constants.uniformDouble() > p) {
+							if (Utils.uniformDouble() > p) {
 								continue;
 							}
 							if (remove.containsKey(otherCreature.getID()) | (otherCreature.isLight())) {
@@ -325,7 +326,7 @@ public class RealMap extends Map {
 				predator.setBorderColor(Color.black);
 			}
 			// only save successful predation
-			if(Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse){
+			if(Constants.Save && Utils.uniformDouble() <= Constants.SaveCoarse){
 				/*
 					String header_predation = "t, pred_id, pos[0], pos[1], pred_is_light," +
 					"pred_lifeSpan, pred_speed, pred_maxEnergy, pred_kidEnergy," +

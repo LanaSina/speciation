@@ -2,6 +2,7 @@ package com.alife.tolsim.communication;
 
 import com.alife.tolsim.animals.EmbodiedIndividual;
 import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ThreadRemoveDead extends ThreadApplyChanges {
      */
     protected void treatCreature(int i) {
         EmbodiedIndividual creature = creaturesToTreat.get(i);
-        if (Constants.Save && Constants.uniformDouble() <= Constants.SaveCoarse) {
+        if (Constants.Save && Utils.uniformDouble() <= Constants.SaveCoarse) {
             if (!creature.isLight() & !creature.parentIsLight()) {
                 //write down info
                 // "ID,pred_pos_x, pred_pos_y,isLight,parent,created,lifeSpan,speed,maxEnergy,kidEnergy,sensors,ancestor, parentIsLight\n";

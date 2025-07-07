@@ -1,6 +1,6 @@
 package com.alife.tolsim.animals;
 
-import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 
 import java.util.*;
 
@@ -34,7 +34,7 @@ public class Node {
 //			return;
 //		}
 
-		int sensedId = (int) (Constants.uniformDouble(0, childCount-1)+0.5);
+		int sensedId = (int) (Utils.uniformDouble(0, childCount-1)+0.5);
 		List<Integer> keys = new ArrayList<Integer>(children.keySet());
 		if (keys.size()==0){
 			int a = 0; //breakpoint

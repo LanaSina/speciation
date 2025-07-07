@@ -15,6 +15,7 @@ import javax.swing.*;
 import com.alife.tolsim.communication.MyLog;
 import com.alife.tolsim.startup.Constants;
 import com.alife.tolsim.startup.Starter;
+import com.alife.tolsim.utils.Utils;
 
 /**
  * Graphic panel
@@ -299,7 +300,7 @@ public class Display extends JFrame {
 			pause = true;
 
 			for(GraphicalComponent graphicalComponent : components.values()){
-				if(Constants.uniformDouble()<Constants.DrawCoarse){
+				if(Utils.uniformDouble()<Constants.DrawCoarse){
 					graphicalComponent.draw(g,step);
 				}
 			}

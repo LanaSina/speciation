@@ -2,6 +2,7 @@ package com.alife.tolsim.animals;
 
 import com.alife.tolsim.communication.MyLog;
 import com.alife.tolsim.startup.Constants;
+import com.alife.tolsim.utils.Utils;
 
 import static java.lang.Math.max;
 
@@ -24,7 +25,7 @@ public abstract class IndividualWithProperties implements Individual {
     //nr of kids
     protected int nKids = 2;
     //sensors: map of property value to action
-    public int death = (int) (Constants.uniformDouble(0, 4) - 2 + 0.5) + 20;//50
+    public int death = (int) (Utils.uniformDouble(0, 4) - 2 + 0.5) + 20;//50
 
 
     //will be replaced by cell properties sensors
@@ -120,9 +121,9 @@ public abstract class IndividualWithProperties implements Individual {
         if (generateBool()) {
 
             // mutation parameters
-            double minMut = Constants.uniformDouble(-2, 2);
-            //double plus = Constants.uniformDouble(-cst_mut_factor, cst_mut_factor);
-            double plus = Constants.uniformDouble(-0.01, 0.01);
+            double minMut = Utils.uniformDouble(-2, 2);
+            //double plus = Utils.uniformDouble(-cst_mut_factor, cst_mut_factor);
+            double plus = Utils.uniformDouble(-0.01, 0.01);
 
 
             //do this after too
@@ -137,7 +138,7 @@ public abstract class IndividualWithProperties implements Individual {
             double bias = 0.6;
             // mutate speed
             if (generateBool(bias)) {
-                // double minMut = Constants.uniformDouble(-2, 2);
+                // double minMut = Utils.uniformDouble(-2, 2);
                 speed = (int) (speed + minMut);
                 // todo speed = check()
                 if (speed < 0) speed = 0;
@@ -146,7 +147,7 @@ public abstract class IndividualWithProperties implements Individual {
             }
             // mutate maxEnergy
             if (generateBool(bias)) {
-                // double minMut = Constants.uniformDouble(-2, 2);
+                // double minMut = Utils.uniformDouble(-2, 2);
                 maxEnergy = (int) (maxEnergy + minMut);
                 if (maxEnergy < 0) {
                     maxEnergy = 0;
@@ -156,13 +157,13 @@ public abstract class IndividualWithProperties implements Individual {
             }
             // mutate kidEnergy
             if (generateBool(bias)) {
-                // double minMut = Constants.uniformDouble(-2, 2);
+                // double minMut = Utils.uniformDouble(-2, 2);
                 kidEnergy = (int) (kidEnergy + minMut);
                 if (kidEnergy < 0) kidEnergy = 0;
             }
             // mutate matForKids
             if (generateBool(bias)) {
-                // double minMut = Constants.uniformDouble(-2, 2);
+                // double minMut = Utils.uniformDouble(-2, 2);
                 matForKids = (int) (matForKids + minMut);
                 if (matForKids < 0) matForKids = 0;
             }
@@ -170,9 +171,9 @@ public abstract class IndividualWithProperties implements Individual {
             if (generateBool(bias)) {
                 //if(true){
                 //create or modify sensor
-                // double plus = Constants.uniformDouble(-1, 1);
+                // double plus = Utils.uniformDouble(-1, 1);
                 if (plus > 0) {
-                    int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);//-1
+                    int prop = (int) (Utils.uniformDouble(0, nProperties - 1) + 0.5);//-1
 
                     // modify the detection value if sensor exists
                     if (generateBool()) {
@@ -183,7 +184,7 @@ public abstract class IndividualWithProperties implements Individual {
                             int[] actionPair = sensors.removeRandomSensor(prop);
                             // if(actionPair[0]>-1) {
                             // new sensed value
-                            int value = (int) max(0, (actionPair[0] + Constants.uniformDouble(-3, 3)));
+                            int value = (int) max(0, (actionPair[0] + Utils.uniformDouble(-3, 3)));
                             // same action
                             sensedValues.addChild(value, actionPair[1]);
                             // }
@@ -191,20 +192,20 @@ public abstract class IndividualWithProperties implements Individual {
 //						else {
 //							// create sensor.
 //							// property being sensed -> value being sensed -> action
-//							int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
-//							int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes-1)+0.5);
+//							int sensor_value = (int) Utils.uniformDouble(0, cst_energy_max);
+//							int action = (int) (Utils.uniformDouble(0, Constants.ActionTypes-1)+0.5);
 //							sensors.addSensor(prop, sensor_value, action);
 //						}
                     } else {
                         // create sensor.
                         // root -> property being sensed -> value being sensed -> action
                         // root -> [prop id, array]
-                        int sensor_value = (int) Constants.uniformDouble(0, cst_energy_max);
-                        int action = (int) (Constants.uniformDouble(0, Constants.ActionTypes - 1) + 0.5);
+                        int sensor_value = (int) Utils.uniformDouble(0, cst_energy_max);
+                        int action = (int) (Utils.uniformDouble(0, Constants.ActionTypes - 1) + 0.5);
                         sensors.addSensor(prop, sensor_value, action);
                     }
                 } else {
-                    int prop = (int) (Constants.uniformDouble(0, nProperties - 1) + 0.5);
+                    int prop = (int) (Utils.uniformDouble(0, nProperties - 1) + 0.5);
                     if (sensors.properties.get(prop).getChildCount() > 0) {
                         //tree nodes: properties -> detectionValue -> action
                         int[] values = sensors.removeRandomChild(prop);
@@ -214,8 +215,8 @@ public abstract class IndividualWithProperties implements Individual {
 
             // mutate nKids
             if (generateBool(bias)) {
-				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				/*double plus = Utils.uniformDouble(-1, 1)*0.01; //1% change
+				double minMut = Utils.uniformDouble(-2, 2); // direct intervention for small values*/
 
                 int n = (int) (getNKids() * (plus + 1) + minMut + 0.5);
                 if (n < 0) n = 0;
@@ -224,8 +225,8 @@ public abstract class IndividualWithProperties implements Individual {
 
             // mutate death
             if (generateBool(bias)) {
-				/*double plus = Constants.uniformDouble(-1, 1)*0.01; //1% change
-				double minMut = Constants.uniformDouble(-2, 2); // direct intervention for small values*/
+				/*double plus = Utils.uniformDouble(-1, 1)*0.01; //1% change
+				double minMut = Utils.uniformDouble(-2, 2); // direct intervention for small values*/
 
                 death = (int) (death * (1 + plus) + minMut + 0.5);
                 if (death < 0) death = 0;
@@ -278,11 +279,11 @@ public abstract class IndividualWithProperties implements Individual {
      * @return a boolean, with a probability of <code>bias</code> to be true
      */
     protected boolean generateBool(double bias) {
-        return Constants.uniformDouble() < bias;
+        return Utils.uniformDouble() < bias;
     }
 
     protected boolean generateBool() {
-        return Constants.uniformDouble() > 0.5;
+        return Utils.uniformDouble() > 0.5;
     }
 
     public long getID() {
