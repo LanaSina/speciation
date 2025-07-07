@@ -35,12 +35,12 @@ public class Constants {
 	public static boolean Save = false;
     /** Percentage of individuals/predations saved. */
     public static double SaveCoarse = 0.01;
-    /** This field is both:
-     * <ul>
-     *     <li>the number of time steps during which to save information about dead individuals and predation before switching to a new file;</li>
-     *     <li>the number of time steps between two saves of the alive individuals and of the sensors.</li>
-     * </ul> */
+    /** This field is the number of time steps during which to save information about dead individuals and predation before switching to news files. */
     public static int SaveEvery = 5000;
+
+	/** This field is the number of time steps between two backups of the alive individuals and of the sensors.
+	 * Backups allow to stop the program then later resume it at the same point. */
+	public static int BackupEvery = 100000;
 
 	/** Controls whether the RealMap is displayed. (NB: the ShadowMap is never displayed.) */
 	public static final boolean EnableDisplay = false;

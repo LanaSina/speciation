@@ -283,18 +283,18 @@ public class Starter {
 		 */
 		protected void saveDeltasAndOtherInformation() {
 			if (Constants.Save) {
-				if (realMap.getTime() % Constants.SaveEvery == 0) {
+				if (realMap.getTime() % Constants.SaveEvery == 0)
 					for (Map map : theMaps) map.setupLogFiles();
-					save();
-				}
 				realMap.savePopulation();
 			}
+			if (realMap.getTime() % Constants.BackupEvery == 0)
+				backup();
 			if (realMap.getTime() % deltasSavedEvery == 0)
 				updateDeltasSavers();
 		}
 
-		/** (Maybe) saves information about dead individuals, predation, alive individuals, the sensors. */
-        public void save() {
+		/** Backups the state of the maps. */
+        public void backup() {
 			mlog.say("backup all logs");
 			if (realMap.getDisplay() != null) {
 				realMap.getDisplay().pauseProcedure(true);
