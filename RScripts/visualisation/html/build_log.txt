@@ -1,0 +1,17 @@
+Build started: 2025-09-05 16:06:58.55824
+Found 3 repositories:
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_10_03_47/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_12_00_26/SummaryIndividuals
+
+[2025-09-05 16:06:58.577766] Rendering 2025_07_10_03_47 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+FAILED: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+  -> cannot open the connection
+
+[2025-09-05 16:07:03.68621] Rendering 2024_12_29_17_15 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+FAILED: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+  -> cannot open the connection
+
+[2025-09-05 16:07:23.748774] Rendering 2025_07_12_00_26 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+FAILED: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/
+  -> cannot open the connection
