@@ -1,14 +1,12 @@
-Build started: 2025-09-05 16:12:22.180842
-Found 3 repositories:
+Build started: 2025-09-08 11:20:18.282849
+Found 10 repositories:
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_07_23_23/SummaryIndividuals
  - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_10_03_47/SummaryIndividuals
- - /Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/SummaryIndividuals
  - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_12_00_26/SummaryIndividuals
-
-[2025-09-05 16:12:22.207581] Rendering 2025_07_10_03_47 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2025_07_10_03_47_pgmDeath_maxEnergy.html
-SUCCESS: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2025_07_10_03_47_pgmDeath_maxEnergy.html
-
-[2025-09-05 16:12:29.840407] Rendering 2024_12_29_17_15 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2024_12_29_17_15_pgmDeath_maxEnergy.html
-SUCCESS: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2024_12_29_17_15_pgmDeath_maxEnergy.html
-
-[2025-09-05 16:12:55.146467] Rendering 2025_07_12_00_26 -> /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2025_07_12_00_26_pgmDeath_maxEnergy.html
-SUCCESS: /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/html/2025_07_12_00_26_pgmDeath_maxEnergy.html
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_12_05_36/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_13_00_35/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_15_00_17/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_15_23_11/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_16_23_11/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_18_00_57/SummaryIndividuals
+ - /Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_25_22_40/SummaryIndividuals

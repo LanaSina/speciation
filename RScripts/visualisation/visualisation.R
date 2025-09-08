@@ -16,11 +16,11 @@ plot_summary_tree <- function(
   dot_size_range = c(1, 15)
 ) {
 
-  # ---------------- helpers ----------------
+  #helpers
   read_summary_individuals <- function(folder_path) {
     files <- list.files(
       folder_path,
-      pattern = "SummaryIndividuals_\\d+\\.csv$",
+      pattern = "^SummaryIndividuals_\\d+\\.csv$",
       full.names = TRUE
     )
 
@@ -30,7 +30,7 @@ plot_summary_tree <- function(
     files <- files[ord]
 
     cat("Found", length(files), "summary-individual files (numeric order):\n")
-    print(basename(files))
+#     print(basename(files))
 
     data_list <- lapply(files, function(f) {
       df <- read.csv(f, stringsAsFactors = FALSE)
@@ -195,8 +195,6 @@ speed_adj <- if (!is.null(speed_col)) {
 
       world$feat_color <- cols
     }
-
-
 
   #size
   if ("size" %in% names(world) && any(!is.na(world$lifeSpan))) {
