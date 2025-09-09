@@ -21,7 +21,7 @@ base_folder = "../../new_data"
 ## Read agents data
 
 ```{r}
-folder = "2025_02_15_19_29" #"trees/best-2024_11_05_20_37"
+folder = "../data/2025_07_07_23_23/SummaryIndividuals"
 fileName = file.path(base_folder, folder,"SummaryIndividuals_0.csv")
 
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
@@ -39,7 +39,7 @@ world = whole_world
 # # random subset
 sample_vector=c(1:nrow(whole_world))
 # sample elements from the vector (in this example 30 elements sampled without replacement)
-the_sample = sample(sample_vector, 50000, replace=FALSE)
+the_sample = sample(sample_vector, 5000, replace=FALSE)
 # the vector of randomly selected elements is then used to select rows from the dataframe
 world = whole_world[the_sample,]
 

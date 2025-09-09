@@ -1,5 +1,3 @@
-#packages
-#for PCA< KNN, DBSCAN in order
 if (!requireNamespace("irlba", quietly = TRUE)) {
   install.packages("irlba", repos = "https://cloud.r-project.org")
 }
@@ -18,24 +16,36 @@ library(tidyr)
 library(irlba)
 library(RANN); library(dbscan)
 library(jsonlite)
-source("visualisation.R")      #3d visualisation Tree of Life
+source("visualisation.R")
 source("phylogeneticTree.R")
 source("speciesCluster.R")
 
-#view settings and folder path
 camera <- list(eye=list(x=1.4,y=-1.6,z=1.0), center=list(x=0,y=0,z=0), up=list(x=0,y=0,z=1))
-folder  <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/0-30K"
+folder  <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_07_23_23/SummaryIndividuals"
+folder_name <- "2025_07_07_23_23"
 
-#create a 3d visualisation html file (Tree of Life)
+time_range <- c(0L, 8000L)
+
+
+
+
 fig3d <- plot_summary_tree(
   folder_path  = folder,
-  trait_y      = "pgmDeath",
-  trait_z      = "maxEnergy",
-  color_by     = c("speed","pgmDeath","sensors"),
+  folder_name  = folder_name,
+  created_range= time_range,
+  trait_y      = "maxEnergy",
+  trait_z      = "speed",
+  color_by     = c("lifeSpan",
+                   "speed",
+                   "maxEnergy",
+                   "kidEnergy",
+                   "nkids"),
+  dot_sizes = c(1, 15),
   keep_parents = FALSE,
-  sample_frac  = 0.008
+  sample_frac  = 1.0
 ) %>% layout(scene = list(camera = camera, aspectmode = "manual",
                           aspectratio = list(x = 1.3, y = 1.3, z = 1)))
+
 
 #Species cluster
 read_summary_individuals <- function(folder_path) {
@@ -44,6 +54,9 @@ read_summary_individuals <- function(folder_path) {
   nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
   ord   <- order(nums, na.last = TRUE)
   files <- files[ord]; nums <- nums[ord]
+  cat("Found", length(files), "summary-individual files (numeric order):\n")
+  # print(basename(files))
+
   dl <- lapply(seq_along(files), function(i) {
     df <- read.csv(files[i], stringsAsFactors = FALSE)
     df$snapshot <- nums[i]; df
@@ -52,6 +65,10 @@ read_summary_individuals <- function(folder_path) {
 }
 
 all_data <- read_summary_individuals(folder)
+
+limited_data <- all_data %>%
+  dplyr::filter(created >= time_range[1], created <= time_range[3])
+
 
 numdf <- all_data |>
   select(snapshot, where(is.numeric)) |>
@@ -67,7 +84,6 @@ n_pca_fit <- min(120000L, n_total)
 fit_idx   <- sample.int(n_total, n_pca_fit)
 pc_fit <- irlba::prcomp_irlba(as.matrix(numdf[fit_idx, feat_cols, drop = FALSE]),
                               n = 2, center = TRUE, scale. = TRUE)
-
 #setting timeline
 CHECKPOINTS <- c(0L, 5000L, 10000L, 15000L, 20000L, 25000L, 30000L)
 LABELS      <- sprintf("%dk", CHECKPOINTS/1000)
@@ -84,6 +100,7 @@ cluster_bundle <- build_cluster_frames(
 )
 frames          <- cluster_bundle$frames
 species_cluster <- cluster_bundle$base_plot
+
 
 #phylogenetic tree
 phy <- build_phylogeny_bundle(
@@ -102,15 +119,13 @@ PHY_XMIN       <- phy$x_min
 PHY_XMAX       <- phy$x_max
 
 
-
 #colours
 pal_base    <- c("#E45756","#4C78A8","#54A24B","#F58518","#72B7B2",
                  "#B279A2","#FF9DA6","#9D755D","#ECA400","#7EBDC2",
                  "#A0A7A8","#8E6C8A","#A3A948","#F2C14E","#F78154")
 noise_color <- "#BDBDBD"
-
 #js
-frames_json      <- toJSON(frames,        auto_unbox = TRUE)
+frames_json      <- toJSON(unname(frames), auto_unbox = TRUE)
 labels_json      <- toJSON(LABELS,        auto_unbox = TRUE)
 palette_json     <- toJSON(pal_base,      auto_unbox = TRUE)
 noise_json       <- toJSON(noise_color,   auto_unbox = TRUE)
@@ -267,7 +282,7 @@ dashboard <- tagList(
   tags$html(
     tags$head(
       tags$style(HTML("
-        body { font-family: Arial, sans-serif; margin: 0; background: #f8f7f5; }
+        body { font-family: Arial, sans-serif; margin: 0; background: #000000; }
         .header { padding: 15px; text-align: center; font-size: 16px; }
         .container {
           display: grid;
@@ -300,26 +315,37 @@ dashboard <- tagList(
     tags$body(
       div(class="header","Individuals → clusters → branches"),
       div(class="container",
-        div(class="box", style="grid-row: 1 / span 2;",
-          h3("3D Visualisation"),
-          div(class="fill", as.tags(fig3d)),
-          div(class="caption","Hover for agent traits.")
+        div(class="box",
+          style="grid-row: 1 / span 2; box-sizing: border-box; padding: 6px 10px 10px 10px;",
+          div(
+            style="transform: translate(6px, 4px);",
+            h3("3D Visualisation"),
+            div(class="caption","This is a 3D visualisation showcasing the canonical result of the simulation. Each dot represents and individual agent.
+            You can explore detailed characteristics of an agent with a narrative story by hovering.")
+          ),
+            div(class="fill", style="transform: scale(0.93); transform-origin: top middle;",
+                as.tags(fig3d))
+
         ),
+
         div(class="box",
           h3("Species Clusters"),
-          div(class="fill", div(id="clusterPlot", style="width:100%; height:100%;", as.tags(species_cluster)))
+          div(class="fill",
+            div(id="clusterPlot", style="width:100%; height:100%;", as.tags(species_cluster))
+          )
         ),
+
         div(class="box",
           h3("Phylogenetic Tree (time on y)"),
           div(class="fill phylo-wrap",
             div(id="phyloPlot", style="width:100%; height:100%;", as.tags(phylo_plot)),
             div(class="vslider",
-              tags$input(id="timeSlider", type="range",
-                         min="1", max=6, step="1", value="1")
+              tags$input(id="timeSlider", type="range", min="1", max=7, step="1", value="1")
             )
           ),
           div(class="caption","Slider controls both cluster view and phylogeny to the same timeframe.")
         )
+
       ),
       tags$script(HTML(js))
     )

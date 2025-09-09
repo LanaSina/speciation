@@ -15,8 +15,8 @@ summary_folders <- all_dirs[
 OUT_DIR <- "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/results"
 
 #hyperparams
-TRAIT_Y <- "kidEnergy"
-TRAIT_Z <- "maxEnergy"
+TRAIT_Y <- "pgmDeath"
+TRAIT_Z <- "nkids"
 SAMPLE_FRAC  <- 0.008
 KEEP_PARENTS <- TRUE
 
