@@ -13,7 +13,8 @@ build_cluster_frames <- function(
   per_cp_max = 20000L,   # max points per checkpoint for plotting
   minpts     = 4L,       # DBSCAN minPts (also k for k-distance)
   kq         = 0.98,     # fallback: use k-distance quantile if elbow fails
-  seed       = 42L
+  seed       = 42L,
+  window_size = 1000L
 ) {
   stopifnot(is.data.frame(numdf), "snapshot" %in% names(numdf))
   stopifnot(all(feat_cols %in% names(numdf)))
@@ -67,13 +68,33 @@ build_cluster_frames <- function(
   for (i in seq_along(checkpoints)) {
     cp <- checkpoints[i]
 
-    sub <- numdf[numdf$snapshot == cp, c("snapshot", feat_cols), drop = FALSE]
+    sub <- numdf[
+      numdf$created >= (cp - window_size) & numdf$created <= cp,
+      c("snapshot", "created", "ID", feat_cols), drop = FALSE
+    ]
     sub <- tidyr::drop_na(sub)
+
+    if (nrow(sub) && "ID" %in% names(sub)) {
+      sub <- sub |>
+        dplyr::mutate(.dist = abs(snapshot - cp)) |>
+        dplyr::group_by(ID) |>
+        dplyr::slice_min(order_by = .dist, n = 1, with_ties = FALSE) |>
+        dplyr::ungroup() |>
+        dplyr::select(-.dist)
+    }
 
     if (nrow(sub) < (minpts + 2L)) {
       frames[[i]] <- list(x = numeric(0), y = numeric(0), cluster = character(0))
       next
     }
+
+    # sub <- numdf[numdf$snapshot == cp, c("snapshot", feat_cols), drop = FALSE]
+    # sub <- tidyr::drop_na(sub)
+
+    # if (nrow(sub) < (minpts + 2L)) {
+    #   frames[[i]] <- list(x = numeric(0), y = numeric(0), cluster = character(0))
+    #   next
+    # }
 
     # ε via elbow on k-distance (with quantile fallback)
     X_full  <- .scale_mat(as.matrix(sub[, feat_cols, drop = FALSE]))
@@ -98,12 +119,12 @@ build_cluster_frames <- function(
     pcs <- predict(pc_fit, newdata = as.matrix(sub_plot[, feat_cols, drop = FALSE]))
     if (is.null(dim(pcs))) pcs <- cbind(pcs, 0)
 
-    cl_lab <- ifelse(cl_plot == 0, "noise", as.character(cl_plot))
+    # cl_lab <- ifelse(cl_plot == 0, "noise", as.character(cl_plot))
 
     frames[[i]] <- list(
       x = as.numeric(pcs[, 1]),
       y = as.numeric(pcs[, 2]),
-      cluster = cl_lab
+      cluster = ifelse(cl_plot == 0, "noise", as.character(cl_plot))
     )
   }
 

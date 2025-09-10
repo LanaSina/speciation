@@ -21,7 +21,7 @@ plot_summary_tree <- function(
   dot_sizes = NULL
 ) {
 
-  # ---------- helpers ----------
+  #helper functions
   read_summary_individuals <- function(folder_path) {
     files <- list.files(
       folder_path,
@@ -46,15 +46,16 @@ plot_summary_tree <- function(
     out
   }
 
-  norm01 <- function(v) {
-    r <- range(v, na.rm = TRUE)
-    if (!is.finite(r[1]) || diff(r) == 0) return(rep(0, length(v)))
-    (v - r[1]) / diff(r)
-  }
-  rescale_to <- function(v, to = c(4, 20)) {
-    p <- norm01(v)
-    to[1] + p * (to[2] - to[1])
-  }
+  # norm01 <- function(v) {
+  #   r <- range(v, na.rm = TRUE)
+  #   if (!is.finite(r[1]) || diff(r) == 0) return(rep(0, length(v)))
+  #   (v - r[1]) / diff(r)
+  # }
+  # rescale_to <- function(v, to = c(4, 20)) {
+  #   p <- norm01(v)
+  #   to[1] + p * (to[2] - to[1])
+  # }
+
   pick_col <- function(df, ...) {
     opts <- c(...)
     hits <- opts[opts %in% names(df)]
@@ -63,7 +64,7 @@ plot_summary_tree <- function(
   qlabel <- function(v, low="low", mid="medium", high="high") {
     if (is.null(v) || all(is.na(v))) return(factor(rep(mid, length(v))))
     qs <- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
-    # guard for non-unique breaks
+
     qs <- unique(qs)
     if (length(qs) < 2) {
       return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
@@ -78,10 +79,7 @@ plot_summary_tree <- function(
     (x - rng[1]) / diff(rng)
   }
 
-  # ---------- load & initial time-slice ----------
   all_data <- read_summary_individuals(folder_path)
-
-  # ensure numeric 'created' for filtering
   if ("created" %in% names(all_data)) {
     all_data$created <- suppressWarnings(as.numeric(all_data$created))
   }
@@ -94,7 +92,7 @@ plot_summary_tree <- function(
     )
   }
 
-  # ---------- schema check & numeric coercions ----------
+  #id check
   needed <- unique(c("ID", "parent", "ancestor", "created", trait_y, trait_z))
   missing <- setdiff(needed, names(all_data))
   if (length(missing)) stop("Missing required columns: ", paste(missing, collapse = ", "))
@@ -116,7 +114,7 @@ plot_summary_tree <- function(
 
   if (!nrow(all_data)) stop("No rows to plot after filtering/coercion.")
 
-  # ---------- sampling ----------
+  #sampling
   if (!is.null(sample_frac) && is.finite(sample_frac) && sample_frac > 0 && sample_frac < 1) {
     set.seed(123)
     keep_ids <- sample(all_data$ID, size = max(1, ceiling(nrow(all_data) * sample_frac)))
@@ -130,7 +128,7 @@ plot_summary_tree <- function(
     world <- all_data
   }
 
-  # ---------- labels ----------
+  #labels
   species_col <- pick_col(world, "species", "ancestor", "parent")
   size_col    <- pick_col(world, "size", "maxEnergy", trait_z)
   speed_col   <- pick_col(world, "speed")
@@ -195,40 +193,35 @@ plot_summary_tree <- function(
     born_line
   )
 
-  # ---------- colour (t-SNE/PCA → HSL) ----------
+  #colour
   feat_cols <- intersect(color_by, names(world))
   if (length(feat_cols) == 0) {
     warning("No color_by columns found in data; using grey.")
     world$feat_color <- "#9E9E9E"
   } else {
-    # Build feature matrix (rows = individuals, cols = selected stats), numeric only
+    #feature matrix
     X <- as.data.frame(lapply(feat_cols, function(nm) suppressWarnings(as.numeric(world[[nm]]))))
     names(X) <- feat_cols
 
-    # Drop fully-NA columns, keep at least 2 columns (repeat a column if needed)
     keep_col <- vapply(X, function(v) any(is.finite(v)), logical(1))
     X <- X[, keep_col, drop = FALSE]
     if (ncol(X) == 0) {
       world$feat_color <- "#9E9E9E"
     } else {
-      if (ncol(X) == 1) X <- cbind(X, X)  # ensure ≥2 dims
+      if (ncol(X) == 1) X <- cbind(X, X) #2 dimensions of features
 
-      # Row-wise completeness: replace NAs by column means (so we don’t drop many points)
       for (j in seq_len(ncol(X))) {
         v <- X[[j]]
         mu <- mean(v[is.finite(v)], na.rm = TRUE)
         v[!is.finite(v)] <- mu
         X[[j]] <- v
       }
-
-      # Normalize each feature to [0,1]
+      #normalise
       X[] <- lapply(X, scale01_safe)
       Xmat <- as.matrix(X)
 
-      # --- Embed to 2D: prefer t-SNE, else PCA
       set.seed(42L)
       if (Rtsne_available) {
-        # Perplexity ~ min(30, N/3) with lower bound 5
         perp <- max(5, min(30, floor(nrow(Xmat)/3)))
         ts <- Rtsne::Rtsne(Xmat, dims = 2, perplexity = perp, check_duplicates = FALSE, verbose = FALSE)
         emb <- ts$Y
@@ -237,17 +230,16 @@ plot_summary_tree <- function(
         emb <- pc$x[, 1:2, drop = FALSE]
       }
 
-      # Map emb[:,1] → Hue (0..360), emb[:,2] → Saturation (0..100%), Lightness = 50%
+      #HSL mapping
       e1 <- emb[, 1]; e2 <- emb[, 2]
       h <- 360 * scale01_safe(e1)
       s <- 100 * scale01_safe(e2)
-      # Construct CSS hsl() strings that plotly accepts
       world$feat_color <- paste0("hsl(", round(h), ", ", round(s), "%, 50%)")
     }
   }
 
 
-  # ---------- plot ----------
+  #plot
   fig <- plot_ly(
     world,
     x = ~created,
@@ -278,7 +270,6 @@ plot_summary_tree <- function(
     ) %>%
     config(responsive = TRUE)
 
-  # keep deps local to avoid CDN errors
   fig <- plotly::partial_bundle(fig, local = TRUE)
 
   fig$sizingPolicy <- htmlwidgets::sizingPolicy(
@@ -290,7 +281,7 @@ plot_summary_tree <- function(
     viewer.padding = 0
   )
 
-  # ---------- save ----------
+  #save file
   if (is.null(out_file)) {
     out_file <- sprintf("html/%s_summary_%s_%s.html", folder_name, trait_y, trait_z)
   }
@@ -309,13 +300,12 @@ plot_summary_tree <- function(
   invisible(fig)
 }
 
-# -------- example knobs --------
-TRAIT_Y <- "pgmDeath"
-TRAIT_Z <- "nkids"
-folder_name <- "2025_07_12_00_23"
-OUT_DIR <- "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/results"
+# Example call (uncomment to run)
+# TRAIT_Y <- "pgmDeath"
+# TRAIT_Z <- "nkids"
+# folder_name <- "2025_07_12_00_23"
+# OUT_DIR <- "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/results"
 
-# Example call (uncomment to run):
 # time_range <- c(0, 5000L)
 # fig <- plot_summary_tree(
 #   folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_12_00_26/SummaryIndividuals",

@@ -20,29 +20,34 @@ source("visualisation.R")
 source("phylogeneticTree.R")
 source("speciesCluster.R")
 
+#settings
 camera <- list(eye=list(x=1.4,y=-1.6,z=1.0), center=list(x=0,y=0,z=0), up=list(x=0,y=0,z=1))
-folder  <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_07_23_23/SummaryIndividuals"
-folder_name <- "2025_07_07_23_23"
+folder  <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data"
+folder_name <- "2024_12_29_17_15"
 
-time_range <- c(0L, 8000L)
+time_range <- c(0L, 75000L)
 
-
+#timeline
+CHECKPOINTS <- seq(time_range[1], time_range[2], by = 1000L)
+LABELS      <- sprintf("%dk", CHECKPOINTS/1000)
 
 
 fig3d <- plot_summary_tree(
   folder_path  = folder,
   folder_name  = folder_name,
   created_range= time_range,
-  trait_y      = "maxEnergy",
-  trait_z      = "speed",
+  trait_y      = "pgmDeath",
+  trait_z      = "maxEnergy",
   color_by     = c("lifeSpan",
                    "speed",
-                   "maxEnergy",
                    "kidEnergy",
+                   "maxEnergy",
+                   "pgmDeath",
+                   "sensors",
                    "nkids"),
   dot_sizes = c(1, 15),
   keep_parents = FALSE,
-  sample_frac  = 1.0
+  sample_frac  = 0.01
 ) %>% layout(scene = list(camera = camera, aspectmode = "manual",
                           aspectratio = list(x = 1.3, y = 1.3, z = 1)))
 
@@ -67,7 +72,7 @@ read_summary_individuals <- function(folder_path) {
 all_data <- read_summary_individuals(folder)
 
 limited_data <- all_data %>%
-  dplyr::filter(created >= time_range[1], created <= time_range[3])
+  dplyr::filter(created >= time_range[1], created <= time_range[2])
 
 
 numdf <- all_data |>
@@ -84,9 +89,7 @@ n_pca_fit <- min(120000L, n_total)
 fit_idx   <- sample.int(n_total, n_pca_fit)
 pc_fit <- irlba::prcomp_irlba(as.matrix(numdf[fit_idx, feat_cols, drop = FALSE]),
                               n = 2, center = TRUE, scale. = TRUE)
-#setting timeline
-CHECKPOINTS <- c(0L, 5000L, 10000L, 15000L, 20000L, 25000L, 30000L)
-LABELS      <- sprintf("%dk", CHECKPOINTS/1000)
+
 
 
 cluster_bundle <- build_cluster_frames(
@@ -331,16 +334,16 @@ dashboard <- tagList(
         div(class="box",
           h3("Species Clusters"),
           div(class="fill",
-            div(id="clusterPlot", style="width:100%; height:100%;", as.tags(species_cluster))
+            div(id="clusterPlot", style="width:85%; height:85%;", as.tags(species_cluster))
           )
         ),
 
         div(class="box",
           h3("Phylogenetic Tree (time on y)"),
           div(class="fill phylo-wrap",
-            div(id="phyloPlot", style="width:100%; height:100%;", as.tags(phylo_plot)),
+            div(id="phyloPlot", style="width:85%; height:85%;", as.tags(phylo_plot)),
             div(class="vslider",
-              tags$input(id="timeSlider", type="range", min="1", max=7, step="1", value="1")
+              tags$input(id="timeSlider", type="range", min="1", max=length(CHECKPOINTS), step="1", value="1")
             )
           ),
           div(class="caption","Slider controls both cluster view and phylogeny to the same timeframe.")
