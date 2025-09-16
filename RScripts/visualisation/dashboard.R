@@ -32,24 +32,24 @@ CHECKPOINTS <- seq(time_range[1], time_range[2], by = 1000L)
 LABELS      <- sprintf("%dk", CHECKPOINTS/1000)
 
 
-fig3d <- plot_summary_tree(
-  folder_path  = folder,
-  folder_name  = folder_name,
-  created_range= time_range,
-  trait_y      = "pgmDeath",
-  trait_z      = "maxEnergy",
-  color_by     = c("lifeSpan",
-                   "speed",
-                   "kidEnergy",
-                   "maxEnergy",
-                   "pgmDeath",
-                   "sensors",
-                   "nkids"),
-  dot_sizes = c(1, 15),
-  keep_parents = FALSE,
-  sample_frac  = 0.01
-) %>% layout(scene = list(camera = camera, aspectmode = "manual",
-                          aspectratio = list(x = 1.3, y = 1.3, z = 1)))
+# fig3d <- plot_summary_tree(
+#   folder_path  = folder,
+#   folder_name  = folder_name,
+#   created_range= time_range,
+#   trait_y      = "pgmDeath",
+#   trait_z      = "maxEnergy",
+#   color_by     = c("lifeSpan",
+#                    "speed",
+#                    "kidEnergy",
+#                    "maxEnergy",
+#                    "pgmDeath",
+#                    "sensors",
+#                    "nkids"),
+#   dot_sizes = c(1, 15),
+#   keep_parents = FALSE,
+#   sample_frac  = 0.01
+# ) %>% layout(scene = list(camera = camera, aspectmode = "manual",
+#                           aspectratio = list(x = 1.3, y = 1.3, z = 1)))
 
 
 #Species cluster
@@ -98,7 +98,7 @@ cluster_bundle <- build_cluster_frames(
   feat_cols   = feat_cols,
   checkpoints = CHECKPOINTS,
   per_cp_max  = 20000L,
-  minpts      = 4L,
+  minpts      = 10L,
   kq          = 0.98
 )
 frames          <- cluster_bundle$frames

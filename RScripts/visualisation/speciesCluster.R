@@ -6,13 +6,13 @@ suppressPackageStartupMessages({
 })
 
 build_cluster_frames <- function(
-  numdf,                 # data.frame with columns: snapshot, feat_cols...
-  pc_fit,                # prcomp/prcomp_irlba object with 2 PCs
-  feat_cols,             # character vector of numeric feature columns
-  checkpoints,           # numeric vector of snapshot values to render
-  per_cp_max = 20000L,   # max points per checkpoint for plotting
-  minpts     = 4L,       # DBSCAN minPts (also k for k-distance)
-  kq         = 0.98,     # fallback: use k-distance quantile if elbow fails
+  numdf,
+  pc_fit,
+  feat_cols,
+  checkpoints,
+  per_cp_max = 20000L,
+  minpts     = 4L,
+  kq         = 0.98,
   seed       = 42L,
   window_size = 1000L
 ) {
@@ -49,6 +49,20 @@ build_cluster_frames <- function(
     d_sorted[i]
   }
 
+  .draw_elbow <- function(cp, kd, eps_hat, eps_chosen, minpts){
+    par(mar = c(4,4,3,1))
+    plot(kd, type = "l", xlab = "Sorted neighbors", ylab = "k-distance",
+         main = sprintf("Checkpoint %s | minPts = %d", as.character(cp), minpts))
+    abline(h = eps_hat,    col = "red", lty = 2, lwd = 2)
+    abline(h = eps_chosen, col = "red", lty = 1, lwd = 2)
+    legend("topleft",
+           legend = c(sprintf("elbow eps_hat = %.4g", eps_hat),
+                      sprintf("chosen eps = %.4g", eps_chosen)),
+           lty = c(2,1), lwd = 2, col = "red", bty = "n")
+  }
+
+
+
   frames <- vector("list", length(checkpoints))
   names(frames) <- as.character(checkpoints)
 
@@ -64,6 +78,13 @@ build_cluster_frames <- function(
       yaxis = list(title = "PC2", fixedrange = TRUE),
       margin = list(l = 40, r = 10, b = 40, t = 10)
     )
+
+  elbow_pdf_file <- "all_elbows.pdf"   # set to NULL to disable
+  if (!is.null(elbow_pdf_file)) {
+    if (!dir.exists(dirname(elbow_pdf_file))) dir.create(dirname(elbow_pdf_file), recursive = TRUE, showWarnings = FALSE)
+    grDevices::pdf(elbow_pdf_file, width = 7, height = 5)   # inches
+    on.exit(try(grDevices::dev.off(), silent = TRUE), add = TRUE)
+  }
 
   for (i in seq_along(checkpoints)) {
     cp <- checkpoints[i]
@@ -96,37 +117,72 @@ build_cluster_frames <- function(
     #   next
     # }
 
-    # ε via elbow on k-distance (with quantile fallback)
-    X_full  <- .scale_mat(as.matrix(sub[, feat_cols, drop = FALSE]))
-    kd      <- .k_distances(X_full, k = minpts)
+    # --- Build 2D PCs and standardize for DBSCAN ---
+    pcs_full <- predict(pc_fit, newdata = as.matrix(sub[, feat_cols, drop = FALSE]))
+    pcs_full <- pcs_full[, 1:2, drop = FALSE]
+    X2 <- .scale_mat(pcs_full)
+
+    if (nrow(X2) < (minpts + 1L)) {
+      frames[[i]] <- list(x = numeric(0), y = numeric(0), cluster = character(0))
+      next
+    }
+
+    #k distance
+    kd      <- .k_distances(X2, k = minpts)
     eps_hat <- .elbow_kneedle(kd)
-    if (!is.finite(eps_hat)) {
+    if (!is.finite(eps_hat) || eps_hat <= 0) {
       eps_hat <- as.numeric(stats::quantile(kd, probs = kq, na.rm = TRUE, names = FALSE))
-      if (!is.finite(eps_hat)) {
+      if (!is.finite(eps_hat) || eps_hat <= 0) {
         frames[[i]] <- list(x = numeric(0), y = numeric(0), cluster = character(0))
         next
       }
     }
 
-    # DBSCAN
-    db <- dbscan::dbscan(X_full, eps = eps_hat, minPts = minpts, borderPoints = TRUE)
-    cl <- db$cluster
+    
+    mults <- c(1.0)
+    best <- NULL
+    for (m in mults) {
+      eps_try <- eps_hat * m
+      fit <- dbscan::dbscan(X2, eps = eps_try, minPts = minpts, borderPoints = TRUE)
+      n_clusters <- max(fit$cluster)
+      noise_frac <- mean(fit$cluster == 0)
+
+      if (n_clusters >= 1 && noise_frac <= 0.9) {
+        best <- list(fit = fit, eps = eps_try, noise_frac = noise_frac, n_clusters = n_clusters)
+        break
+      }
+    }
+
+
+    if (is.null(best)) {
+      fit <- dbscan::dbscan(X2, eps = eps_hat * tail(mults, 1L), minPts = minpts, borderPoints = TRUE)
+      best <- list(fit = fit,
+                   eps = eps_hat * tail(mults, 1L),
+                   noise_frac = mean(fit$cluster == 0),
+                   n_clusters = max(fit$cluster))
+    }
+
+    cat(sprintf("cp=%s | eps=%.4f | clusters=%d | noise=%.1f%%\n",
+                as.character(cp), best$eps, best$n_clusters, 100*best$noise_frac))
+
+    cl <- best$fit$cluster
+    .draw_elbow(cp, kd, eps_hat, best$eps, minpts)
+
+    # DBSCANelbow_outdir
+    # db <- dbscan::dbscan(X2, eps = eps_hat, minPts = minpts, borderPoints = TRUE)
+    # cl <- db$cluster
+
 
     plot_idx <- if (nrow(sub) > per_cp_max) sample.int(nrow(sub), per_cp_max) else seq_len(nrow(sub))
-    sub_plot <- sub[plot_idx, , drop = FALSE]
+    pcs_plot <- pcs_full[plot_idx, , drop = FALSE]
     cl_plot  <- cl[plot_idx]
 
-    pcs <- predict(pc_fit, newdata = as.matrix(sub_plot[, feat_cols, drop = FALSE]))
-    if (is.null(dim(pcs))) pcs <- cbind(pcs, 0)
-
-    # cl_lab <- ifelse(cl_plot == 0, "noise", as.character(cl_plot))
-
     frames[[i]] <- list(
-      x = as.numeric(pcs[, 1]),
-      y = as.numeric(pcs[, 2]),
+      x = as.numeric(pcs_plot[, 1]),
+      y = as.numeric(pcs_plot[, 2]),
       cluster = ifelse(cl_plot == 0, "noise", as.character(cl_plot))
     )
   }
 
-  list(frames = frames, base_plot = base_plot)
+    list(frames = frames, base_plot = base_plot)
 }
