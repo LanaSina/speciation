@@ -1,4 +1,3 @@
-# this file builds a 3d visualisation of Tree of Life
 library(dplyr)
 library(plotly)
 library(htmlwidgets)
@@ -15,7 +14,7 @@ plot_summary_tree <- function(
   trait_y,
   trait_z,
   color_by = NULL,
-  sample_frac  = NULLm,
+  sample_frac  = NULL,
   keep_parents = TRUE,
   out_file     = NULL,
   dot_sizes = NULL
@@ -46,15 +45,6 @@ plot_summary_tree <- function(
     out
   }
 
-  # norm01 <- function(v) {
-  #   r <- range(v, na.rm = TRUE)
-  #   if (!is.finite(r[1]) || diff(r) == 0) return(rep(0, length(v)))
-  #   (v - r[1]) / diff(r)
-  # }
-  # rescale_to <- function(v, to = c(4, 20)) {
-  #   p <- norm01(v)
-  #   to[1] + p * (to[2] - to[1])
-  # }
 
   pick_col <- function(df, ...) {
     opts <- c(...)

@@ -1,14 +1,3 @@
-# ============================================================
-# phylogeneticTree.R
-# Vertical, time-on-Y phylogeny for the dashboard
-# Exposes:
-#   build_phylogeny_bundle(all_data, feat_cols, pc_fit, checkpoints,
-#                          min_branch_size = 1500L, fallback_k = 4L)
-# Returns:
-#   list(plot, frames, col_order, t_min, t_max, n_connectors, n_uprights,
-#        x_min, x_max)
-# ============================================================
-
 suppressPackageStartupMessages({
   library(dplyr)
   library(tidyr)
@@ -16,16 +5,21 @@ suppressPackageStartupMessages({
   library(dbscan)
 })
 
-# ---- Ensure species labels (uses existing global PCA for embedding) ----
-.ensure_embedding_species <- function(df, feat_cols, pc_fit) {
+.ensure_embedding_species <- function(df, feat_cols, pc_fit, eps_chosen = NULL) {
   if ("ancestor" %in% names(df)) {
     df$.species <- as.character(df$ancestor)
     return(df)
   }
   pcs <- predict(pc_fit, newdata = as.matrix(df[, feat_cols, drop = FALSE]))
   pcs <- pcs[, 1:2, drop = FALSE]
-  sdx <- stats::sd(pcs[,1]); sdy <- stats::sd(pcs[,2])
-  eps <- 0.15 * sqrt(sdx^2 + sdy^2)
+
+  if (is.null(eps_chosen)) {
+    sdx <- stats::sd(pcs[,1]); sdy <- stats::sd(pcs[,2])
+    eps <- 0.15 * sqrt(sdx^2 + sdy^2)
+  } else {
+    eps <- eps_chosen
+  }
+
   minPts <- max(10L, floor(nrow(df) * 0.001))
   cl <- dbscan::dbscan(pcs, eps = eps, minPts = minPts)
   labs <- cl$cluster; labs[labs == 0] <- NA_integer_
@@ -33,7 +27,22 @@ suppressPackageStartupMessages({
   df
 }
 
-# ---- Build species meta & edges (time = first snapshot) ----
+.export_filtered_data <- function(df, start_time, window_duration, output_file) {
+  # Convert the 'snapshot' column (assuming it is the timestamp) to datetime if necessary
+  df$snapshot <- as.POSIXct(df$snapshot, origin = "1970-01-01", tz = "UTC")
+
+  # Filter the data for the sliding window
+  t_min <- as.POSIXct(start_time, origin = "1970-01-01", tz = "UTC")
+  t_max <- t_min + window_duration
+
+  filtered_data <- df |>
+    filter(snapshot >= t_min & snapshot <= t_max)
+
+  # Export the filtered data to CSV
+  write.csv(filtered_data, output_file, row.names = FALSE)
+  cat("Filtered data has been exported to", output_file, "\n")
+}
+
 .build_phylo_core <- function(df, id_col="ID", parent_col="parent") {
   stopifnot(all(c(id_col, parent_col, "snapshot", ".species") %in% names(df)))
 
@@ -93,7 +102,6 @@ suppressPackageStartupMessages({
   list(edges = edges_sp, meta = sp_meta)
 }
 
-# ---- Choose branches by threshold; fallback to top-K ----
 .select_branches <- function(meta, min_size = 1500L, fallback_k = 4L, rank_by = c("n_indiv","n_snapshots")) {
   rank_by <- match.arg(rank_by)
   keep <- meta |>
@@ -110,7 +118,6 @@ suppressPackageStartupMessages({
   keep
 }
 
-# ---- Make an empty Plotly scaffold with enough traces ----
 .make_plot_scaffold <- function(col_order, t_min, t_max, n_connectors, n_uprights,
                                 y_ticks, y_text) {
   make_line <- function() {
@@ -123,14 +130,10 @@ suppressPackageStartupMessages({
   }
   traces <- list()
 
-  # [0] trunk (fixed at x = 0)
   tr <- make_line(); tr$line$width <- 2.2; tr$line$color <- "#666"
   traces[[length(traces)+1]] <- tr
-  # [1..C] connectors
   for (i in seq_len(max(1L, n_connectors))) traces[[length(traces)+1]] <- make_line()
-  # [C+1..C+U] uprights
   for (i in seq_len(max(1L, n_uprights)))   traces[[length(traces)+1]] <- make_line()
-  # [last] labels (text scatter)
   traces[[length(traces)+1]] <- list(
     x = numeric(0), y = numeric(0), text = character(0),
     type = "scatter", mode = "text",
@@ -167,20 +170,15 @@ suppressPackageStartupMessages({
     config(staticPlot = TRUE, displayModeBar = FALSE, responsive = TRUE)
 }
 
-# ---- Precompute frames per checkpoint (time-on-Y; x fixed) ----
 .prepare_frames <- function(edges_join, col_order, t_min, t_max, checkpoints) {
   lapply(checkpoints, function(t_cut) {
-    # trunk from t_min up to t_cut at x=0
     trunk <- list(x = c(0, 0), y = c(t_min, t_cut))
-
-    # horizontal connectors appear at each branch time <= t_cut
     cons <- edges_join |> filter(div_time <= t_cut)
     connectors <- if (nrow(cons)) {
       Map(function(x0, x1, y) list(x = c(x0, x1), y = c(y, y)),
           cons$x_parent, cons$x_child, cons$div_time)
     } else list()
 
-    # uprights from each child x up to current t_cut, start at branch time
     upr <- edges_join |> filter(div_time <= t_cut)
     uprights <- if (nrow(upr)) {
       Map(function(x, y0) list(x = c(x, x), y = c(y0, t_cut)),
@@ -198,29 +196,24 @@ suppressPackageStartupMessages({
   })
 }
 
-# ---- Public entrypoint ----
+#main function
 build_phylogeny_bundle <- function(all_data, feat_cols, pc_fit, checkpoints,
-                                   min_branch_size = 1500L, fallback_k = 4L) {
+                                   min_branch_size = 1500L, fallback_k = 4L, eps_chosen = NULL) {
   stopifnot(all(c("snapshot") %in% names(all_data)))
-  # 1) species labelling (stable across whole dataset)
-  df <- .ensure_embedding_species(all_data, feat_cols, pc_fit)
 
-  # 2) core edges + meta
+  df <- .ensure_embedding_species(all_data, feat_cols, pc_fit, eps_chosen = eps_chosen)
   core  <- .build_phylo_core(df)
   edges <- core$edges
   meta  <- core$meta
 
-  # 3) choose branches to keep (x positions determined by first appearance order)
   keep <- .select_branches(meta, min_size = min_branch_size, fallback_k = fallback_k, rank_by = "n_indiv")
   meta_keep <- meta |> filter(name %in% keep) |> arrange(first_snapshot, name)
 
-  # columns (fixed x for each species; never moves)
   col_order <- meta_keep |>
     mutate(col = row_number(),
            x   = as.numeric(col)) |>
     select(name, x, first_snapshot)
 
-  # 4) join edges to x positions and branch times (child first appearance)
   edges_join <- edges |>
     inner_join(col_order, by = c("from" = "name")) |>
     rename(x_parent = x) |>
@@ -228,18 +221,18 @@ build_phylogeny_bundle <- function(all_data, feat_cols, pc_fit, checkpoints,
     rename(x_child = x) |>
     transmute(x_parent, x_child, div_time = time)
 
-  # 5) y range is directly in snapshot units (match slider checkpoints)
   t_min <- min(checkpoints, na.rm = TRUE)
   t_max <- max(checkpoints, na.rm = TRUE)
 
-  # x-range used for the horizontal time line (shapes)
+  # start_time <- '2025-09-22 14:00:00'
+  # window_duration <- 38000L
+  # output_file <- '38K_filter.csv'
+
   x_min <- 0 - 0.5
   x_max <- max(col_order$x, 1) + 0.5
 
-  # 6) precompute frames
   frames <- .prepare_frames(edges_join, col_order, t_min, t_max, checkpoints)
 
-  # 7) build a stable, pre-sized scaffold
   n_connectors <- max(1L, nrow(edges_join))
   n_uprights   <- max(1L, nrow(edges_join))
   p <- .make_plot_scaffold(

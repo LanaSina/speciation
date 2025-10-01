@@ -7,112 +7,120 @@ if (!requireNamespace("RANN", quietly = TRUE)) {
 if (!requireNamespace("dbscan", quietly = TRUE)) {
   install.packages("dbscan", repos = "https://cloud.r-project.org")
 }
-
-library(htmltools)
-library(htmlwidgets)
-library(plotly)
-library(dplyr)
-library(tidyr)
-library(irlba)
-library(RANN); library(dbscan)
-library(jsonlite)
+suppressPackageStartupMessages({
+  library(htmltools)
+  library(htmlwidgets)
+  library(plotly)
+  library(dplyr)
+  library(tidyr)
+  library(irlba)
+  library(RANN); library(dbscan)
+  library(jsonlite)
+  library(rmarkdown)
+})
 source("visualisation.R")
 source("phylogeneticTree.R")
 source("speciesCluster.R")
+
 
 #settings
 camera <- list(eye=list(x=1.4,y=-1.6,z=1.0), center=list(x=0,y=0,z=0), up=list(x=0,y=0,z=1))
 folder  <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data"
 folder_name <- "2024_12_29_17_15"
-
 time_range <- c(0L, 75000L)
-
-#timeline
 CHECKPOINTS <- seq(time_range[1], time_range[2], by = 1000L)
 LABELS      <- sprintf("%dk", CHECKPOINTS/1000)
 
 
-# fig3d <- plot_summary_tree(
-#   folder_path  = folder,
-#   folder_name  = folder_name,
-#   created_range= time_range,
-#   trait_y      = "pgmDeath",
-#   trait_z      = "maxEnergy",
-#   color_by     = c("lifeSpan",
-#                    "speed",
-#                    "kidEnergy",
-#                    "maxEnergy",
-#                    "pgmDeath",
-#                    "sensors",
-#                    "nkids"),
-#   dot_sizes = c(1, 15),
-#   keep_parents = FALSE,
-#   sample_frac  = 0.01
-# ) %>% layout(scene = list(camera = camera, aspectmode = "manual",
-#                           aspectratio = list(x = 1.3, y = 1.3, z = 1)))
-
-
-#Species cluster
+#helper function
 read_summary_individuals <- function(folder_path) {
   files <- list.files(folder_path, pattern = "SummaryIndividuals_\\d+\\.csv$", full.names = TRUE)
   stopifnot(length(files) > 0)
-  nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
-  ord   <- order(nums, na.last = TRUE)
+
+  nums <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
+  ord <- order(nums, na.last = TRUE)
   files <- files[ord]; nums <- nums[ord]
-  cat("Found", length(files), "summary-individual files (numeric order):\n")
-  # print(basename(files))
 
   dl <- lapply(seq_along(files), function(i) {
     df <- read.csv(files[i], stringsAsFactors = FALSE)
-    df$snapshot <- nums[i]; df
+    df$snapshot <- nums[i]
+    df
   })
+
   dplyr::bind_rows(dl)
 }
 
+
+#define full data
 all_data <- read_summary_individuals(folder)
-
-limited_data <- all_data %>%
-  dplyr::filter(created >= time_range[1], created <= time_range[2])
-
-
 numdf <- all_data |>
-  select(snapshot, where(is.numeric)) |>
-  tidyr::drop_na()
-
-nzv <- vapply(numdf |> select(-snapshot), function(x) sd(x, na.rm = TRUE) > 0, logical(1))
-feat_cols <- names((numdf |> select(-snapshot))[, nzv, drop = FALSE])
-
-#PCA
-set.seed(42)
-n_total   <- nrow(numdf)
-n_pca_fit <- min(120000L, n_total)
-fit_idx   <- sample.int(n_total, n_pca_fit)
-pc_fit <- irlba::prcomp_irlba(as.matrix(numdf[fit_idx, feat_cols, drop = FALSE]),
-                              n = 2, center = TRUE, scale. = TRUE)
+  dplyr::select(ID, snapshot, where(is.numeric)) |> tidyr::drop_na()
+nzv <- vapply(numdf |> dplyr::select(-ID, -snapshot), function(x) sd(x, na.rm = TRUE) > 0, logical(1))
+feat_cols <- names((numdf |> dplyr::select(-ID, -snapshot))[, nzv, drop = FALSE]) #feature columns
 
 
+# visualisation tree
+fig3d <- plot_summary_tree(
+  folder_path  = folder,
+  folder_name  = folder_name,
+  created_range= time_range,
+  trait_y      = "pgmDeath",
+  trait_z      = "maxEnergy",
+  color_by     = c("lifeSpan",
+                   "speed",
+                   "kidEnergy",
+                   "maxEnergy",
+                   "pgmDeath",
+                   "sensors",
+                   "nkids"),
+  dot_sizes = c(1, 15),
+  keep_parents = FALSE,
+  sample_frac  = 0.01
+) %>% layout(scene = list(camera = camera, aspectmode = "manual",
+                          aspectratio = list(x = 1.3, y = 1.3, z = 1)))
 
-cluster_bundle <- build_cluster_frames(
-  numdf       = numdf,
-  pc_fit      = pc_fit,
-  feat_cols   = feat_cols,
-  checkpoints = CHECKPOINTS,
-  per_cp_max  = 20000L,
-  minpts      = 10L,
-  kq          = 0.98
+
+files <- c(
+  "output_raw_data/raw_data_2024_12_29_17_15_cp_0.csv",
+  "output_raw_data/raw_data_2024_12_29_17_15_cp_1000.csv",
+  "output_raw_data/raw_data_2024_12_29_17_15_cp_2000.csv",
+  "output_raw_data/raw_data_2024_12_29_17_15_cp_3000.csv"
 )
-frames          <- cluster_bundle$frames
-species_cluster <- cluster_bundle$base_plot
+
+feat_cols <- c("lifeSpan", "nkids", "matForKids", "speed", "maxEnergy",
+               "kidEnergy", "sensors", "pgmDeath")
+
+frames <- vector("list", length(files))
+names(frames) <- basename(files)
+
+for (i in seq_along(files)) {
+  env <- new.env(parent = globalenv())
+  render(input = "umap.Rmd", output_file = NULL, quiet = TRUE, 
+         params = list(file_path = files[i]),envir = env)
+  frames[[i]] <- env$frame
+}
+
+
+species_cluster <- plotly::ggplotly(env$g, tooltip = c("x","y","colour"))
+
+  
+#
+# #species cluster
+# cluster_bundle <- build_cluster_frames(feat_cols = feat_cols, checkpoints = CHECKPOINTS)
+#
+# frames          <- cluster_bundle$frames
+# species_cluster <- cluster_bundle$base_plot
 
 
 #phylogenetic tree
 phy <- build_phylogeny_bundle(
-  all_data        = all_data,
-  feat_cols       = feat_cols,
-  pc_fit          = pc_fit,
-  checkpoints     = CHECKPOINTS,
-  min_branch_size = 1500L,
-  fallback_k      = 4L
+  all_data = all_data,
+  feat_cols = feat_cols,
+  pc_fit = pc_fit,
+  checkpoints = CHECKPOINTS,
+  min_branch_size = 50L,
+  fallback_k = 10L,
+  eps_chosen = cluster_bundle$eps_chosen
 )
 phylo_plot     <- phy$plot
 phy_frames     <- phy$frames
@@ -153,8 +161,7 @@ js <- sprintf("(function() {
 
   function colorize(clusters) {
     const uniq = Array.from(new Set(clusters || [])).filter(c => c !== 'noise').sort();
-    const map = new Map();
-    map.set('noise', noiseColor);
+    const map = new Map();    map.set('noise', noiseColor);
     uniq.forEach((c, i) => map.set(c, basePalette[i %% basePalette.length]));
     return (clusters || []).map(c => map.get(c) || noiseColor);
   }
@@ -355,5 +362,5 @@ dashboard <- tagList(
   )
 )
 
-htmltools::save_html(dashboard, "dashboard.html", background = "white", libdir = "dashboard_libs")
+htmltools::save_html(dashboard, "dashboard/dashboard.html", background = "white", libdir = "dashboard_libs")
 cat("Dashboard saved as dashboard.html\n")
