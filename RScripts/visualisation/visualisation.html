@@ -355,6 +355,7 @@ display: none;
 </div>
 
 
+<p>#change your folder path accordingly</p>
 <pre class="r"><code>options(plotly.cdn = FALSE)
 
 plot_summary_tree &lt;- function(
@@ -370,30 +371,30 @@ plot_summary_tree &lt;- function(
 ) {
   
   #helper functions
-  pick_col &lt;- function(df, ...) {
+  pick_col &lt;- function(df, ...) { 
     opts &lt;- c(...)
     hits &lt;- opts[opts %in% names(df)]
     if (length(hits)) hits[1] else NULL
   }
 
-  qlabel &lt;- function(v, low=&quot;low&quot;, mid=&quot;medium&quot;, high=&quot;high&quot;) {
-    if (is.null(v) || all(is.na(v))) return(factor(rep(mid, length(v))))
+  #turn a numeric vector v into low/medium/high for labelling
+  qlabel &lt;- function(v, low=&quot;low&quot;, mid=&quot;medium&quot;, high=&quot;high&quot;) { 
     qs &lt;- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
-    
     qs &lt;- unique(qs)
-    if (length(qs) &lt; 2) {
+    if (length(qs) &lt; 2) { #if two cut points collapse return all med
       return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
     }
     cut(v, breaks = c(-Inf, qs[1], qs[2], Inf),
         labels = c(low, mid, high), include.lowest = TRUE)
   }
-
+  
+  
   read_raw_data &lt;- function(file_paths) {
-  data_list &lt;- lapply(file_paths, function(f) read.csv(f, stringsAsFactors = FALSE))
-  out &lt;- dplyr::bind_rows(data_list, .id = &quot;snapshot_id&quot;)
-  out$snapshot_index &lt;- as.integer(out$snapshot_id)
-  out
-}
+    data_list &lt;- lapply(file_paths, function(f) read.csv(f, stringsAsFactors = FALSE))
+    out &lt;- dplyr::bind_rows(data_list, .id = &quot;snapshot_id&quot;)
+    out$snapshot_index &lt;- as.integer(out$snapshot_id)
+    out
+  }
 
   #read the data
   all_data &lt;- read_raw_data(file_paths)
@@ -438,6 +439,7 @@ plot_summary_tree &lt;- function(
   size_col    &lt;- pick_col(world, &quot;size&quot;, &quot;maxEnergy&quot;, trait_z)
   speed_col   &lt;- pick_col(world, &quot;speed&quot;)
   
+  #speed
   speed_adj &lt;- if (!is.null(speed_col)) {
     spd &lt;- world[[speed_col]]
     qs  &lt;- quantile(spd, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
@@ -454,22 +456,20 @@ plot_summary_tree &lt;- function(
     }
   } else factor(rep(&quot;unknown speed&quot;, nrow(world)))
   
+  #size
   size_adj &lt;- if (!is.null(size_col)) {
     factor(qlabel(world[[size_col]], &quot;small&quot;, &quot;medium&quot;, &quot;large&quot;),
            levels = c(&quot;small&quot;,&quot;medium&quot;,&quot;large&quot;))
   } else factor(rep(&quot;unknown size&quot;, nrow(world)))
   
-  if (&quot;lifeExpectancy&quot; %in% names(world)) {
-    exp_life &lt;- world$lifeExpectancy
-  } else if (&quot;lifeSpan&quot; %in% names(world)) {
-    grp &lt;- if (!is.null(species_col)) world[[species_col]] else factor(1)
-    exp_life &lt;- ave(
-      world$lifeSpan, grp,
-      FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE))
-    )
-  } else {
-    exp_life &lt;- rep(NA_real_, nrow(world))
-  }
+
+  #lifeSpan
+  grp &lt;- factor(1)
+  exp_life &lt;- ave(
+    world$lifeSpan, grp,
+      #get 90% quantile of lifeSpan of the entire group
+    FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE)) 
+  )
   
   if (&quot;lifeSpan&quot; %in% names(world)) {
     frac &lt;- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
@@ -485,6 +485,7 @@ plot_summary_tree &lt;- function(
     died_phrase &lt;- rep(&quot;lifespan unknown&quot;, nrow(world))
   }
   
+  #create hover text
   species_lbl &lt;- if (!is.null(species_col)) paste0(world[[species_col]]) else rep(&quot;unknown&quot;, nrow(world))
   nkids_txt   &lt;- if (&quot;nkids&quot; %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
   kids_phrase &lt;- ifelse(is.na(nkids_txt), &quot;kids: n/a&quot;,
@@ -511,8 +512,8 @@ plot_summary_tree &lt;- function(
     base_cols &lt;- base_cols[seq_len(max(K, 0))]
   }
 
-  col_map &lt;- c(&quot;0&quot; = &quot;#BDBDBD&quot;) #map ids to colours
-  if (K &gt; 0) names(base_cols) &lt;- as.character(pos_ids)
+  col_map &lt;- c(&quot;0&quot; = &quot;#BDBDBD&quot;) #noise points
+  if (K &gt; 0) names(base_cols) &lt;- as.character(pos_ids) #map cluster ids to colours
   if (K &gt; 0) col_map &lt;- c(col_map, base_cols)
 
   world$feat_color &lt;- unname(col_map[as.character(world$Cluster)])
@@ -559,8 +560,7 @@ plot_summary_tree &lt;- function(
   tryCatch(
     saveWidget(fig, out_file, selfcontained = TRUE),
     error = function(e) {
-      message(&quot;Selfcontained save failed: &quot;, e$message,
-              &quot; — falling back to non-selfcontained with a local lib dir.&quot;)
+      message(&quot;Selfcontained save failed: &quot;, e$message)
       saveWidget(fig, out_file, selfcontained = FALSE,
                  libdir = file.path(dirname(out_file), &quot;lib&quot;))
     }
@@ -569,12 +569,11 @@ plot_summary_tree &lt;- function(
   
   return(fig)
 }</code></pre>
-<p>#function</p>
+<p>#parameter settings &amp; plot #change your file_paths, TRAIT_Y,
+TRAIT_Z, time_range, cluster_paths, accordingly</p>
 <pre class="r"><code>file_paths &lt;- c(
   &quot;/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_35000.csv&quot;,
-  &quot;/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv&quot;
-)
-
+  &quot;/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv&quot;)
 TRAIT_Y    &lt;- &quot;pgmDeath&quot;
 TRAIT_Z    &lt;- &quot;nkids&quot;
 time_range &lt;- c(35000L, 40000L)

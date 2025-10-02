@@ -9,7 +9,6 @@ params:
   folder_name: "2025_07_12_00_26"
   out_dir: "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/visualisation/results"
 ---
-
 #change your folder path accordingly 
 
 
@@ -38,30 +37,30 @@ plot_summary_tree <- function(
 ) {
   
   #helper functions
-  pick_col <- function(df, ...) {
+  pick_col <- function(df, ...) { 
     opts <- c(...)
     hits <- opts[opts %in% names(df)]
     if (length(hits)) hits[1] else NULL
   }
 
-  qlabel <- function(v, low="low", mid="medium", high="high") {
-    if (is.null(v) || all(is.na(v))) return(factor(rep(mid, length(v))))
+  #turn a numeric vector v into low/medium/high for labelling
+  qlabel <- function(v, low="low", mid="medium", high="high") { 
     qs <- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
-    
     qs <- unique(qs)
-    if (length(qs) < 2) {
+    if (length(qs) < 2) { #if two cut points collapse return all med
       return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
     }
     cut(v, breaks = c(-Inf, qs[1], qs[2], Inf),
         labels = c(low, mid, high), include.lowest = TRUE)
   }
-
+  
+  
   read_raw_data <- function(file_paths) {
-  data_list <- lapply(file_paths, function(f) read.csv(f, stringsAsFactors = FALSE))
-  out <- dplyr::bind_rows(data_list, .id = "snapshot_id")
-  out$snapshot_index <- as.integer(out$snapshot_id)
-  out
-}
+    data_list <- lapply(file_paths, function(f) read.csv(f, stringsAsFactors = FALSE))
+    out <- dplyr::bind_rows(data_list, .id = "snapshot_id")
+    out$snapshot_index <- as.integer(out$snapshot_id)
+    out
+  }
 
   #read the data
   all_data <- read_raw_data(file_paths)
@@ -106,6 +105,7 @@ plot_summary_tree <- function(
   size_col    <- pick_col(world, "size", "maxEnergy", trait_z)
   speed_col   <- pick_col(world, "speed")
   
+  #speed
   speed_adj <- if (!is.null(speed_col)) {
     spd <- world[[speed_col]]
     qs  <- quantile(spd, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
@@ -122,22 +122,20 @@ plot_summary_tree <- function(
     }
   } else factor(rep("unknown speed", nrow(world)))
   
+  #size
   size_adj <- if (!is.null(size_col)) {
     factor(qlabel(world[[size_col]], "small", "medium", "large"),
            levels = c("small","medium","large"))
   } else factor(rep("unknown size", nrow(world)))
   
-  if ("lifeExpectancy" %in% names(world)) {
-    exp_life <- world$lifeExpectancy
-  } else if ("lifeSpan" %in% names(world)) {
-    grp <- if (!is.null(species_col)) world[[species_col]] else factor(1)
-    exp_life <- ave(
-      world$lifeSpan, grp,
-      FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE))
-    )
-  } else {
-    exp_life <- rep(NA_real_, nrow(world))
-  }
+
+  #lifeSpan
+  grp <- factor(1)
+  exp_life <- ave(
+    world$lifeSpan, grp,
+      #get 90% quantile of lifeSpan of the entire group
+    FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE)) 
+  )
   
   if ("lifeSpan" %in% names(world)) {
     frac <- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
@@ -153,6 +151,7 @@ plot_summary_tree <- function(
     died_phrase <- rep("lifespan unknown", nrow(world))
   }
   
+  #create hover text
   species_lbl <- if (!is.null(species_col)) paste0(world[[species_col]]) else rep("unknown", nrow(world))
   nkids_txt   <- if ("nkids" %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
   kids_phrase <- ifelse(is.na(nkids_txt), "kids: n/a",
@@ -179,8 +178,8 @@ plot_summary_tree <- function(
     base_cols <- base_cols[seq_len(max(K, 0))]
   }
 
-  col_map <- c("0" = "#BDBDBD") #map ids to colours
-  if (K > 0) names(base_cols) <- as.character(pos_ids)
+  col_map <- c("0" = "#BDBDBD") #noise points
+  if (K > 0) names(base_cols) <- as.character(pos_ids) #map cluster ids to colours
   if (K > 0) col_map <- c(col_map, base_cols)
 
   world$feat_color <- unname(col_map[as.character(world$Cluster)])
@@ -227,8 +226,7 @@ plot_summary_tree <- function(
   tryCatch(
     saveWidget(fig, out_file, selfcontained = TRUE),
     error = function(e) {
-      message("Selfcontained save failed: ", e$message,
-              " — falling back to non-selfcontained with a local lib dir.")
+      message("Selfcontained save failed: ", e$message)
       saveWidget(fig, out_file, selfcontained = FALSE,
                  libdir = file.path(dirname(out_file), "lib"))
     }
@@ -240,13 +238,12 @@ plot_summary_tree <- function(
 
 ```
 
-#function
+#parameter settings & plot
+#change your file_paths, TRAIT_Y, TRAIT_Z, time_range, cluster_paths, accordingly
 ```{r}
 file_paths <- c(
   "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_35000.csv",
-  "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv"
-)
-
+  "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv")
 TRAIT_Y    <- "pgmDeath"
 TRAIT_Z    <- "nkids"
 time_range <- c(35000L, 40000L)
