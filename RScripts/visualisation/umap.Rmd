@@ -21,7 +21,9 @@ library(RColorBrewer)
 #Load file
 #change your base_path accordingly
 ```{r}
-base_path = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_45000.csv"
+file_number <- 5000L
+base_path <- sprintf("/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_%d.csv", file_number)
+
 df = read.csv(base_path)
 
 select_columns = c("lifeSpan", "nkids", "matForKids", "speed", "maxEnergy", 
@@ -137,7 +139,9 @@ frame <- list(
     id = df$ID,
     Cluster = db_umap$cluster
   )
-write.csv(cluster_output, "umap_res/Summary_45000.csv", row.names = FALSE)
+ 
+out_path <- sprintf("umap_res/umap_res_%d.csv", file_number)
+write.csv(cluster_output, out_path, row.names = FALSE)
 
 
 ```

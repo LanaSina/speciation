@@ -9,8 +9,6 @@ params:
   folder_name: "2025_07_12_00_26"
   out_dir: "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/visualisation/results"
 ---
-#change your folder path accordingly 
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
@@ -47,7 +45,7 @@ plot_summary_tree <- function(
   qlabel <- function(v, low="low", mid="medium", high="high") { 
     qs <- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
     qs <- unique(qs)
-    if (length(qs) < 2) { #if two cut points collapse return all med
+    if (length(qs) < 2) { #if two cut points collapse return all mid
       return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
     }
     cut(v, breaks = c(-Inf, qs[1], qs[2], Inf),
@@ -241,12 +239,12 @@ plot_summary_tree <- function(
 #parameter settings & plot
 #change your file_paths, TRAIT_Y, TRAIT_Z, time_range, cluster_paths, accordingly
 ```{r}
-file_paths <- c(
-  "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_35000.csv",
-  "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv")
+prefix <- "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_"
+nums   <- c(30000, 35000, 40000, 45000, 50000)
+file_paths <- sprintf("%s%d.csv", prefix, nums)
 TRAIT_Y    <- "pgmDeath"
 TRAIT_Z    <- "nkids"
-time_range <- c(35000L, 40000L)
+time_range <- c(30000L, 50000L)
 
 fig <- plot_summary_tree(
   folder_name   = params$folder_name,
@@ -255,8 +253,13 @@ fig <- plot_summary_tree(
   trait_z       = TRAIT_Z,
   dot_sizes = 4,
   cluster_paths = c(
-    "umap_res/Summary_35000.csv",
-    "umap_res/Summary_40000.csv"
+    "umap_res/umap_res_25000_tmp.csv",
+    "umap_res/umap_res_30000.csv",
+    "umap_res/umap_res_35000.csv",
+    "umap_res/umap_res_40000.csv",
+    "umap_res/umap_res_45000.csv",
+    "umap_res/umap_res_50000.csv"
+    #"umap_res/umap_res_55000.csv"
   ),
   sample_frac   = 0.01,
   out_file      = file.path(params$out_dir,
