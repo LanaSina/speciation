@@ -20,7 +20,7 @@ library(RColorBrewer)
 
 #Load file
 ```{r}
-base_path = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv"
+base_path = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_45000.csv"
 df = read.csv(base_path)
 
 select_columns = c("lifeSpan", "nkids", "matForKids", "speed", "maxEnergy", 
@@ -136,9 +136,8 @@ frame <- list(
     id = df$ID,
     Cluster = db_umap$cluster
   )
-write.csv(cluster_output, "Summary_40000.csv", row.names = FALSE)
+write.csv(cluster_output, "umap_res/Summary_45000.csv", row.names = FALSE)
 
-#write_json(frame, "dashboards/frame_0.json", auto_unbox = TRUE)
 
 ```
 

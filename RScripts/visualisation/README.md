@@ -5,3 +5,7 @@ This directory contains files that are needed for building visualisation dashboa
 - speciesCluster.R: Creates species cluster with a dbscan based method for dashboard.R
 - phylogeneticTree.R: Creates a phylogenetic tree for dashboard.R; currently fails to build it 
 properly.
+
+Directory structure:
+  - results: HTML file that contains 3D Tree of Life visualisation will be stored here.
+
