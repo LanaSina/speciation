@@ -24,7 +24,7 @@ suppressPackageStartupMessages(library(zoo))
 # ============================ CONSTANTS =======================================
 
 # window size of the moving averages (in number of time steps)
-AVERAGE_WINDOW_SIZE_IN_TIME_STEPS <- 100000
+AVERAGE_WINDOW_SIZE_IN_TIME_STEPS <- 200000
 # color of raw data lines when original ("normal") formula is used
 NORMAL_RAW_COL <- "#0072B2"
 # color of moving average lines when original ("normal") formula is used
