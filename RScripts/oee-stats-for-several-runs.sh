@@ -2,6 +2,7 @@
 
 
 # Usage: $program INPUT_SUPERFOLDER OUTPUT
+# In order to work, the program must be run in the same folder as `oee-stats.R`.
 
 # This script generates graphs of:
 # - total activity,
