@@ -275,6 +275,8 @@ public abstract class IndividualWithProperties implements Individual {
         this.sensors = in.sensors.copy();
     }
 
+
+
     /**
      * @param bias between 0 and 1; probability to return true.
      * @return a boolean, with a probability of <code>bias</code> to be true

@@ -27,8 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.*;
 
-
-
 /**
  * @author lana
  * This class is the main class.
@@ -284,7 +282,8 @@ public class Starter {
 		protected void saveDeltasAndOtherInformation() {
 			if (Constants.Save) {
 				if (realMap.getTime() % Constants.SaveEvery == 0)
-					for (Map map : theMaps) map.setupLogFiles();
+//					for (Map map : theMaps) map.setupLogFiles();
+					realMap.setupLogFiles();
 				realMap.savePopulation();
 			}
 			if (realMap.getTime() % Constants.BackupEvery == 0)
@@ -310,8 +309,15 @@ public class Starter {
 
 		/** Generates a snapshot file and a sensors file for each map. */
 		public void saveMapsStates() {
-			for (Map map : theMaps)
-				map.saveState(dataFolderName);
+//			for (Map map : theMaps)
+//				map.saveState(dataFolderName);
+//			if (Constants.SaveShadowModel) {
+//				for (Map map : theMaps)
+//					map.saveState(dataFolderName);
+//			}
+//			else{
+			realMap.saveState(dataFolderName);
+//			}
         }
 
 		/** Saves the deltas of the map(s). */
@@ -507,11 +513,13 @@ public class Starter {
 		public void setRealMap(RealMap realMap) {
 			super.setRealMap(realMap);
 			this.shadowMap = new ShadowMap(realMap, Constants.ShadowModelSummaryFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
-			theMaps.add(shadowMap);
-			if (Constants.Save)
-				this.shadowMap.setupLogFiles();
-			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
-			theDeltasSavers.add(shadowMapDeltasSaver);
+
+//			if (Constants.SaveShadowModel){
+//				theMaps.add(shadowMap);
+//				this.shadowMap.setupLogFiles();
+//				this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
+//				theDeltasSavers.add(shadowMapDeltasSaver);
+//			}
 		}
 
 

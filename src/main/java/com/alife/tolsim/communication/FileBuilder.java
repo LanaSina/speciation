@@ -11,7 +11,7 @@ public class FileBuilder {
 	
 	public FileBuilder(String folderName, String fileName){
 		// create csv files
-		try {			
+		try {
 			filew = new FileWriter(folderName+"/"+ fileName + ".csv");
 			mlog.say("stream opened "+ fileName);
 		} catch (IOException e) {

@@ -222,6 +222,7 @@ public class Display extends JFrame {
 			paint(bufImage.createGraphics());
 			File imageFile = new File("."+File.separator+snapshotLocation);
 			try{
+				imageFile.getParentFile().mkdirs();
 				imageFile.createNewFile();
 				ImageIO.write(bufImage, "jpeg", imageFile);
 			}catch(Exception ex){
