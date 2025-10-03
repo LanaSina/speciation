@@ -1,3 +1,4 @@
+#!/usr/bin/Rscript
 
 # This script generates graphs of:
 # - total activity,
@@ -23,20 +24,20 @@ suppressPackageStartupMessages(library(zoo))
 
 # ============================ CONSTANTS =======================================
 
-# window size of the moving averages (in number of time steps)
-AVERAGE_WINDOW_SIZE_IN_TIME_STEPS <- 200000
+# window size of the running averages (in number of time steps)
+RUNNING_AVERAGE_WINDOW_SIZE_IN_TIME_STEPS <- 200000
 # color of raw data lines when original ("normal") formula is used
-NORMAL_RAW_COL <- "#0072B2"
-# color of moving average lines when original ("normal") formula is used
-NORMAL_AVERAGE_COL <- "black"
+RAW_DATA_COLOR_ORIGINAL <- "#0072B2"
 # color of raw data lines when alternative formula is used
-ALT_RAW_COL <- "#D55E00"
-# color of moving average lines when alternative formula is used
-ALT_AVERAGE_COL <- "black"
-# width of raw data lines
-RAW_LWD <- 1
-# width of running average lines
-AVERAGE_LWD <- 2
+RAW_DATA_COLOR_ALTERNATIVE <- "#D55E00"
+# color of running average curves
+RUNNING_AVERAGE_COLOR <- "black"
+# width of raw data curves
+RAW_DATA_LWD <- 1
+# width of running average curves
+RUNNING_AVERAGE_LWD <- 2
+# default output folder
+DEFAULT_OUTPUT_FOLDER <- "./tolsim_oee_stats"
 
 # ==============================================================================
 
@@ -61,8 +62,8 @@ parser$add_argument(
 
 parser$add_argument(
   "-o", "--output",
-  default = "./tolsim_oee_stats",
-  help = "The output folder where the graphs will be saved"
+  default = DEFAULT_OUTPUT_FOLDER,
+  help = paste("The output folder where the graphs will be saved (default is ", DEFAULT_OUTPUT_FOLDER, ")")
 )
 
 args <- parser$parse_args()
@@ -87,8 +88,8 @@ output_subfolder <- file.path(output_folder, basename(run_folder))
 # number of time steps between each save of the deltas
 properties_file = file.path(run_folder, "config.properties")
 deltas_saved_every = as.numeric(properties::read.properties(properties_file, fields = c("deltas_saved_every")))
-# window size of the moving averages (in number of deltas)
-average_window_size <- AVERAGE_WINDOW_SIZE_IN_TIME_STEPS / deltas_saved_every
+# window size of the running averages (in number of deltas)
+average_window_size <- RUNNING_AVERAGE_WINDOW_SIZE_IN_TIME_STEPS / deltas_saved_every
 
 # paths of the deltas files
 realMapDeltasFile <- file.path(run_folder,"RealMapDeltas.csv")
@@ -105,28 +106,29 @@ shadowMapDeltasFile <- file.path(run_folder,"ShadowMapDeltas.csv")
 
 # ========================== MAIN FUNCTIONS ====================================
 
-#' Plot a statistic with optional moving average
+#' Plot a statistic with optional running average
 #'
 #' @param data dataframe with one column "t" (time) and another arbitrary column
 #' @param ycol string, the name of the column to plot on Y axis
+#' @param color string, the color of the raw data curve
 #' @param ylab string, label of the y-axis
-#' @param window_size integer, window size for moving average (default = NULL, no average)
-plot_statistic <- function(data, ycol, ylab, window_size = average_window_size, deltas_save_frequency = deltas_saved_every) {
+#' @param window_size integer, window size for running average (default = NULL, no average)
+plot_statistic <- function(data, ycol, ylab, color, window_size = average_window_size, deltas_save_frequency = deltas_saved_every) {
   plot(
     data$t,
     data[[ycol]],
     type = "l",
-    col = NORMAL_RAW_COL,
-    lwd = RAW_LWD,
+    col = color,
+    lwd = RAW_DATA_LWD,
     xlab = "Time",
     ylab = ylab
   )
   grid()
-  
+
   # running average
   if (!is.null(window_size) && window_size > 1) {
     ma <- zoo::rollmean(data[[ycol]], k = window_size, fill = NA, align = "center")
-    lines(data$t, ma, col = NORMAL_AVERAGE_COL, lwd = AVERAGE_LWD, lty = 1)
+    lines(data$t, ma, col = RUNNING_AVERAGE_COLOR, lwd = RUNNING_AVERAGE_LWD, lty = 1)
   }
 }
 
@@ -210,7 +212,7 @@ cat("\r\n")
 dir.create(output_folder, showWarnings = FALSE)
 dir.create(output_subfolder, showWarnings = FALSE)
 
-save_plot("total_activity", function() plot_statistic(totalActivities, "totalActivity", "Total activity"))
+save_plot("total_activity", function() plot_statistic(totalActivities, "totalActivity", "Total activity", RAW_DATA_COLOR_ORIGINAL))
 
 # ==============================================================================
 
@@ -343,19 +345,19 @@ cat("\r\n")
 # --- PLOT TOTAL NORMALIZED ACTIVITY, MEDIAN NORMALIZED ACTIVITY & NEW ACTIVITY ---
 
 # total normalized activity (original formula)
-save_plot("total_normalized_activity", function() plot_statistic(normTotalActivities, "normTotalActivity", "Total normalized activity"))
+save_plot("total_normalized_activity", function() plot_statistic(normTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ORIGINAL))
 
 # median normalized activity (original formula)
-save_plot("median_normalized_activity", function() plot_statistic(normMedianActivities, "normMedianActivity", "Median normalized activity"))
+save_plot("median_normalized_activity", function() plot_statistic(normMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ORIGINAL))
 
 # new activity (original formula)
-save_plot("new_activity", function() plot_statistic(normNewActivities, "normNewActivity", "New activity"))
+save_plot("new_activity", function() plot_statistic(normNewActivities, "normNewActivity", "New activity", RAW_DATA_COLOR_ORIGINAL))
 
 # total normalized activity (alternative formula)
-save_plot("total_normalized_activity_alt", function() plot_statistic(altNormTotalActivities, "normTotalActivity", "Total normalized activity"))
+save_plot("total_normalized_activity_alt", function() plot_statistic(altNormTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
 
 # median normalized activity (alternative formula)
-save_plot("median_normalized_activity_alt", function() plot_statistic(altNormMedianActivities, "normMedianActivity", "Median normalized activity"))
+save_plot("median_normalized_activity_alt", function() plot_statistic(altNormMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
 
 # new activity (alternative formula)
 # TODO
