@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.alife.tolsim.startup;
 import java.io.FileInputStream;
@@ -29,10 +29,10 @@ public class Constants {
 
 	/** Controls whether to save the data about individuals and predation. */
 	public static boolean Save = ConfigLoader.getBoolean("save", true);
-    /** Percentage of individuals/predations saved. */
-    public static double SaveCoarse = ConfigLoader.getDouble("save.coarse", 0.01);
-    /** This field is the number of time steps during which to save information about dead individuals and predation before switching to news files. */
-    public static int SaveEvery = ConfigLoader.getInt("save.every", 5000);
+	/** Percentage of individuals/predations saved. */
+	public static double SaveCoarse = ConfigLoader.getDouble("save.coarse", 0.01);
+	/** This field is the number of time steps during which to save information about dead individuals and predation before switching to news files. */
+	public static int SaveEvery = ConfigLoader.getInt("save.every", 5000);
 
 	/** This field is the number of time steps between two backups of the alive individuals and of the sensors.
 	 * Backups allow to stop the program then later resume it at the same point. */
@@ -62,4 +62,3 @@ public class Constants {
 	public static final int NbThreads = ConfigLoader.getInt("nb.threads", 16);
 
 }
-

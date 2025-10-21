@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.alife.tolsim.startup;
 
@@ -26,6 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.*;
+
+
 
 /**
  * @author lana
@@ -282,8 +284,7 @@ public class Starter {
 		protected void saveDeltasAndOtherInformation() {
 			if (Constants.Save) {
 				if (realMap.getTime() % Constants.SaveEvery == 0)
-//					for (Map map : theMaps) map.setupLogFiles();
-					realMap.setupLogFiles();
+					for (Map map : theMaps) map.setupLogFiles();
 				realMap.savePopulation();
 			}
 			if (realMap.getTime() % Constants.BackupEvery == 0)
@@ -293,7 +294,7 @@ public class Starter {
 		}
 
 		/** Backups the state of the maps. */
-        public void backup() {
+		public void backup() {
 			mlog.say("backup all logs");
 			if (realMap.getDisplay() != null) {
 				realMap.getDisplay().pauseProcedure(true);
@@ -309,16 +310,9 @@ public class Starter {
 
 		/** Generates a snapshot file and a sensors file for each map. */
 		public void saveMapsStates() {
-//			for (Map map : theMaps)
-//				map.saveState(dataFolderName);
-//			if (Constants.SaveShadowModel) {
-//				for (Map map : theMaps)
-//					map.saveState(dataFolderName);
-//			}
-//			else{
-			realMap.saveState(dataFolderName);
-//			}
-        }
+			for (Map map : theMaps)
+				map.saveState(dataFolderName);
+		}
 
 		/** Saves the deltas of the map(s). */
 		protected void updateDeltasSavers() {
@@ -513,13 +507,11 @@ public class Starter {
 		public void setRealMap(RealMap realMap) {
 			super.setRealMap(realMap);
 			this.shadowMap = new ShadowMap(realMap, Constants.ShadowModelSummaryFileName, Constants.ShadowModelSnapshotFileName, Constants.ShadowModelSensorsFileName);
-
-//			if (Constants.SaveShadowModel){
-//				theMaps.add(shadowMap);
-//				this.shadowMap.setupLogFiles();
-//				this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
-//				theDeltasSavers.add(shadowMapDeltasSaver);
-//			}
+			theMaps.add(shadowMap);
+			if (Constants.Save)
+				this.shadowMap.setupLogFiles();
+			this.shadowMapDeltasSaver = new DeltasSaver(shadowMap, dataFolderName, Constants.ShadowMapDeltasFileName + ".csv");
+			theDeltasSavers.add(shadowMapDeltasSaver);
 		}
 
 

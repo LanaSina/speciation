@@ -25,14 +25,8 @@ base_folder = "/Users/hyoyeon/Desktop/Career/Sony"
 ## Read agents data
 
 ```{r}
-<<<<<<< Updated upstream
 folder = "2025_02_15_19_29" #"trees/best-2024_11_05_20_37"
 fileName = file.path(base_folder, folder,"SummaryIndividuals_0.csv")
-=======
-folder = "simulation/2025_10_02_15_36" #"trees/best-2024_11_05_20_37"
-fileName = file.path(base_folder, folder,"SummaryIndividuals_10000.csv")
->>>>>>> Stashed changes
-
 whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
 world = whole_world
 ```
