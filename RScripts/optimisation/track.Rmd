@@ -1,0 +1,77 @@
+---
+title: "track"
+output: html_document
+comment: "This file tracks the priority of the parameters by creating a histogram for each
+          parameter and seeing how many ups and downs(need to get down to zero) there are for             each bins. The more there are, the more diverse the species are." 
+---
+
+```{r setup, include=FALSE}
+#library setup
+```
+
+
+```{r}
+library(scatterplot3d)
+options(rgl.useNULL = TRUE)
+library(rgl)
+# this library allows super fast reading of CSV files!
+library(data.table)
+library(zoo)
+library(properties)
+
+# replace with your base folder
+base_folder = "/Users/hyoyeon/Desktop/Career/Sony"
+```
+
+#visualisation
+```{r}
+
+folder = "Lana/2024_12_29_17_15/OEE-data" #"trees/best-2024_11_05_20_37"
+fileName = file.path(base_folder, folder,"SummaryIndividuals_0.csv")
+
+whole_world <- read.csv(fileName, stringsAsFactors=F, dec =".")#, header=TRUE)
+world = whole_world
+```
+
+```{r}
+# plot tree
+
+# # display data as is, or extract a subset
+# world = subset(world, created >90000 & created < 110000 & maxEnergy>50)
+
+# # random subset
+sample_vector=c(1:nrow(whole_world))
+# sample elements from the vector (in this example 30 elements sampled without replacement)
+the_sample = sample(sample_vector, 2000, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+world = whole_world[the_sample,]
+
+colors = rgb(world$speed/max(world$speed), world$maxEnergy/max(world$maxEnergy), world$kidEnergy/max(world$kidEnergy))
+close3d()
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy, 
+      col = colors, main = folder) # xlim=c(0,max(world$created)), 
+rglwidget()
+```
+ 
+#Read data
+```{r}
+n <- nrow(world)
+idx <- sample.int(n, size = 2000, replace = FALSE)
+sampled_world <- world[idx, , drop = FALSE]
+```
+
+#List of parameters (isLight and parentIsLigt are categorical, rest are numerical)
+```{r}
+param_list <- c("lifeSpan", "speed", "maxEnergy", "kidEnergy", "sensors", "nkids", "pgmDeath", "matForKids", "energy")
+```
+
+
+#Iterate one each and count the number of different 
+```{r}
+for(param in param_list){
+  title = paste("Distribution of", param)
+  hist(sampled_world[[param]], breaks = 20, main= title, xlab=param, ylab="Frequency")
+}
+```
+
+

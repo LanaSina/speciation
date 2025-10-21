@@ -1,0 +1,22 @@
+---
+title: "gsa"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+```
+
+```{r}
+#fix the scope
+
+
+```
+
+
+```{r}
+#Build the sampling design
+
+
+```
+

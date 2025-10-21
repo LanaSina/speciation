@@ -1,0 +1,71 @@
+---
+title: "tree_visualisation"
+output: html_document
+---
+
+```{r}
+# Setup for inline 3D plotting
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(rgl.useNULL = TRUE)
+library(rgl)
+rgl::setupKnitr()
+library(data.table)
+
+base_folder <- "/Users/hyoyeon/Desktop/Career/Sony"
+folder <- "Lana/2024_12_29_17_15/OEE-data"
+data_dir <- file.path(base_folder, folder)
+
+files <- list.files(data_dir, pattern="^SummaryIndividuals_\\d+\\.csv$", full.names=TRUE)
+stopifnot(length(files) > 0)
+
+nums <- as.numeric(gsub("\\D", "", basename(files)))
+ord  <- order(nums)
+files <- files[ord]
+nums  <- nums[ord]
+
+splits <- lapply(files, fread)
+splits <- Filter(function(dt) nrow(dt) > 0, splits)
+stopifnot(length(splits) > 0)
+
+world <- rbindlist(splits, use.names=TRUE, fill=TRUE, idcol="src_id")
+world[, file_index := nums[src_id]]
+world[, src_id := NULL]
+
+set.seed(42)
+sample_size <- 20000
+if (nrow(world) > sample_size) {
+  world <- world[sample(.N, sample_size)]
+}
+
+# Open offscreen rgl device
+open3d(useNULL = TRUE)
+
+# Colors (normalized)
+denom <- function(x){ m <- max(x, na.rm=TRUE); if(!is.finite(m) || m==0) 1 else m }
+colors <- rgb(
+  world$speed     / denom(world$speed),
+  world$maxEnergy / denom(world$maxEnergy),
+  world$kidEnergy / denom(world$kidEnergy)
+)
+
+# Plot 3D tree
+rgl.clear()
+plot3d(
+  x = world$created,
+  y = world$pgmDeath,   # adjust if missing
+  z = world$maxEnergy,
+  col = colors,
+  size = 3,
+  alpha = 0.9,
+  main = paste0(folder, " (full tree)")
+)
+
+rglwidget()
+
+```
+
+
+
+
+
+
