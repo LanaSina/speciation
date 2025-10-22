@@ -264,6 +264,7 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
                 while (energy - kidEnergy > 0) {//matForKids
                     EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
                             cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
+                    baby.applyInitIfFounder();
                     babies.add(baby);
                     energy = energy - kidEnergy;
                     n++;
@@ -272,6 +273,7 @@ public class EmbodiedIndividual extends IndividualWithProperties implements Grap
                 while ((n < getNKids())) {//
                     EmbodiedIndividual baby = new EmbodiedIndividual(this, -1, date, cst_mut_factor, cst_speed_max,
                             cst_light_birth_dst, cst_birth_dst, cst_grid_max, cst_energy_max);
+                    baby.applyInitIfFounder();
                     babies.add(baby);
                     energy = energy - kidEnergy;//*(1-transparency*effect);
                     n++;

@@ -347,6 +347,21 @@ public abstract class IndividualWithProperties implements Individual {
         return parentIsLight;
     }
 
+    protected void applyInitIfFounder() {
+        if (!this.isLight && (this.parentIsLight || this.parentID <= 0)) {
+            int cap = com.alife.tolsim.startup.ConfigLoader.getInt("energy_max", 1000);
+            int ke  = Math.max(MIN_KID_ENERGY,
+                    com.alife.tolsim.startup.ConfigLoader.getInt("init.kidEnergy", 3));
+            int me  = com.alife.tolsim.startup.ConfigLoader.getInt("init.maxEnergy", 12);
+            me = Math.min(Math.max(me, ke), cap); // ke ≤ me ≤ cap
+
+            setKidEnergy(ke);
+            setMaxEnergy(me);
+            setEnergy(Math.min(getEnergy() > 0 ? getEnergy() : ke, me));
+        }
+    }
+
+
     /**
      * @return a csv string description of this creature
      */
