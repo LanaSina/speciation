@@ -9,10 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Hyoyeon Lee" />
+<meta name="author" content="hyoyeon" />
 
+<meta name="date" content="2025-10-24" />
 
-<title>UMAP + Tree of Life Visualization</title>
+<title>speciesCluster.R</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -349,252 +350,193 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">UMAP + Tree of Life Visualization</h1>
-<h4 class="author">Hyoyeon Lee</h4>
+<h1 class="title toc-ignore">speciesCluster.R</h1>
+<h4 class="author">hyoyeon</h4>
+<h4 class="date">2025-10-24</h4>
 
 </div>
 
 
-<p>#change your folder path accordingly</p>
-<pre class="r"><code>options(plotly.cdn = FALSE)
+<pre class="r"><code>suppressPackageStartupMessages({
+  knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+  library(dplyr)
+  library(tidyr)
+  library(plotly)
+  library(grDevices)
+  library(dbscan)
+  library(kneedle)
+  library(umap)
+  library(uwot)
+  library(ggplot2)
+  library(dplyr)
+  library(RColorBrewer)
+})
 
-plot_summary_tree &lt;- function(
-    folder_name,
-    created_range = NULL,
-    trait_y,
-    trait_z,
-    sample_frac  = NULL,
-    out_file     = NULL,
-    dot_sizes = NULL,
-    cluster_paths = NULL,
-    file_paths = NULL
-) {
-  
-  #helper functions
-  pick_col &lt;- function(df, ...) { 
-    opts &lt;- c(...)
-    hits &lt;- opts[opts %in% names(df)]
-    if (length(hits)) hits[1] else NULL
-  }
+#helper function
+plot_umap &lt;- function(umap_plot_df){
+  p &lt;- ggplot(umap_plot_df, aes(x = UMAP1, y = UMAP2)) +
+    geom_point(alpha = 0.5) +
+    theme_minimal() +
+    labs(title = &quot;UMAP Projection of Agent Attributes (Current Frame)&quot;)
+  print(p)
+}
 
-  #turn a numeric vector v into low/medium/high for labelling
-  qlabel &lt;- function(v, low=&quot;low&quot;, mid=&quot;medium&quot;, high=&quot;high&quot;) { 
-    qs &lt;- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
-    qs &lt;- unique(qs)
-    if (length(qs) &lt; 2) { #if two cut points collapse return all med
-      return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
-    }
-    cut(v, breaks = c(-Inf, qs[1], qs[2], Inf),
-        labels = c(low, mid, high), include.lowest = TRUE)
-  }
-  
-  
-  read_raw_data &lt;- function(file_paths) {
-    data_list &lt;- lapply(file_paths, function(f) read.csv(f, stringsAsFactors = FALSE))
-    out &lt;- dplyr::bind_rows(data_list, .id = &quot;snapshot_id&quot;)
-    out$snapshot_index &lt;- as.integer(out$snapshot_id)
-    out
-  }
+plot_elbow &lt;- function(k_dist_umap_df, elbow_umap, db_minPts){
+  p &lt;- ggplot(k_dist_umap_df, aes(x = Index, y = Distance)) +
+    geom_line() +
+    geom_hline(yintercept = elbow_umap, linetype = &quot;dashed&quot;, color = &quot;red&quot;) +
+    theme_minimal() +
+    labs(x = &quot;Sorted Index of UMAP Sample Points&quot;,
+         y = paste0(db_minPts, &quot;-Nearest Neighbor Distance in UMAP Space&quot;),
+         title = &quot;K-Distance Plot for Epsilon Selection (UMAP Sample)&quot;)
+  print(p)
+}
 
-  #read the data
-  all_data &lt;- read_raw_data(file_paths)
-  if (&quot;created&quot; %in% names(all_data)) {
-    all_data$created &lt;- suppressWarnings(as.numeric(all_data$created))
-  }
-  
-  
-  #read the cluster data and merge it with all_data
-  if (!is.null(cluster_paths) &amp;&amp; length(cluster_paths) &gt; 0) {
-    clist &lt;- lapply(cluster_paths, function(p) {
-      tmp &lt;- read.csv(p, stringsAsFactors = FALSE)
-      id_col    &lt;- intersect(names(tmp), c(&quot;ID&quot;,&quot;id&quot;))[1]
-      group_col &lt;- intersect(names(tmp), c(&quot;Cluster&quot;,&quot;cluster&quot;))[1]
-      tmp &lt;- tmp[, c(id_col, group_col)]
-      names(tmp) &lt;- c(&quot;ID&quot;,&quot;Cluster&quot;)
-      tmp$ID &lt;- as.character(tmp$ID)
-      tmp
-    })
-    clusters_df &lt;- dplyr::bind_rows(clist)
-    all_data$ID &lt;- as.character(all_data$ID)
-    all_data &lt;- dplyr::left_join(all_data, clusters_df, by = &quot;ID&quot;)
-  }
+plot_dbscan &lt;- function(db_umap, umap_plot_df_full, elbow_umap, db_minPts, elbow_sens){
+  primary_colors &lt;- c(&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;orange&quot;, &quot;purple&quot;, &quot;cyan&quot;)
+  n_clusters_umap &lt;- max(db_umap$cluster)
 
-  #id check
-  needed &lt;- unique(c(&quot;ID&quot;, &quot;created&quot;, trait_y, trait_z))
-  missing &lt;- setdiff(needed, names(all_data))
-  if (length(missing)) stop(&quot;Missing required columns: &quot;, paste(missing, collapse = &quot;, &quot;))
-
-  all_data$created         &lt;- suppressWarnings(as.numeric(all_data$created))
-  all_data[[trait_y]]      &lt;- suppressWarnings(as.numeric(all_data[[trait_y]]))
-  all_data[[trait_z]]      &lt;- suppressWarnings(as.numeric(all_data[[trait_z]]))
-
-
-  #sampling
-  set.seed(123)
-  keep_ids &lt;- sample(all_data$ID, size = max(1, ceiling(nrow(all_data) * sample_frac)))
-  world &lt;- all_data %&gt;% dplyr::filter(ID %in% keep_ids)
-  
-  #labels
-  species_col &lt;- pick_col(world, &quot;species&quot;, &quot;ancestor&quot;, &quot;parent&quot;)
-  size_col    &lt;- pick_col(world, &quot;size&quot;, &quot;maxEnergy&quot;, trait_z)
-  speed_col   &lt;- pick_col(world, &quot;speed&quot;)
-  
-  #speed
-  speed_adj &lt;- if (!is.null(speed_col)) {
-    spd &lt;- world[[speed_col]]
-    qs  &lt;- quantile(spd, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
-    qs  &lt;- unique(qs)
-    if (length(qs) &lt; 4) {
-      factor(rep(&quot;average&quot;, nrow(world)), levels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;))
-    } else {
-      speed_bins &lt;- cut(
-        spd, breaks = qs,
-        labels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;),
-        include.lowest = TRUE
-      )
-      factor(speed_bins, levels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;))
-    }
-  } else factor(rep(&quot;unknown speed&quot;, nrow(world)))
-  
-  #size
-  size_adj &lt;- if (!is.null(size_col)) {
-    factor(qlabel(world[[size_col]], &quot;small&quot;, &quot;medium&quot;, &quot;large&quot;),
-           levels = c(&quot;small&quot;,&quot;medium&quot;,&quot;large&quot;))
-  } else factor(rep(&quot;unknown size&quot;, nrow(world)))
-  
-
-  #lifeSpan
-  grp &lt;- factor(1)
-  exp_life &lt;- ave(
-    world$lifeSpan, grp,
-      #get 90% quantile of lifeSpan of the entire group
-    FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE)) 
-  )
-  
-  if (&quot;lifeSpan&quot; %in% names(world)) {
-    frac &lt;- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
-    pct  &lt;- ifelse(is.na(frac), NA_integer_, round(frac * 100))
-    died_phrase &lt;- ifelse(is.na(frac), &quot;lifespan unknown&quot;,
-                          ifelse(frac &lt; 0.5,  &quot;died very early&quot;,
-                                 ifelse(frac &lt; 0.9,  &quot;died early&quot;,
-                                        ifelse(frac &lt; 0.98, &quot;lived a full life&quot;,
-                                               &quot;outlived expectations&quot;))))
-    died_phrase &lt;- ifelse(is.na(pct), died_phrase,
-                          paste0(died_phrase, &quot; at ~&quot;, pct, &quot;% of expected lifespan&quot;))
+  #colour sceme (if cluster 0 exists, include lightgrey as a colour for noise)
+  if (any(db_umap$cluster == 0)) {
+    cluster_colors_umap &lt;- c(&quot;0&quot; = &quot;lightgrey&quot;, setNames(primary_colors[1:n_clusters_umap], 1:n_clusters_umap))
   } else {
-    died_phrase &lt;- rep(&quot;lifespan unknown&quot;, nrow(world))
-  }
-  
-  #create hover text
-  species_lbl &lt;- if (!is.null(species_col)) paste0(world[[species_col]]) else rep(&quot;unknown&quot;, nrow(world))
-  nkids_txt   &lt;- if (&quot;nkids&quot; %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
-  kids_phrase &lt;- ifelse(is.na(nkids_txt), &quot;kids: n/a&quot;,
-                        paste0(&quot;had &quot;, nkids_txt, ifelse(nkids_txt==1,&quot; kid&quot;,&quot; kids&quot;)))
-  born_line &lt;- if (&quot;created&quot; %in% names(world)) paste0(&quot;Born at: &quot;, world$created) else &quot;&quot;
-  
-  hover_text &lt;- paste0(
-    &quot;Individual &quot;, world$ID, &quot; (species &quot;, species_lbl, &quot;)&lt;br&gt;&quot;,
-    &quot;was &quot;, as.character(speed_adj), &quot; and &quot;, as.character(size_adj), &quot;-sized; &lt;br&gt;&quot;,
-    &quot;it &quot;, kids_phrase, &quot;, and &quot;, died_phrase, &quot;.&lt;br&gt;&quot;,
-    born_line
-  )
-  
-  #colour
-  world$Cluster &lt;- as.integer(world$Cluster)
-  clus_ids &lt;- sort(unique(world$Cluster)) #collect all unique cluster ids
-  pos_ids  &lt;- clus_ids[clus_ids &gt; 0]
-  K        &lt;- length(pos_ids)
-
-  base_cols &lt;- RColorBrewer::brewer.pal(12, &quot;Set2&quot;) #creating colour palette
-  if (K &gt; length(base_cols)) {
-    base_cols &lt;- grDevices::colorRampPalette(base_cols)(K)
-  } else {
-    base_cols &lt;- base_cols[seq_len(max(K, 0))]
+    cluster_colors_umap &lt;- setNames(primary_colors[1:n_clusters_umap], 1:n_clusters_umap)
   }
 
-  col_map &lt;- c(&quot;0&quot; = &quot;#BDBDBD&quot;) #noise points
-  if (K &gt; 0) names(base_cols) &lt;- as.character(pos_ids) #map cluster ids to colours
-  if (K &gt; 0) col_map &lt;- c(col_map, base_cols)
+  p &lt;- ggplot(umap_plot_df_full, aes(x = UMAP1, y = UMAP2, color = Cluster)) +
+    geom_point(alpha = 0.6, size = 1.5) +
+    scale_color_manual(values = cluster_colors_umap) +
+    theme_minimal() +
+    labs(
+      title = &quot;DBSCAN Clusters on UMAP Projection (Full Data)&quot;,
+      subtitle = paste(&quot;eps =&quot;, round(elbow_umap, 4), &quot;, MinPts =&quot;, db_minPts, &quot;sensitivity = &quot;, elbow_sens)
+    ) +
+    guides(color = guide_legend(override.aes = list(size = 3)))
+  print(p)
+}
 
-  world$feat_color &lt;- unname(col_map[as.character(world$Cluster)])
+elbow_detection &lt;- function(db_minPts, select_n, umap_embedding, elbow_sens){
+  set.seed(42)
+  sample_indices = sample(1:nrow(umap_embedding), select_n)
+  umap_sample = umap_embedding[sample_indices, ]
+  k_distance_umap &lt;- kNNdist(umap_sample, k = db_minPts)
 
-  
-  #plot
-  fig &lt;- plot_ly(
-    world,
-    x = ~created,
-    y = world[[trait_y]],
-    z = world[[trait_z]],
-    text = hover_text,
-    hoverinfo = &quot;text&quot;,
-    type = &quot;scatter3d&quot;,
-    mode = &quot;markers&quot;,
-    marker = list(
-      color = world$feat_color,
-      size  = dot_sizes,
-      opacity = 0.9
-    )
-  ) %&gt;%
-    layout(
-      autosize = TRUE,
-      scene = list(
-        xaxis = list(
-          title     = &quot;created&quot;,
-          range     = c(1, 75000),
-          autorange = FALSE   # &lt;- add this
-        ),
-        yaxis = list(title = trait_y),
-        zaxis = list(title = trait_z),
-        dragmode = &quot;turntable&quot;
-      ),
-      margin = list(l = 0, r = 0, b = 0, t = 0)
-    ) %&gt;%
-    config(responsive = TRUE)
-  
-  fig &lt;- plotly::partial_bundle(fig, local = TRUE)
-  fig &lt;- fig %&gt;% layout(height = 600)
+  d_umap = sort(k_distance_umap)
+  k_dist_umap_df &lt;- data.frame(Index = 1:length(d_umap), Distance = d_umap)
 
-  
-  #save file
-  dir.create(dirname(out_file), recursive = TRUE, showWarnings = FALSE)
-  tryCatch(
-    saveWidget(fig, out_file, selfcontained = TRUE),
-    error = function(e) {
-      message(&quot;Selfcontained save failed: &quot;, e$message)
-      saveWidget(fig, out_file, selfcontained = FALSE,
-                 libdir = file.path(dirname(out_file), &quot;lib&quot;))
-    }
-  )
-  cat(&quot;Saved as&quot;, out_file, &quot;\n&quot;)
-  
-  return(fig)
-}</code></pre>
-<p>#parameter settings &amp; plot #change your file_paths, TRAIT_Y,
-TRAIT_Z, time_range, cluster_paths, accordingly</p>
-<pre class="r"><code>file_paths &lt;- c(
-  &quot;/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_35000.csv&quot;,
-  &quot;/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_40000.csv&quot;)
-TRAIT_Y    &lt;- &quot;pgmDeath&quot;
-TRAIT_Z    &lt;- &quot;nkids&quot;
-time_range &lt;- c(35000L, 40000L)
+  knee_umap &lt;- kneedle(k_dist_umap_df$Index, k_dist_umap_df$Distance, sensitivity = elbow_sens, decreasing = FALSE)
+  elbow_umap &lt;- knee_umap[2] #1st element = index, 2nd = value
 
-fig &lt;- plot_summary_tree(
-  folder_name   = params$folder_name,
-  created_range = time_range,
-  trait_y       = TRAIT_Y,
-  trait_z       = TRAIT_Z,
-  dot_sizes = 4,
-  cluster_paths = c(
-    &quot;umap_res/Summary_35000.csv&quot;,
-    &quot;umap_res/Summary_40000.csv&quot;
-  ),
-  sample_frac   = 0.01,
-  out_file      = file.path(params$out_dir,
-                  paste0(params$folder_name, &quot;_summary_&quot;, TRAIT_Y, &quot;_&quot;, TRAIT_Z, &quot;_tree.html&quot;)),
-  file_paths    = file_paths     
-)</code></pre>
-<pre><code>## Saved as /Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/visualisation/results/2025_07_12_00_26_summary_pgmDeath_nkids_tree.html</code></pre>
-<pre class="r"><code>print(fig)</code></pre>
+  cat(paste(&quot;New epsilon (elbow) calculated from UMAP sample:&quot;, round(elbow_umap, 4), &quot;\n&quot;))
+  plot_elbow(k_dist_umap_df = k_dist_umap_df, elbow_umap = elbow_umap, db_minPts = db_minPts)
+
+  return(list(epsilon = round(elbow_umap, 4), elbow_umap = elbow_umap))
+}
+
+proceed_single_timeframe &lt;- function(df_stripped, db_minPts, elbow_sens, select_n, verbose = TRUE){
+  umap_embedding &lt;- uwot::umap(df_stripped, n_components = 2)
+
+  umap_plot_df = data.frame(UMAP1 = umap_embedding[,1], UMAP2 = umap_embedding[,2])
+  plot_umap(umap_plot_df = umap_plot_df)
+
+  #detect elbow (epsilon)
+  elbow_result &lt;- elbow_detection(db_minPts = db_minPts, select_n = select_n,
+                                  umap_embedding = umap_embedding, elbow_sens = elbow_sens)
+  elbow_umap &lt;- elbow_result$elbow_umap
+
+
+  #dbscan on full data
+  db_umap = dbscan(umap_embedding, eps = elbow_umap, minPts = db_minPts)
+  umap_plot_df_full &lt;- data.frame(UMAP1 = umap_embedding[,1],
+                                  UMAP2 = umap_embedding[,2]) %&gt;%
+    mutate(Cluster = as.factor(db_umap$cluster))
+
+  n_clusters_umap = max(db_umap$cluster)
+  noise_points_umap = sum(db_umap$cluster == 0)
+  cat(paste(&quot;DBSCAN (on full UMAP) found&quot;, n_clusters_umap, &quot;clusters and&quot;, noise_points_umap, &quot;noise points (Cluster 0).\n&quot;))
+
+  plot_dbscan(db_umap = db_umap, umap_plot_df_full = umap_plot_df_full, elbow_umap = elbow_umap,
+              db_minPts = db_minPts, elbow_sens = elbow_sens)
+
+  return(umap_plot_df_full)
+}
+
+# speciesCluster.R
+run_single_file &lt;- function(file_path,
+                            feat_cols,
+                            db_minPts   = 10L,
+                            elbow_sens  = 10.0,
+                            select_n    = 2000L,
+                            out_dir     = &quot;dashboards&quot;) {
+  if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+
+  df &lt;- read.csv(file_path)
+  df_stripped &lt;- df |&gt;
+    dplyr::select(dplyr::all_of(feat_cols)) |&gt;
+    tidyr::drop_na()
+
+  # html_path  &lt;- file.path(out_dir, paste0(tools::file_path_sans_ext(basename(file_path)), &quot;_dbscan.html&quot;))
+  # html_title &lt;- paste(&quot;DBSCAN UMAP —&quot;, basename(file_path))
+
+  res &lt;- proceed_single_timeframe(df_stripped, db_minPts, elbow_sens, select_n, verbose = verbose)
+  res$frame$file &lt;- basename(file_path)
+  res
+}
+
+
+
+# #main function
+# build_cluster_frames &lt;- function(
+#   all_data,
+#   feat_cols,
+#   checkpoints,
+#   db_minPts      = 10L,
+#   elbow_sens     = 10.0,
+#   select_n       = 2000L,
+#   seed           = 42L,
+#   window_size    = 1000L
+# ) {
+#   if (!is.null(seed)) set.seed(seed)
+#
+#   # plotting preparation
+#   base_plot &lt;- plotly::plot_ly(type = &quot;scattergl&quot;, mode = &quot;markers&quot;) |&gt;
+#     plotly::add_trace(
+#       x = numeric(0), y = numeric(0),
+#       hovertext = character(0),
+#       marker = list(size = 4),
+#       showlegend = FALSE
+#     ) |&gt;
+#     plotly::layout(
+#       xaxis = list(title = &quot;UMAP1&quot;, fixedrange = TRUE),
+#       yaxis = list(title = &quot;UMAP2&quot;, fixedrange = TRUE),
+#       margin = list(l = 40, r = 10, b = 40, t = 10)
+#     )
+#
+#   #list for holding checkpoints results
+#   frames &lt;- vector(&quot;list&quot;, length(checkpoints))
+#   cat(paste(&quot;frames: &quot;, frames))
+#   names(frames) &lt;- as.character(checkpoints)
+#
+#   for (i in seq_along(checkpoints)) { #loop through checkpoints and cluster
+#     cp &lt;- checkpoints[i]
+#     cat(paste(&quot;\n--- Processing Checkpoint: &quot;, cp, &quot; ---\n&quot;))
+#
+#     current_data &lt;- all_data %&gt;%
+#       filter(created &gt;= cp &amp; created &lt; (cp + window_size)) %&gt;%
+#       select(all_of(feat_cols)) %&gt;% tidyr::drop_na()
+#
+#     umap_df_clustered &lt;- proceed_single_timeframe(df_stripped = current_data, db_minPts = db_minPts,
+#                                                     elbow_sens = elbow_sens, select_n = select_n)
+#
+#     frames[[i]] &lt;- list(
+#       x = umap_df_clustered$UMAP1,
+#       y = umap_df_clustered$UMAP2,
+#       cluster = ifelse(umap_df_clustered$Cluster == &quot;0&quot;, &quot;noise&quot;, as.character(umap_df_clustered$Cluster))
+#     )
+#   }
+#
+#   return(list(frames = frames, base_plot = base_plot))
+# }</code></pre>
 
 
 

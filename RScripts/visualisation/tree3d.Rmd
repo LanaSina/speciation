@@ -1,3 +1,9 @@
+---
+title: "tree3d"
+output: html_document
+---
+
+```{r}
 library(dplyr)
 library(plotly)
 library(htmlwidgets)
@@ -290,21 +296,30 @@ plot_summary_tree <- function(
   invisible(fig)
 }
 
-# Example call (uncomment to run)
-# TRAIT_Y <- "pgmDeath"
-# TRAIT_Z <- "nkids"
-# folder_name <- "2025_07_12_00_23"
-# OUT_DIR <- "/Users/hyoyeon/Desktop/Career/Sony/speciation/RScripts/results"
 
-# time_range <- c(0, 5000L)
-# fig <- plot_summary_tree(
-#   folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2025_07_12_00_26/SummaryIndividuals",
-#   folder_name   = folder_name,
-#   created_range = time_range,
-#   trait_y       = TRAIT_Y,
-#   trait_z       = TRAIT_Z,
-#   color_by      = c("speed", "maxEnergy", "pgmDeath"),
-#   keep_parents  = FALSE,
-#   sample_frac   = 0.01,
-#   out_file      = file.path(OUT_DIR, paste0(folder_name, "_summary_", TRAIT_Y, "_", TRAIT_Z, "_0to5000.html"))
-# )
+```
+
+
+```{r}
+
+# Example call (uncomment to run)
+ TRAIT_Y <- "pgmDeath"
+ TRAIT_Z <- "maxEnergy"
+ folder_name <- "2024_12_29_17_15"
+ OUT_DIR <- "../../../speciation/RScripts/visualisation/results"
+
+ time_range <- c(0, 75000L)
+ fig <- plot_summary_tree(
+   folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data",
+   folder_name   = folder_name,
+   created_range = time_range,
+   trait_y       = TRAIT_Y,
+   trait_z       = TRAIT_Z,
+   color_by      = c("speed", "maxEnergy", "pgmDeath"),
+   keep_parents  = FALSE,
+   sample_frac   = 0.004,
+   out_file      = file.path(OUT_DIR, paste0(folder_name, "_summary_", TRAIT_Y, "_", TRAIT_Z, "_3d.html"))
+ )
+```
+
+
