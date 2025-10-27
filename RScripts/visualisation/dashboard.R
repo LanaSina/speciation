@@ -122,14 +122,14 @@ dashboard <- tagList(
           div(class="box",
               h3("Species Clusters"),
               div(class="caption",
-                  "This is a 2D cluster of species of a particular timestamp. Slide the time slider on the right panel of the phylogenetic tree dashboard below to update this plot."),
+                  "2D cluster of species per timestamp. Slide the time slider on the right side of the phylogenetic tree dashboard below to update this plot."),
               div(class="fill",
                   div(id="clusterPlot", class="iframe-wrap",
-                      tags$iframe(
+                      tags$img(
                         id   = "clusterIframe",
-                        src  = "clusters.html",
-                        class= "iframe-inner",
-                        allowfullscreen = "true"
+                        src  = "speciesCluster.png",
+                        class= "iframe-inner"
+                        #allowfullscreen = "true"
                       )
                   )
               )
@@ -137,27 +137,24 @@ dashboard <- tagList(
           
           #phylogenetic tree
           div(class="box",
-              h3("Phylogenetic Tree (time on y)"),
+              h3("Phylogenetic Tree"),
               div(class="caption",
                   "Branches over evolutionary time. Red line marks selected checkpoint."),
               div(class="fill phylo-wrap",
                   div(id="phyloPlot", class="iframe-wrap",
-                      tags$iframe(
+                      tags$img(
                         id   = "phyloIframe",
-                        src  = "phylo.html",
-                        class= "iframe-inner",
-                        allowfullscreen = "true"
+                        src  = "phylogenetic.png",
+                        class= "iframe-inner"
+                        #allowfullscreen = "true"
                       )
                   ),
                   div(class="vslider",
                       tags$input(
                         id="timeSlider", type="range",
-                        min="1", max=length(CHECKPOINTS), step="1", value="1"
-                      )
+                        min="1", max=length(CHECKPOINTS), step="1", value="1")
                   )
-              ),
-              div(class="caption",
-                  "Use the slider to scrub through time; both panels update together.")
+              )
           )
       ),
       

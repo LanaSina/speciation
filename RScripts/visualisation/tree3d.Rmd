@@ -185,8 +185,7 @@ plot_summary_tree <- function(
   hover_text <- paste0(
     "Individual ", world$ID, " (species ", species_lbl, ")<br>",
     "was ", as.character(speed_adj), " and ", as.character(size_adj), "-sized; <br>",
-    "it ", kids_phrase, ", and ", died_phrase, ".<br>",
-    born_line
+    "it ", kids_phrase, ", and ", died_phrase, ".<br>", "and maxEnergy", world$maxEnergy, "<br>", "pgmDeath", world$pgmDeath, "<br>",  born_line
   )
 
   #colour
@@ -308,7 +307,7 @@ plot_summary_tree <- function(
  folder_name <- "2024_12_29_17_15"
  OUT_DIR <- "../../../speciation/RScripts/visualisation/results"
 
- time_range <- c(0, 75000L)
+ time_range <- c(0, 78000L)
  fig <- plot_summary_tree(
    folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data",
    folder_name   = folder_name,
