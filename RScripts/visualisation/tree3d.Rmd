@@ -306,11 +306,11 @@ plot_summary_tree <- function(
  TRAIT_Y <- "pgmDeath"
  TRAIT_Z <- "maxEnergy"
  folder_name <- "2024_12_29_17_15"
- OUT_DIR <- "../../../speciation/RScripts/visualisation/results"
+ OUT_DIR <- "results/"
 
  time_range <- c(0, 75000L)
  fig <- plot_summary_tree(
-   folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data",
+   folder_path   = "../../../Lana/2024_12_29_17_15/OEE-data/",
    folder_name   = folder_name,
    created_range = time_range,
    trait_y       = TRAIT_Y,
