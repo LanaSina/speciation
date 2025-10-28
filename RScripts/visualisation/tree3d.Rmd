@@ -74,6 +74,9 @@ plot_summary_tree <- function(
     if (!is.finite(rng[1]) || diff(rng) == 0) return(rep(0, length(x)))
     (x - rng[1]) / diff(rng)
   }
+  
+  
+  # ------------ end of helper functions -------
 
   all_data <- read_summary_individuals(folder_path)
   if ("created" %in% names(all_data)) {
@@ -241,6 +244,8 @@ plot_summary_tree <- function(
     x = ~created,
     y = world[[trait_y]],
     z = world[[trait_z]],
+    # animate
+    frame = ~created,
     text = hover_text,
     hoverinfo = "text",
     type = "scatter3d",
@@ -261,16 +266,25 @@ plot_summary_tree <- function(
         yaxis = list(title = trait_y),
         zaxis = list(title = trait_z),
         dragmode = "turntable",
-        # view
+        # view 
+        # (ref: https://stackoverflow.com/questions/78598698/changing-view-angle-in-a-3d-plotly-plot 
+        # and https://plotly.com/python/3d-camera-controls/)
         camera = list(
+          # Up vector
           up=list(x=0, y=0, z=1),
+          # Look-at point
           center=list(x=0, y=0, z=0),
-          eye=list(x=1.25, y=1.25, z=1.25)
+          # created, pgmDeath, maxEnergy
+          eye=list(x=1.5, y=-0.5, z=0.5) # Camera position
         )
       ),
       margin = list(l = 0, r = 0, b = 0, t = 0)
     ) %>%
+    # animation
+    animation_opts(frame = 500, transition = frame, easing = "linear", redraw = FALSE, mode = "immediate") %>%
     config(responsive = TRUE)
+   
+   
 
   fig <- plotly::partial_bundle(fig, local = TRUE)
 
@@ -281,7 +295,7 @@ plot_summary_tree <- function(
     defaultWidth  = "100%",
     defaultHeight = "100%",
     viewer.padding = 0
-  )
+  ) 
 
   #save file
   if (is.null(out_file)) {
