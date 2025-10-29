@@ -1,0 +1,52 @@
+
+Make tree animation
+
+Helper functions
+```{r}
+read_summary_individuals <- function(folder_path) {
+  files <- list.files(
+    folder_path,
+    pattern = "^SummaryIndividuals_\\d+\\.csv$",
+    full.names = TRUE
+  )
+  nums <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
+  ord  <- order(nums, na.last = TRUE)
+  files <- files[ord]
+
+  cat("Found", length(files), "summary-individual files (numeric order):\n")
+
+  data_list <- lapply(files, function(f) {
+    df <- read.csv(f, stringsAsFactors = FALSE)
+    if ("isLight" %in% names(df)) {
+      df <- df %>% dplyr::select(-isLight, -parentIsLight)  # drop non-numeric lamp flags
+    }
+    df
+  })
+  out <- dplyr::bind_rows(data_list, .id = "snapshot_id")
+  out$snapshot_index <- as.integer(out$snapshot_id)
+  out
+}
+```
+
+
+Read data
+```{r}
+data_folder = "../../../2024_12_29_17_15/OEE-data/"
+whole_world = read_summary_individuals(data_folder)
+```
+
+Sample and save
+
+```{r}
+ratio = 0.004
+total_n = nrow(whole_world)
+n = round(ratio*total_n)
+
+sample_vector=c(1:total_n)
+# sample elements from the vector (in this example 30 elements sampled without replacement)
+the_sample = sample(sample_vector, n, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+world = whole_world[the_sample,]
+
+```
+
