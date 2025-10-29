@@ -198,6 +198,10 @@ grid3d(c("x", "y+", "z"))
 # The default angle is roughly theta = 0, phi = -80. Starting from this position:
 view3d(0, -80)
 um <- par3d()$userMatrix
+
+mat = rotate3d(um, -pi/4, 0, 0, 1)
+view3d(userMatrix = mat)
+um <- par3d()$userMatrix
 rglwidget()
 
 ```
@@ -207,7 +211,7 @@ https://gist.github.com/slowkow/a9907d8fdc2e85ce539ca4015983b893
 
 ```{r}
 # rotation matrices
-rotation_steps = 500
+rotation_steps = 1000
 rotations = list(um)
 for (i in c(1:rotation_steps-1)){
   mat = rotate3d(um, 2*pi*i/rotation_steps, 0, 0, 1)
@@ -235,8 +239,8 @@ close3d()
 # plot slice by slice
 t = 0
 i =0
-max_t = 2000# max(world$created)
-step = 100
+max_t = max(world$created)
+step = 20
 
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
       col = "white", alpha=0,
@@ -249,17 +253,33 @@ par3d(windowRect = c(20, 30, 800, 800))
 while (t<max_t) {
   sub_world = subset(world, created>=t & created<(t+step))
   t = t +step
- 
-  points3d(x= sub_world$created, y=sub_world$pgmDeath, z = sub_world$maxEnergy,
-           col = rgb(sub_world$color_r/255,sub_world$color_g/255, sub_world$color_b/255)#,
-           #alpha = 0.8
-  )
+  
+  if(nrow(sub_world)>0){
+    points3d(x= sub_world$created, y=sub_world$pgmDeath, z = sub_world$maxEnergy,
+             col = rgb(sub_world$color_r/255,sub_world$color_g/255, sub_world$color_b/255)#,
+             #alpha = 0.8
+    )
+  }
   
   # rotate
   r_id = i%%rotation_steps + 1
   view3d(userMatrix = rotations[[r_id]])
   
-  file_name = sprintf("./movie-frames/frame_%04d.png", i)
+  file_name = sprintf("./movie-frames/frame_%05d.png", i)
+  snapshot3d(width = 900, height = 900,
+           filename =file_name,
+           fmt = "png"
+           )
+   i = i+1
+}
+
+# linger on last frame
+for (j in c(0:50)) {
+  # rotate
+  r_id = i%%rotation_steps + 1
+  view3d(userMatrix = rotations[[r_id]])
+  
+  file_name = sprintf("./movie-frames/frame_%05d.png", i)
   snapshot3d(width = 900, height = 900,
            filename =file_name,
            fmt = "png"
@@ -283,8 +303,8 @@ or
 https://stackoverflow.com/questions/20126812/mac-terminal-create-animated-gif-from-png-files
 
 ```{r}
-png_files <- sprintf("./movie-frames/frame_%04d.png", 0:(i-1))
-av::av_encode_video(png_files, './movie.mp4', framerate = 5)
+png_files <- sprintf("./movie-frames/frame_%05d.png", 0:(i-1))
+av::av_encode_video(png_files, './movie.mp4', framerate = 10)
 ```
 
 ----
