@@ -36,6 +36,12 @@ read_summary_individuals <- function(folder_path) {
   out$snapshot_index <- as.integer(out$snapshot_id)
   out
 }
+
+scale01_safe <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  if (!is.finite(rng[1]) || diff(rng) == 0) return(rep(0, length(x)))
+  (x - rng[1]) / diff(rng)
+}
 ```
 
 
@@ -84,6 +90,53 @@ scene = list(camera = list(
            center=list(x=0, y=0, z=0),
            eye=list(x=1.5, y=-0.5, z=0.5)
          ))
+
+# color
+feat_cols <- intersect(c("speed", "maxEnergy", "pgmDeath"), names(world))
+#feature matrix
+X <- as.data.frame(lapply(feat_cols, function(nm) suppressWarnings(as.numeric(world[[nm]]))))
+names(X) <- feat_cols
+
+keep_col <- vapply(X, function(v) any(is.finite(v)), logical(1))
+X <- X[, keep_col, drop = FALSE]
+if (ncol(X) == 0) {
+  world$feat_color <- "#9E9E9E"
+} else {
+  if (ncol(X) == 1) X <- cbind(X, X) #2 dimensions of features
+
+  for (j in seq_len(ncol(X))) {
+    v <- X[[j]]
+    mu <- mean(v[is.finite(v)], na.rm = TRUE)
+    v[!is.finite(v)] <- mu
+    X[[j]] <- v
+  }
+  #normalise
+  X[] <- lapply(X, scale01_safe)
+  Xmat <- as.matrix(X)
+
+  set.seed(42L)
+  if (Rtsne_available) {
+    perp <- max(5, min(30, floor(nrow(Xmat)/3)))
+    ts <- Rtsne::Rtsne(Xmat, dims = 2, perplexity = perp, check_duplicates = FALSE, verbose = FALSE)
+    emb <- ts$Y
+  } else {
+    pc <- stats::prcomp(Xmat, center = TRUE, scale. = FALSE)
+    emb <- pc$x[, 1:2, drop = FALSE]
+  }
+
+  #HSL mapping
+  e1 <- emb[, 1]; e2 <- emb[, 2]
+  h <- 360 * scale01_safe(e1)
+  s <- 100 * scale01_safe(e2)
+  world$feat_color <- paste0("hsl(", round(h), ", ", round(s), "%, 50%)")
+}
+```
+
+Save file with colors
+
+```{r}
+samples_folder = "../../../2024_12_29_17_15/sampled/"
+write.csv(world, paste0(samples_folder, "4pct-color.csv"))
 ```
 
 
@@ -100,16 +153,20 @@ fig <- plot_ly(
     type = "scatter3d",
     mode = "markers",
     marker = list(
-      # color = world$feat_color,
+      color = world$feat_color,
       size  = 2, #dot_sizes,
       opacity = 0.9
     )
   ) %>% 
   layout(title = "3D Scatter plot", scene = scene)
 
-         
-
-
 fig
+```
+
+https://r-graph-gallery.com/package/gganimate.html
+animate
+
+```{r}
+
 ```
 
