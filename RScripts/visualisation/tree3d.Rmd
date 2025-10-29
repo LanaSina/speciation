@@ -265,7 +265,7 @@ plot_summary_tree <- function(
         camera = list(
           up=list(x=0, y=0, z=1),
           center=list(x=0, y=0, z=0),
-          eye=list(x=1.25, y=1.25, z=1.25)
+          eye=list(x=1.25, y=-0.5, z=0.5)
         )
       ),
       margin = list(l = 0, r = 0, b = 0, t = 0)
