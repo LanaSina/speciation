@@ -1,0 +1,116 @@
+---
+title: "speciesPlot"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+```{r}
+folder <- "../../../Lana/2024_12_29_17_15/OEE-data"
+
+files <- list.files(folder, pattern = "^SummaryIndividuals_\\d+_with_clusters.csv$", full.names = TRUE)
+nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
+files <- files[order(nums, na.last = TRUE)]
+
+# check structure
+
+plot_one_cluster_file <- function(csv_path) {
+df <- read_csv(csv_path, show_col_types = FALSE)
+
+p <- ggplot(df, aes(x = x, y = y, color = factor(cluster_id))) +
+  geom_point(size = 2, alpha = 0.7) +
+  theme_minimal() +
+  labs(
+    title = basename(csv_path),
+    color = "cluster_id",
+    x = "x",
+    y = "y"
+  )
+
+return(p)
+}
+    
+```
+
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(plotly)
+library(htmlwidgets)
+library(purrr)
+library(htmltools)
+
+folder <- "../../../Lana/2024_12_29_17_15/OEE-data"
+
+files <- list.files(folder, pattern = "^SummaryIndividuals_\\d+_with_clusters.csv$", full.names = TRUE)
+nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
+files <- files[order(nums, na.last = TRUE)]
+
+# function: read one csv and build a plotly scatter plot
+make_plot_div <- function(csv_path) {
+  df <- read_csv(csv_path, show_col_types = FALSE)
+
+  # basic interactive scatter, colored by cluster_id
+  plt <- plot_ly(
+    df,
+    x = ~x,
+    y = ~y,
+    color = ~as.factor(cluster_id),
+    type = "scatter",
+    mode = "markers",
+    marker = list(size = 5, opacity = 0.7)
+  ) %>%
+    layout(
+      title = list(text = basename(csv_path)),
+      xaxis = list(title = "x"),
+      yaxis = list(title = "y"),
+      legend = list(title = list(text = "cluster_id"))
+    )
+
+  # wrap in a <div> so we can stack them later
+  div(
+    style = "margin-bottom:40px;",
+    plt
+  )
+}
+
+# build a list of <div> blocks, one per timestep
+plot_divs <- map(files, make_plot_div)
+
+# assemble full page
+page <- browsable(
+  tagList(
+    tags$html(
+      tags<head>(
+        tags$title("Species Clusters by Timestep")
+      ),
+      tags$body(
+        h2("Species Clusters (per 5000 steps)"),
+        plot_divs
+      )
+    )
+  )
+)
+
+# save as a single self-contained html file
+saveWidget(
+  widget = page,
+  file = out_html,
+  selfcontained = TRUE
+)
+
+```
+
+
+
+
+
+
+
+

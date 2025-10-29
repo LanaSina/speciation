@@ -23,7 +23,7 @@ plot_summary_tree <- function(
   sample_frac  = NULL,
   keep_parents = TRUE,
   out_file     = NULL,
-  dot_sizes = NULL
+  dot_sizes = 3
 ) {
 
   #helper functions
@@ -183,9 +183,9 @@ plot_summary_tree <- function(
   born_line <- if ("created" %in% names(world)) paste0("Born at: ", world$created) else ""
 
   hover_text <- paste0(
-    "Individual ", world$ID, " (species ", species_lbl, ")<br>",
-    "was ", as.character(speed_adj), " and ", as.character(size_adj), "-sized; <br>",
-    "it ", kids_phrase, ", and ", died_phrase, ".<br>", "and maxEnergy", world$maxEnergy, "<br>", "pgmDeath", world$pgmDeath, "<br>",  born_line
+    "Individual ", world$ID, " (species ", species_lbl, ") ",
+    "was ", as.character(speed_adj), " and ", as.character(size_adj), "-sized; ",
+    "It ", kids_phrase, ", and <br>", died_phrase, ".", " It was born in ", born_line, "."
   )
 
   #colour
@@ -317,7 +317,7 @@ plot_summary_tree <- function(
    color_by      = c("speed", "maxEnergy", "pgmDeath"),
    keep_parents  = FALSE,
    sample_frac   = 0.004,
-   out_file      = file.path(OUT_DIR, paste0(folder_name, "_summary_", TRAIT_Y, "_", TRAIT_Z, "_3d.html"))
+   out_file      = file.path(OUT_DIR, paste0(folder_name, "tree3d.html"))
  )
 ```
 

@@ -38,15 +38,19 @@
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
         .vslider{
-          position:absolute; right:6px; top:0; bottom:0;
-          width:24px; display:flex; justify-content:center; align-items:center;
+          position:absolute;
+          bottom:6px; left:0; right:0;
+          height:30px;
+          display:flex; justify-content:center; align-items:center;
           pointer-events:auto;
         }
         .vslider input[type=range]{
-          writing-mode: bt-lr;
-          -webkit-appearance: slider-vertical; appearance: slider-vertical;
-          width:22px; height:100%; margin:0; padding:0; background:transparent;
+          -webkit-appearance: none;
+          appearance: none;
+          width:90%;
+          height:6px;
         }
+
       </style>
 </head>
 <html>
@@ -78,7 +82,7 @@
         <div class="caption">Branches over evolutionary time. Red line marks selected checkpoint.</div>
         <div class="fill phylo-wrap">
           <div id="phyloPlot" class="iframe-wrap">
-            <img id="phyloIframe" src="phylogenetic.png" class="iframe-inner"/>
+            <img id="phyloIframe" src="phylogenetic_tree.png" class="iframe-inner"/>
           </div>
           <div class="vslider">
             <input id="timeSlider" type="range" min="1" max="76" step="1" value="1"/>

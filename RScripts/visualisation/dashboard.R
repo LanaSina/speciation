@@ -82,15 +82,19 @@ dashboard <- tagList(
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
         .vslider{
-          position:absolute; right:6px; top:0; bottom:0;
-          width:24px; display:flex; justify-content:center; align-items:center;
+          position:absolute;
+          bottom:6px; left:0; right:0;
+          height:30px;
+          display:flex; justify-content:center; align-items:center;
           pointer-events:auto;
         }
         .vslider input[type=range]{
-          writing-mode: bt-lr;
-          -webkit-appearance: slider-vertical; appearance: slider-vertical;
-          width:22px; height:100%; margin:0; padding:0; background:transparent;
+          -webkit-appearance: none;
+          appearance: none;
+          width:90%;
+          height:6px;
         }
+
       "))
     ),
     tags$body(
@@ -144,7 +148,7 @@ dashboard <- tagList(
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "phylogenetic.png",
+                        src  = "phylogenetic_tree.png",
                         class= "iframe-inner"
                         #allowfullscreen = "true"
                       )
