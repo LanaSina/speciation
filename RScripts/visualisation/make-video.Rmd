@@ -1,6 +1,16 @@
 
 Make tree animation
 
+
+Setup
+
+```{r}
+library(scatterplot3d)
+options(rgl.useNULL = TRUE)
+library(rgl)
+library(ggplot2)
+```
+
 Helper functions
 ```{r}
 read_summary_individuals <- function(folder_path) {
@@ -47,6 +57,59 @@ sample_vector=c(1:total_n)
 the_sample = sample(sample_vector, n, replace=FALSE)
 # the vector of randomly selected elements is then used to select rows from the dataframe
 world = whole_world[the_sample,]
+```
 
+Save 
+
+```{r}
+samples_folder = "../../../2024_12_29_17_15/sampled/"
+write.csv(world, paste0(samples_folder, "4pct.csv"))
+```
+
+
+Plot
+
+```{r}
+close3d()
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy) 
+rglwidget()
+```
+
+Pretty plot
+
+Parameters
+```{r}
+scene = list(camera = list(
+           up=list(x=0, y=0, z=1),
+           center=list(x=0, y=0, z=0),
+           eye=list(x=1.5, y=-0.5, z=0.5)
+         ))
+```
+
+
+Plot
+
+```{r}
+fig <- plot_ly(
+    world,
+    x = ~created,
+    y = ~pgmDeath,
+    z = ~maxEnergy,
+    # text = hover_text,
+    hoverinfo = "text",
+    type = "scatter3d",
+    mode = "markers",
+    marker = list(
+      # color = world$feat_color,
+      size  = 2, #dot_sizes,
+      opacity = 0.9
+    )
+  ) %>% 
+  layout(title = "3D Scatter plot", scene = scene)
+
+         
+
+
+fig
 ```
 
