@@ -13,6 +13,7 @@ library(gganimate)
 library(magick)
 library(av)
 # colorscience
+library(schemr)
 ```
 
 Helper functions
@@ -130,10 +131,14 @@ if (ncol(X) == 0) {
 
   #HSL mapping
   e1 <- emb[, 1]; e2 <- emb[, 2]
-  h <- scale01_safe(e1) # 360 * 
+  h <- 360 * scale01_safe(e1) # 
   s <-  scale01_safe(e2) # 100 *
-  # world$feat_color <- paste0("hsl(", round(h), ", ", round(s), "%, 50%)")
-  world$feat_color = HSL2RGB(c(h,s,rep(0.50,length(s))))
+  world$feat_color <- paste0("hsl(", round(h), ", ", round(100 *s), "%, 50%)")
+  hsl_df = data.frame(h,s,rep(0.50,length(s)))
+  rgb = hsl_to_rgb(hsl_df)
+  world$color_r = round(rgb$r)
+  world$color_g = round(rgb$g)
+  world$color_b = round(rgb$b)
 }
 ```
 
@@ -222,8 +227,9 @@ av::av_encode_video(png_files, './movie.mp4', framerate = 2)
 
 ```{r}
 close3d()
-plot3d(x= sub_world$created, y=sub_world$pgmDeath, z = sub_world$maxEnergy
-) 
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
+       col = rgb(world$color_r/255,world$color_g/255, world$color_b/255)
+       ) 
 rglwidget()
 ```
 
