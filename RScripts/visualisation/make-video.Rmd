@@ -177,6 +177,12 @@ fig
  from https://www.geeksforgeeks.org/r-language/how-to-create-3d-plots-and-animations-in-r-using-rgl-package/
  https://www.rdocumentation.org/packages/rgl/versions/1.3.18/topics/play3d
  
+ delete existing frames if necessary
+ 
+```{r}
+unlink("./movie-frames/*")
+```
+ 
  
 ```{r}
 close3d()
@@ -184,12 +190,15 @@ close3d()
 # plot slice by slice
 t = 0
 i =0
-max_t = max(world$created)
-step = 1000
+max_t = 2000# max(world$created)
+step = 100
 
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
-      col = "white", alpha=0
+      col = "white", alpha=0,
+      xlab = "時代", ylab = "寿命", zlab = "体の大きさ",
+      axes = FALSE,
 ) 
+grid3d(c("x", "y+", "z"))
 par3d(windowRect = c(20, 30, 800, 800))
 
 while (t<max_t) {
@@ -197,7 +206,16 @@ while (t<max_t) {
   t = t +step
  
   points3d(x= sub_world$created, y=sub_world$pgmDeath, z = sub_world$maxEnergy,
-           col = "black")
+           col = rgb(sub_world$color_r/255,sub_world$color_g/255, sub_world$color_b/255)#,
+           #alpha = 0.8
+  )
+  
+  # rotate
+  
+while ((i <- 36*(proc.time()[3] - start)) < 360) {
+  view3d(i, i/4); 
+}
+  
   file_name = sprintf("./movie-frames/frame_%04d.png", i)
   snapshot3d(width = 900, height = 900,
            filename =file_name,
@@ -217,9 +235,13 @@ while (t<max_t) {
 To create the movie run:
 https://www.r-bloggers.com/2018/10/the-av-package-production-quality-video-in-r/
 
+or 
+
+https://stackoverflow.com/questions/20126812/mac-terminal-create-animated-gif-from-png-files
+
 ```{r}
 png_files <- sprintf("./movie-frames/frame_%04d.png", 0:(i-1))
-av::av_encode_video(png_files, './movie.mp4', framerate = 2)
+av::av_encode_video(png_files, './movie.mp4', framerate = 5)
 ```
 
 
@@ -228,9 +250,24 @@ av::av_encode_video(png_files, './movie.mp4', framerate = 2)
 ```{r}
 close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
-       col = rgb(world$color_r/255,world$color_g/255, world$color_b/255)
+       xlab = "時代", ylab = "寿命", zlab = "体の大きさ",
+       axes = FALSE,
+       col = rgb(world$color_r/255,world$color_g/255, world$color_b/255),
+       alpha = 0.8
        ) 
+# bbox3d(color = c("grey", "black"), alpha = c(0.2,1))
+# segments3d(c(0, max(world$created)*1.3), c(0, 0), c(0, 0), color = "black")
+# segments3d(c(0,0), c(0, max(world$pgmDeath)*1.3), c(0, 0), color = "black")
+# segments3d(c(0,0), c(0, 0), c(0, max(world$maxEnergy)*1.3), color = "black")
+
+grid3d(c("x", "y+", "z"))
+
+# The default angle is roughly theta = 0, phi = -80. Starting from this position:
+view3d(90, -90)
+# um <- par3d()$userMatrix
+
 rglwidget()
+
 ```
 
 
