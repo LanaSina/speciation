@@ -256,6 +256,8 @@ plot_summary_tree <- function(
       opacity = 0.9
     )
   ) %>%
+    # animation
+    # animation_opts(frame = 500, transition = 100, easing = "linear", redraw = FALSE, mode = "immediate") %>%
     layout(
       autosize = TRUE,
       scene = list(
@@ -280,8 +282,6 @@ plot_summary_tree <- function(
       ),
       margin = list(l = 0, r = 0, b = 0, t = 0)
     ) %>%
-    # animation
-    animation_opts(frame = 500, transition = frame, easing = "linear", redraw = FALSE, mode = "immediate") %>%
     config(responsive = TRUE)
    
    
@@ -337,7 +337,7 @@ plot_summary_tree <- function(
    trait_z       = TRAIT_Z,
    color_by      = c("speed", "maxEnergy", "pgmDeath"),
    keep_parents  = FALSE,
-   sample_frac   = 0.004,
+   sample_frac   = 0.0004,
    out_file      = file.path(OUT_DIR, paste0(folder_name, "_summary_", TRAIT_Y, "_", TRAIT_Z, "_3d.html"))
  )
 ```
