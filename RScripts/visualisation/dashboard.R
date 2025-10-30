@@ -53,7 +53,7 @@ dashboard <- tagList(
         .header { padding: 15px; text-align: center; font-size: 16px; color: white; }
         .container {
           display: grid;
-          grid-template-columns: 2fr 1fr;
+          grid-template-columns: 1.8fr 1.2fr;
           grid-template-rows: minmax(0,1fr) minmax(0,1fr);
           gap: 20px; padding: 20px; align-items: stretch;
           height: calc(100vh - 90px);
@@ -82,12 +82,14 @@ dashboard <- tagList(
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
         .vslider{
-          position:absolute;
-          bottom:6px; left:0; right:0;
-          height:30px;
-          display:flex; justify-content:center; align-items:center;
-          pointer-events:auto;
-        }
+            margin-top: auto;
+            padding-top: 6px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+
         .vslider input[type=range]{
           -webkit-appearance: none;
           appearance: none;
@@ -103,41 +105,85 @@ dashboard <- tagList(
       div(class="container",
           
           # LEFT big panel: 3D Tree of Life iframe
-          div(class="box",
-              style="grid-row: 1 / span 2; box-sizing: border-box; padding: 6px 10px 10px 10px;",
+          div(
+            class = "box",
+            style = "grid-row: 1 / span 2; box-sizing: border-box; padding: 6px 10px 10px 10px;",
+            div(
+              style = "transform: translate(6px, 4px);",
+              h3("Tree of Life"),
               div(
-                style="transform: translate(6px, 4px);",
-                h3("Tree of Life"),
-                div(class="caption",
-                    "Each node typically represents an individual organism, and each branch represents mutation and divergence in species. Hover over each agent for descriptive information.")
-              ),
-              div(class="fill",
-                  style="transform: scale(0.93); transform-origin: top middle;",
-                  div(class="iframe-wrap",
-                      tags$iframe(
-                        src = "results/tree3d.html",
-                        class = "iframe-inner",
-                        allowfullscreen = "true"
-                      )
-                  )
+                class = "caption",
+                "Each node typically represents an individual organism, and each branch represents mutation and divergence in species. Hover over each agent for descriptive information."
               )
+            ),
+            div(
+              class = "fill",
+              style = "transform: scale(0.93); transform-origin: top center;",
+              div(
+                class = "iframe-wrap",
+                tags$video(
+                  src = "movie.mp4",
+                  type = "video/mp4",
+                  autoplay = NA,
+                  loop = NA,
+                  muted = NA,
+                  playsinline = NA,  # allows autoplay on mobile
+                  width = "100%",
+                  style = "transform: translateY(-90px) scale(0.93); transform-origin: top center;"
+                )
+              )
+            )
           ),
           #species clusters
+          # species clusters
           div(class="box",
               h3("Species Clusters"),
               div(class="caption",
-                  "2D cluster of species per timestamp. Slide the time slider on the right side of the phylogenetic tree dashboard below to update this plot."),
+                  "2D cluster of species per timestamp. Slide the time slider on the right side of the phylogenetic tree dashboard below to update this plot."
+              ),
               div(class="fill",
                   div(id="clusterPlot", class="iframe-wrap",
                       tags$img(
                         id   = "clusterIframe",
-                        src  = "speciesCluster.png",
-                        class= "iframe-inner"
-                        #allowfullscreen = "true"
+                        src  = "cluster_images/1.png",
+                        class= "iframe-inner",
+                        style = "width: 75%; margin:auto; display: block;"
                       )
                   )
-              )
+              ),
+              div(class="vslider",
+                  tags$input(
+                    id="timeSlider",
+                    type="range",
+                    min="1", max="16", step="1", value="1"
+                  )
+              ),
+              # ← add this part below
+              tags$script(HTML("
+      (function(){
+        const slider = document.getElementById('timeSlider');
+        const img    = document.getElementById('clusterIframe');
+        const INTERVAL_MS = 15000;
+
+        function setImage(){
+          const idx = parseInt(slider.value, 10);
+          img.src = 'cluster_images/' + idx + '.png';
+        }
+
+        function advance(){
+          let idx = parseInt(slider.value, 10) + 1;
+          if (idx > parseInt(slider.max, 10)) idx = parseInt(slider.min, 10);
+          slider.value = idx;
+          setImage();
+        }
+
+        setImage();
+        slider.addEventListener('input', setImage);
+        setInterval(advance, INTERVAL_MS);
+      })();
+    "))
           ),
+          
           
           #phylogenetic tree
           div(class="box",
@@ -152,11 +198,6 @@ dashboard <- tagList(
                         class= "iframe-inner"
                         #allowfullscreen = "true"
                       )
-                  ),
-                  div(class="vslider",
-                      tags$input(
-                        id="timeSlider", type="range",
-                        min="1", max=length(CHECKPOINTS), step="1", value="1")
                   )
               )
           )

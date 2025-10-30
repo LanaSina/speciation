@@ -316,7 +316,7 @@ plot_summary_tree <- function(
    trait_z       = TRAIT_Z,
    color_by      = c("speed", "maxEnergy", "pgmDeath"),
    keep_parents  = FALSE,
-   sample_frac   = 0.004,
+   sample_frac   = 0.003,
    out_file      = file.path(OUT_DIR, paste0(folder_name, "tree3d.html"))
  )
 ```
