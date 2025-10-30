@@ -142,9 +142,9 @@ dashboard <- tagList(
           
           #phylogenetic tree
           div(class="box",
-              h3("Phylogenetic Tree"),
+              h3("系統樹"),
               div(class="caption",
-                  "系統樹。生物の進化の道筋"),
+                  "生物の進化の道筋"),
               div(class="fill phylo-wrap",
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
