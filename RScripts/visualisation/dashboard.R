@@ -29,12 +29,12 @@ parent_js <- HTML(sprintf("
       clusterFrame.contentWindow.setCheckpoint(cp);
     }
 
-    // tell phylo iframe to move its red line to this checkpoint
+    // tell phylo iframe to redraw for this checkpoint
     if (phyloFrame && phyloFrame.contentWindow &&
         typeof phyloFrame.contentWindow.setCheckpoint === 'function') {
       phyloFrame.contentWindow.setCheckpoint(cp);
     }
-  }
+      }
 
   window.addEventListener('load', () => {
     const { slider } = getEls();
@@ -194,7 +194,7 @@ dashboard <- tagList(
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "phylogenetic_tree.png",
+                        src  = "phylogentic_images/1.png",
                         class= "iframe-inner"
                         #allowfullscreen = "true"
                       )
@@ -202,8 +202,27 @@ dashboard <- tagList(
               )
           )
       ),
-      
-      tags$script(parent_js)
+      tags$script(HTML("
+      (function(){
+        const img = document.getElementById('phyloIframe');
+        const INTERVAL_MS = 15000;
+        const MAX_IDX = 16;
+        let idx = 1;
+    
+        function setImage(){
+          img.src = 'phylogenetic_images/' + idx + '.png';
+        }
+    
+        function advance(){
+          idx++;
+          if (idx > MAX_IDX) idx = 1;
+          setImage();
+        }
+    
+        setImage();
+        setInterval(advance, INTERVAL_MS);
+      })();
+    "))
     )
   )
 )
