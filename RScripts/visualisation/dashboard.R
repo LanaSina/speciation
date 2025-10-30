@@ -129,7 +129,7 @@ dashboard <- tagList(
                   muted = NA,
                   playsinline = NA,  # allows autoplay on mobile
                   width = "100%",
-                  style = "transform: translateY(-90px) scale(0.93); transform-origin: top center;"
+                  style = "transform: translateY(-120px) scale(0.93); transform-origin: top center;"
                 )
               )
             )
@@ -187,9 +187,9 @@ dashboard <- tagList(
           
           #phylogenetic tree
           div(class="box",
-              h3("Phylogenetic Tree"),
+              h3("系統樹"),
               div(class="caption",
-                  "系統樹。生物の進化の道筋"),
+                  "生物の進化の道筋。"),
               div(class="fill phylo-wrap",
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
