@@ -29,12 +29,12 @@ parent_js <- HTML(sprintf("
       clusterFrame.contentWindow.setCheckpoint(cp);
     }
 
-    // tell phylo iframe to move its red line to this checkpoint
+    // tell phylo iframe to redraw for this checkpoint
     if (phyloFrame && phyloFrame.contentWindow &&
         typeof phyloFrame.contentWindow.setCheckpoint === 'function') {
       phyloFrame.contentWindow.setCheckpoint(cp);
     }
-  }
+      }
 
   window.addEventListener('load', () => {
     const { slider } = getEls();
@@ -129,7 +129,7 @@ dashboard <- tagList(
                   muted = NA,
                   playsinline = NA,  # allows autoplay on mobile
                   width = "100%",
-                  style = "transform: translateY(-90px) scale(0.93); transform-origin: top center;"
+                  style = "transform: translateY(-120px) scale(0.93); transform-origin: top center;"
                 )
               )
             )
@@ -142,20 +142,14 @@ dashboard <- tagList(
                   "突然変異によって、生き物は自分と少し違う子供を産む。その「ちょっと違う」が生存に役立つ変異の場合、子供が生き残って、自分の子供を産んで、数世代で「大分違う」生き物になる。"
               ),
               div(class="fill",
-                  div(id="clusterPlot", class="iframe-wrap",
+                  div(id="clusterPlot",
+                      class="iframe-wrap",
                       tags$img(
                         id   = "clusterIframe",
                         src  = "cluster_images/1.png",
                         class= "iframe-inner",
-                        style = "width: 75%; margin:auto; display: block;"
+                        style = "object-fit: contain;"
                       )
-                  )
-              ),
-              div(class="vslider",
-                  tags$input(
-                    id="timeSlider",
-                    type="range",
-                    min="1", max="16", step="1", value="1"
                   )
               ),
               # ← add this part below
@@ -187,23 +181,42 @@ dashboard <- tagList(
           
           #phylogenetic tree
           div(class="box",
-              h3("Phylogenetic Tree"),
+              h3("系統樹"),
               div(class="caption",
-                  "系統樹。生物の進化の道筋"),
+                  "生物の進化の道筋。"),
               div(class="fill phylo-wrap",
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "phylogenetic_tree.png",
-                        class= "iframe-inner"
-                        #allowfullscreen = "true"
+                        src  = "phylogentic_images/1.png",
+                        class= "iframe-inner",
+                        style = "object-fit: contain;"
                       )
                   )
               )
           )
       ),
-      
-      tags$script(parent_js)
+      tags$script(HTML("
+      (function(){
+        const img = document.getElementById('phyloIframe');
+        const INTERVAL_MS = 15000;
+        const MAX_IDX = 16;
+        let idx = 1;
+    
+        function setImage(){
+          img.src = 'phylogenetic_images/' + idx + '.png';
+        }
+    
+        function advance(){
+          idx++;
+          if (idx > MAX_IDX) idx = 1;
+          setImage();
+        }
+    
+        setImage();
+        setInterval(advance, INTERVAL_MS);
+      })();
+    "))
     )
   )
 )
