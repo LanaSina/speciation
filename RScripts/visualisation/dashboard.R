@@ -152,13 +152,6 @@ dashboard <- tagList(
                       )
                   )
               ),
-              div(class="vslider",
-                  tags$input(
-                    id="timeSlider",
-                    type="range",
-                    min="1", max="16", step="1", value="1"
-                  )
-              ),
               # ← add this part below
               tags$script(HTML("
       (function(){
