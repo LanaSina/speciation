@@ -310,7 +310,7 @@ plot_summary_tree <- function(
 # Example call (uncomment to run)
  TRAIT_Y <- "pgmDeath"
  TRAIT_Z <- "maxEnergy"
- folder_name <- "2024_12_29_17_15"
+ folder_name <- "2024_12_29_17_15/"
  OUT_DIR <- "results/"
 
  time_range <- c(0, 78000L)
