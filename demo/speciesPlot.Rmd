@@ -10,7 +10,7 @@ library(purrr)
 library(plotly)
 library(htmlwidgets)
 
-# 1. Load and tag checkpoints ------------------------------------------
+#file path
 folder <- "../../../Lana/2024_12_29_17_15/OEE-data"
 
 files <- list.files(
@@ -32,7 +32,7 @@ data_list <- map2(files, checkpoints, ~{
 
 world <- bind_rows(data_list)
 
-# 2. Hardcoded colours per cluster -------------------------------------
+#colour map
 cluster_col_map <- c(
   "1"  = "#66c2a5",
   "2"  = "#fc8d62",
@@ -55,11 +55,9 @@ cluster_col_map <- c(
 
 noise_col <- "#BDBDBD"
 
-# 3. Output directory ---------------------------------------------------
 out_dir <- file.path("cluster_html")
 dir.create(out_dir, showWarnings = FALSE)
 
-# 4. Plot per checkpoint -----------------------------------------------
 unique_cps <- sort(unique(world$checkpoint))
 
 for (cp in unique_cps) {
@@ -68,14 +66,14 @@ for (cp in unique_cps) {
 
   df_cp <- df_cp %>% sample_frac(0.05)
 
-  # Manually assign colour for each row using the mapping
+  #mapping
   df_cp <- df_cp %>%
     mutate(
       cluster_hex = cluster_col_map[as.character(cluster_id)],
       cluster_hex = ifelse(is.na(cluster_hex), noise_col, cluster_hex)
     )
 
-  # Literal colour assignment per point
+  # colour assignment
   p <- plot_ly(
     data = df_cp,
     x = ~maxEnergy,
