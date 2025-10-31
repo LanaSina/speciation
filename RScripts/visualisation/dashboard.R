@@ -110,10 +110,10 @@ dashboard <- tagList(
             style = "grid-row: 1 / span 2; box-sizing: border-box; padding: 6px 10px 10px 10px;",
             div(
               style = "transform: translate(6px, 4px);",
-              h3("トルシム惑星の生命の樹の進化"),
+              h3("Tree of Life"),
               div(
                 class = "caption",
-                "一つの点が一匹の生き物を表している。時間が経つと、体の大きさ、動きの速さ、寿命、賢さ、子供の数が進化によって変化する。ここでは、体の大きさと寿命を表示している。１つの種(スピーシーズ)から新種が進化したところに、木が枝分かれをしている。"
+                "Each node typically represents an individual organism, and each branch represents mutation and divergence in species. Hover over each agent for descriptive information."
               )
             ),
             div(class="fill",
@@ -130,9 +130,9 @@ dashboard <- tagList(
           #species clusters
           # species clusters
           div(class="box",
-              h3("新種の誕生"),
+              h3("Species Clusters"),
               div(class="caption",
-                  "突然変異によって、生き物は自分と少し違う子供を産む。その「ちょっと違う」が生存に役立つ変異の場合、子供が生き残って、自分の子供を産んで、数世代で「大分違う」生き物になる。"
+                  "This is a 2D cluster of species of a particular timestamp. Slide the time slider on the right panel of the phylogenetic tree dashboard below to update this plot."
               ),
               div(class="fill",
                   div(id="clusterPlot",
@@ -181,9 +181,9 @@ dashboard <- tagList(
           
           #phylogenetic tree
           div(class="box",
-              h3("系統樹"),
+              h3("Phylogenetic Tree"),
               div(class="caption",
-                  "生物の進化の道筋。"),
+                  "Branches over evolutionary time. Red line marks selected checkpoint."),
               div(class="fill phylo-wrap",
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
