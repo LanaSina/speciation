@@ -11,7 +11,7 @@
 
 
 
-<title>speciesPlot</title>
+<title>tree3d</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -348,7 +348,7 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">speciesPlot</h1>
+<h1 class="title toc-ignore">tree3d</h1>
 
 </div>
 
@@ -362,9 +362,7 @@ display: none;
 <pre><code>## The following objects are masked from &#39;package:base&#39;:
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(readr)
-library(purrr)
-library(plotly)</code></pre>
+<pre class="r"><code>library(plotly)</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;plotly&#39;</code></pre>
@@ -378,106 +376,318 @@ library(plotly)</code></pre>
 ## 
 ##     layout</code></pre>
 <pre class="r"><code>library(htmlwidgets)
-
-# 1. Load and tag checkpoints ------------------------------------------
-folder &lt;- &quot;../../../Lana/2024_12_29_17_15/OEE-data&quot;
-
-files &lt;- list.files(
-  folder,
-  pattern = &quot;^SummaryIndividuals_\\d+_with_clusters.csv$&quot;,
-  full.names = TRUE
-)
-
-checkpoints &lt;- as.integer(sub(
-  &quot;^SummaryIndividuals_(\\d+)_with_clusters\\.csv$&quot;, &quot;\\1&quot;,
-  basename(files)
-))
-
-data_list &lt;- map2(files, checkpoints, ~{
-  df &lt;- read_csv(.x, show_col_types = FALSE)
-  df$checkpoint &lt;- .y
-  df
+options(plotly.cdn = FALSE)
+suppressWarnings({
+  Rtsne_available &lt;- requireNamespace(&quot;Rtsne&quot;, quietly = TRUE)
 })
 
-world &lt;- bind_rows(data_list)
 
-# 2. Hardcoded colours per cluster -------------------------------------
-cluster_col_map &lt;- c(
-  &quot;1&quot;  = &quot;#66c2a5&quot;,
-  &quot;2&quot;  = &quot;#fc8d62&quot;,
-  &quot;3&quot;  = &quot;#8da0cb&quot;,
-  &quot;4&quot;  = &quot;#e78ac3&quot;,
-  &quot;5&quot;  = &quot;#a6d854&quot;,
-  &quot;6&quot;  = &quot;#ffd92f&quot;,
-  &quot;7&quot;  = &quot;#e5c494&quot;,
-  &quot;8&quot;  = &quot;#b3b3b3&quot;,
-  &quot;9&quot;  = &quot;#1f78b4&quot;,
-  &quot;10&quot; = &quot;#33a02c&quot;,
-  &quot;11&quot; = &quot;#fb9a99&quot;,
-  &quot;12&quot; = &quot;#cab2d6&quot;,
-  &quot;13&quot; = &quot;#fdbf6f&quot;,
-  &quot;14&quot; = &quot;#b15928&quot;,
-  &quot;15&quot; = &quot;#BDBDBD&quot;,
-  &quot;16&quot; = &quot;#6a3d9a&quot;,
-  &quot;17&quot; = &quot;#ff7f00&quot;
-)
+plot_summary_tree &lt;- function(
+  folder_path,
+  folder_name,
+  created_range = NULL,
+  trait_y,
+  trait_z,
+  color_by = NULL,
+  sample_frac  = NULL,
+  keep_parents = TRUE,
+  out_file     = NULL,
+  dot_sizes = 3
+) {
 
-noise_col &lt;- &quot;#BDBDBD&quot;
+  #helper functions
+  read_summary_individuals &lt;- function(folder_path) {
+    files &lt;- list.files(
+      folder_path,
+      pattern = &quot;^SummaryIndividuals_\\d+\\.csv$&quot;,
+      full.names = TRUE
+    )
+    nums &lt;- as.integer(sub(&quot;.*_(\\d+)\\.csv$&quot;, &quot;\\1&quot;, basename(files)))
+    ord  &lt;- order(nums, na.last = TRUE)
+    files &lt;- files[ord]
 
-# 3. Output directory ---------------------------------------------------
-out_dir &lt;- file.path(&quot;cluster_html&quot;)
-dir.create(out_dir, showWarnings = FALSE)
+    cat(&quot;Found&quot;, length(files), &quot;summary-individual files (numeric order):\n&quot;)
 
-# 4. Plot per checkpoint -----------------------------------------------
-unique_cps &lt;- sort(unique(world$checkpoint))
+    data_list &lt;- lapply(files, function(f) {
+      df &lt;- read.csv(f, stringsAsFactors = FALSE)
+      if (&quot;isLight&quot; %in% names(df)) {
+        df &lt;- df %&gt;% dplyr::select(-isLight, -parentIsLight)  # drop non-numeric lamp flags
+      }
+      df
+    })
+    out &lt;- dplyr::bind_rows(data_list, .id = &quot;snapshot_id&quot;)
+    out$snapshot_index &lt;- as.integer(out$snapshot_id)
+    out
+  }
 
-for (cp in unique_cps) {
-  df_cp &lt;- world %&gt;% filter(checkpoint == cp)
-  if (!nrow(df_cp)) next
 
-  df_cp &lt;- df_cp %&gt;% sample_frac(0.05)
+  pick_col &lt;- function(df, ...) {
+    opts &lt;- c(...)
+    hits &lt;- opts[opts %in% names(df)]
+    if (length(hits)) hits[1] else NULL
+  }
+  qlabel &lt;- function(v, low=&quot;low&quot;, mid=&quot;medium&quot;, high=&quot;high&quot;) {
+    if (is.null(v) || all(is.na(v))) return(factor(rep(mid, length(v))))
+    qs &lt;- stats::quantile(v, probs = c(1/3, 2/3), na.rm = TRUE, names = FALSE)
 
-  # Manually assign colour for each row using the mapping
-  df_cp &lt;- df_cp %&gt;%
-    mutate(
-      cluster_hex = cluster_col_map[as.character(cluster_id)],
-      cluster_hex = ifelse(is.na(cluster_hex), noise_col, cluster_hex)
+    qs &lt;- unique(qs)
+    if (length(qs) &lt; 2) {
+      return(factor(rep(mid, length(v)), levels = c(low, mid, high)))
+    }
+    cut(v, breaks = c(-Inf, qs[1], qs[2], Inf),
+        labels = c(low, mid, high), include.lowest = TRUE)
+  }
+
+  scale01_safe &lt;- function(x) {
+    rng &lt;- range(x, na.rm = TRUE)
+    if (!is.finite(rng[1]) || diff(rng) == 0) return(rep(0, length(x)))
+    (x - rng[1]) / diff(rng)
+  }
+
+  all_data &lt;- read_summary_individuals(folder_path)
+  if (&quot;created&quot; %in% names(all_data)) {
+    all_data$created &lt;- suppressWarnings(as.numeric(all_data$created))
+  }
+
+  if (!is.null(created_range) &amp;&amp; length(created_range) == 2 &amp;&amp; all(is.finite(created_range))) {
+    all_data &lt;- dplyr::filter(
+      all_data,
+      created &gt;= created_range[1],
+      created &lt;= created_range[2]
+    )
+  }
+
+  #id check
+  needed &lt;- unique(c(&quot;ID&quot;, &quot;parent&quot;, &quot;ancestor&quot;, &quot;created&quot;, trait_y, trait_z))
+  missing &lt;- setdiff(needed, names(all_data))
+  if (length(missing)) stop(&quot;Missing required columns: &quot;, paste(missing, collapse = &quot;, &quot;))
+
+  all_data &lt;- all_data %&gt;%
+    dplyr::select(
+      dplyr::any_of(needed),
+      dplyr::any_of(c(&quot;lifeSpan&quot;,&quot;lifeExpectancy&quot;,&quot;size&quot;,&quot;maxEnergy&quot;,&quot;sensors&quot;,&quot;energy&quot;,&quot;speed&quot;,&quot;nkids&quot;))
+    ) %&gt;%
+    dplyr::mutate(
+      dplyr::across(
+        tidyselect::any_of(unique(c(
+          &quot;created&quot;, trait_y, trait_z, color_by,
+          c(&quot;speed&quot;,&quot;nkids&quot;,&quot;lifeSpan&quot;,&quot;lifeExpectancy&quot;,&quot;size&quot;,&quot;maxEnergy&quot;,&quot;sensors&quot;,&quot;energy&quot;)
+        ))),
+        ~ suppressWarnings(as.numeric(.x))
+      )
     )
 
-  # Literal colour assignment per point
-  p &lt;- plot_ly(
-    data = df_cp,
-    x = ~maxEnergy,
-    y = ~pgmDeath,
-    type = &quot;scatter&quot;,
+  if (!nrow(all_data)) stop(&quot;No rows to plot after filtering/coercion.&quot;)
+
+  #sampling
+  if (!is.null(sample_frac) &amp;&amp; is.finite(sample_frac) &amp;&amp; sample_frac &gt; 0 &amp;&amp; sample_frac &lt; 1) {
+    set.seed(123)
+    keep_ids &lt;- sample(all_data$ID, size = max(1, ceiling(nrow(all_data) * sample_frac)))
+    if (isTRUE(keep_parents)) {
+      parent_ids &lt;- all_data$parent[all_data$ID %in% keep_ids]
+      world &lt;- all_data %&gt;% dplyr::filter(ID %in% c(keep_ids, parent_ids))
+    } else {
+      world &lt;- all_data %&gt;% dplyr::filter(ID %in% keep_ids)
+    }
+  } else {
+    world &lt;- all_data
+  }
+
+  #labels
+  species_col &lt;- pick_col(world, &quot;species&quot;, &quot;ancestor&quot;, &quot;parent&quot;)
+  size_col    &lt;- pick_col(world, &quot;size&quot;, &quot;maxEnergy&quot;, trait_z)
+  speed_col   &lt;- pick_col(world, &quot;speed&quot;)
+
+  speed_adj &lt;- if (!is.null(speed_col)) {
+    spd &lt;- world[[speed_col]]
+    qs  &lt;- quantile(spd, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
+    qs  &lt;- unique(qs)
+    if (length(qs) &lt; 4) {
+      factor(rep(&quot;average&quot;, nrow(world)), levels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;))
+    } else {
+      speed_bins &lt;- cut(
+        spd, breaks = qs,
+        labels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;),
+        include.lowest = TRUE
+      )
+      factor(speed_bins, levels = c(&quot;slow&quot;,&quot;average&quot;,&quot;fast&quot;))
+    }
+  } else factor(rep(&quot;unknown speed&quot;, nrow(world)))
+
+  size_adj &lt;- if (!is.null(size_col)) {
+    factor(qlabel(world[[size_col]], &quot;small&quot;, &quot;medium&quot;, &quot;large&quot;),
+           levels = c(&quot;small&quot;,&quot;medium&quot;,&quot;large&quot;))
+  } else factor(rep(&quot;unknown size&quot;, nrow(world)))
+
+  if (&quot;lifeExpectancy&quot; %in% names(world)) {
+    exp_life &lt;- world$lifeExpectancy
+  } else if (&quot;lifeSpan&quot; %in% names(world)) {
+    grp &lt;- if (!is.null(species_col)) world[[species_col]] else factor(1)
+    exp_life &lt;- ave(
+      world$lifeSpan, grp,
+      FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE))
+    )
+  } else {
+    exp_life &lt;- rep(NA_real_, nrow(world))
+  }
+
+  if (&quot;lifeSpan&quot; %in% names(world)) {
+    frac &lt;- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
+    pct  &lt;- ifelse(is.na(frac), NA_integer_, round(frac * 100))
+    died_phrase &lt;- ifelse(is.na(frac), &quot;lifespan unknown&quot;,
+                          ifelse(frac &lt; 0.5,  &quot;died very early&quot;,
+                                 ifelse(frac &lt; 0.9,  &quot;died early&quot;,
+                                        ifelse(frac &lt; 0.98, &quot;lived a full life&quot;,
+                                               &quot;outlived expectations&quot;))))
+    died_phrase &lt;- ifelse(is.na(pct), died_phrase,
+                          paste0(died_phrase, &quot; at ~&quot;, pct, &quot;% of expected lifespan&quot;))
+  } else {
+    died_phrase &lt;- rep(&quot;lifespan unknown&quot;, nrow(world))
+  }
+
+  species_lbl &lt;- if (!is.null(species_col)) paste0(world[[species_col]]) else rep(&quot;unknown&quot;, nrow(world))
+  nkids_txt   &lt;- if (&quot;nkids&quot; %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
+  kids_phrase &lt;- ifelse(is.na(nkids_txt), &quot;kids: n/a&quot;,
+                        paste0(&quot;had &quot;, nkids_txt, ifelse(nkids_txt==1,&quot; kid&quot;,&quot; kids&quot;)))
+  born_line &lt;- if (&quot;created&quot; %in% names(world)) paste0(&quot;Born at: &quot;, world$created) else &quot;&quot;
+
+  hover_text &lt;- paste0(
+    &quot;Individual &quot;, world$ID, &quot; (species &quot;, species_lbl, &quot;) &quot;,
+    &quot;was &quot;, as.character(speed_adj), &quot; and &quot;, as.character(size_adj), &quot;-sized; &quot;,
+    &quot;It &quot;, kids_phrase, &quot;, and &lt;br&gt;&quot;, died_phrase, &quot;.&quot;, &quot; It was born in &quot;, born_line, &quot;.&quot;
+  )
+
+  #colour
+  feat_cols &lt;- intersect(color_by, names(world))
+  if (length(feat_cols) == 0) {
+    warning(&quot;No color_by columns found in data; using grey.&quot;)
+    world$feat_color &lt;- &quot;#9E9E9E&quot;
+  } else {
+    #feature matrix
+    X &lt;- as.data.frame(lapply(feat_cols, function(nm) suppressWarnings(as.numeric(world[[nm]]))))
+    names(X) &lt;- feat_cols
+
+    keep_col &lt;- vapply(X, function(v) any(is.finite(v)), logical(1))
+    X &lt;- X[, keep_col, drop = FALSE]
+    if (ncol(X) == 0) {
+      world$feat_color &lt;- &quot;#9E9E9E&quot;
+    } else {
+      if (ncol(X) == 1) X &lt;- cbind(X, X) #2 dimensions of features
+
+      for (j in seq_len(ncol(X))) {
+        v &lt;- X[[j]]
+        mu &lt;- mean(v[is.finite(v)], na.rm = TRUE)
+        v[!is.finite(v)] &lt;- mu
+        X[[j]] &lt;- v
+      }
+      #normalise
+      X[] &lt;- lapply(X, scale01_safe)
+      Xmat &lt;- as.matrix(X)
+
+      set.seed(42L)
+      if (Rtsne_available) {
+        perp &lt;- max(5, min(30, floor(nrow(Xmat)/3)))
+        ts &lt;- Rtsne::Rtsne(Xmat, dims = 2, perplexity = perp, check_duplicates = FALSE, verbose = FALSE)
+        emb &lt;- ts$Y
+      } else {
+        pc &lt;- stats::prcomp(Xmat, center = TRUE, scale. = FALSE)
+        emb &lt;- pc$x[, 1:2, drop = FALSE]
+      }
+
+      #HSL mapping
+      e1 &lt;- emb[, 1]; e2 &lt;- emb[, 2]
+      h &lt;- 360 * scale01_safe(e1)
+      s &lt;- 100 * scale01_safe(e2)
+      world$feat_color &lt;- paste0(&quot;hsl(&quot;, round(h), &quot;, &quot;, round(s), &quot;%, 50%)&quot;)
+    }
+  }
+
+
+  #plot
+  fig &lt;- plot_ly(
+    world,
+    x = ~created,
+    y = world[[trait_y]],
+    z = world[[trait_z]],
+    text = hover_text,
+    hoverinfo = &quot;text&quot;,
+    type = &quot;scatter3d&quot;,
     mode = &quot;markers&quot;,
     marker = list(
-      size = 4,
-      opacity = 0.8,
-      color = df_cp$cluster_hex   # &lt;-- fixed per-row colour
-    ),
-    text = ~paste(
-      &quot;cluster_id:&quot;, cluster_id,
-      &quot;&lt;br&gt;maxEnergy:&quot;, round(maxEnergy, 2),
-      &quot;&lt;br&gt;pgmDeath:&quot;, round(pgmDeath, 2)
-    ),
-    hoverinfo = &quot;text&quot;,
-    showlegend = FALSE
+      color = world$feat_color,
+      size  = dot_sizes,
+      opacity = 0.9
+    )
+  ) %&gt;%
+    layout(
+      autosize = TRUE,
+      scene = list(
+        xaxis = list(
+          title = &quot;created&quot;,
+          range = if (!is.null(created_range)) created_range else NULL
+        ),
+        yaxis = list(title = trait_y),
+        zaxis = list(title = trait_z),
+        dragmode = &quot;turntable&quot;,
+        # view
+        camera = list(
+          up=list(x=0, y=0, z=1),
+          center=list(x=0, y=0, z=0),
+          eye=list(x=1.25, y=-0.5, z=0.5)
+        )
+      ),
+      margin = list(l = 0, r = 0, b = 0, t = 0)
+    ) %&gt;%
+    config(responsive = TRUE)
+
+  fig &lt;- plotly::partial_bundle(fig, local = TRUE)
+
+  fig$sizingPolicy &lt;- htmlwidgets::sizingPolicy(
+    browser.fill = TRUE,
+    viewer.fill  = TRUE,
+    padding = 0,
+    defaultWidth  = &quot;100%&quot;,
+    defaultHeight = &quot;100%&quot;,
+    viewer.padding = 0
   )
 
-  p &lt;- layout(
-    p,
-    xaxis = list(title = &quot;maxEnergy&quot;),
-    yaxis = list(title = &quot;pgmDeath&quot;),
-    title = paste(&quot;Checkpoint&quot;, cp)
+  #save file
+  if (is.null(out_file)) {
+    out_file &lt;- sprintf(&quot;html/%s_summary_%s_%s.html&quot;, folder_name, trait_y, trait_z)
+  }
+  dir.create(dirname(out_file), recursive = TRUE, showWarnings = FALSE)
+  tryCatch(
+    saveWidget(fig, out_file, selfcontained = TRUE),
+    error = function(e) {
+      message(&quot;Selfcontained save failed: &quot;, e$message,
+              &quot; — falling back to non-selfcontained with a local lib dir.&quot;)
+      saveWidget(fig, out_file, selfcontained = FALSE,
+                 libdir = file.path(dirname(out_file), &quot;lib&quot;))
+    }
   )
+  cat(&quot;Saved as&quot;, out_file, &quot;\n&quot;)
 
-  saveWidget(
-    p,
-    file = file.path(out_dir, sprintf(&quot;clusters_cp_%s.html&quot;, cp)),
-    selfcontained = TRUE
-  )
+  invisible(fig)
 }</code></pre>
+<pre class="r"><code> TRAIT_Y &lt;- &quot;pgmDeath&quot;
+ TRAIT_Z &lt;- &quot;maxEnergy&quot;
+ folder_name &lt;- &quot;2024_12_29_17_15/&quot;
+ OUT_DIR &lt;- &quot;results/&quot;
+
+ time_range &lt;- c(0, 78000L)
+ fig &lt;- plot_summary_tree(
+   folder_path   = &quot;../../Lana/2024_12_29_17_15/OEE-data&quot;,  #replace this with your folder path
+   folder_name   = folder_name,
+   created_range = time_range,
+   trait_y       = TRAIT_Y,
+   trait_z       = TRAIT_Z,
+   color_by      = c(&quot;speed&quot;, &quot;maxEnergy&quot;, &quot;pgmDeath&quot;),
+   keep_parents  = FALSE,
+   sample_frac   = 0.003,
+   out_file      = file.path(OUT_DIR, paste0(folder_name, &quot;tree3d.html&quot;))
+ )</code></pre>
+<pre><code>## Found 16 summary-individual files (numeric order):
+## Saved as results//2024_12_29_17_15/tree3d.html</code></pre>
 
 
 

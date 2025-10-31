@@ -307,7 +307,6 @@ plot_summary_tree <- function(
 
 ```{r}
 
-# Example call (uncomment to run)
  TRAIT_Y <- "pgmDeath"
  TRAIT_Z <- "maxEnergy"
  folder_name <- "2024_12_29_17_15/"
@@ -315,7 +314,7 @@ plot_summary_tree <- function(
 
  time_range <- c(0, 78000L)
  fig <- plot_summary_tree(
-   folder_path   = "../../../Lana/2024_12_29_17_15/OEE-data/",
+   folder_path   = "../../Lana/2024_12_29_17_15/OEE-data",  #replace this with your folder path
    folder_name   = folder_name,
    created_range = time_range,
    trait_y       = TRAIT_Y,

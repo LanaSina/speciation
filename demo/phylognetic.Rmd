@@ -17,7 +17,7 @@ library(readr)
 ```
 
 ```{r}
-folder <- "../../../Lana/2024_12_29_17_15/OEE-data"
+folder <- "../../../2024_12_29_17_15/OEE-data"
 
 files <- list.files(folder, pattern = "^SummaryIndividuals_\\d+_with_clusters.csv$", full.names = TRUE)
 nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
