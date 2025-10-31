@@ -9,3 +9,5 @@ properly.
 Directory structure:
   - results: HTML file that contains 3D Tree of Life visualisation will be stored here.
 
+To publish on github pages: git subtree push --prefix RScripts/visualisation origin gh-pages
+Use your username and token (not pw)
