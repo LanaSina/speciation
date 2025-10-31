@@ -144,14 +144,11 @@ dashboard <- tagList(
               div(class="fill",
                   div(id="clusterPlot",
                       class="iframe-wrap",
-                      style = "position: relative;",
                       tags$img(
                         id   = "clusterIframe",
                         src  = "cluster_images/1.png",
                         class= "iframe-inner",
-                        style = "  max-width: 100%;
-                        aspect-ratio: 16 / 9;
-                        object-fit: contain;"
+                        style = "object-fit: contain;"
                       )
                   )
               ),
@@ -199,8 +196,8 @@ dashboard <- tagList(
                       tags$img(
                         id   = "phyloIframe",
                         src  = "phylogentic_images/1.png",
-                        class= "iframe-inner"
-                        #allowfullscreen = "true"
+                        class= "iframe-inner",
+                        style = "object-fit: contain;"
                       )
                   )
               )
