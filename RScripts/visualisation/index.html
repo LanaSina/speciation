@@ -66,7 +66,7 @@
         </div>
         <div class="fill" style="transform: scale(0.93); transform-origin: top center;">
           <div class="iframe-wrap">
-            <video src="movie.mp4" type="video/mp4" autoplay loop muted playsinline width="100%" style="transform: translateY(-90px) scale(0.93); transform-origin: top center;"></video>
+            <video src="movie.mp4" type="video/mp4" autoplay loop muted playsinline width="100%" style="transform: translateY(-120px) scale(0.93); transform-origin: top center;"></video>
           </div>
         </div>
       </div>
@@ -75,11 +75,8 @@
         <div class="caption">突然変異によって、生き物は自分と少し違う子供を産む。その「ちょっと違う」が生存に役立つ変異の場合、子供が生き残って、自分の子供を産んで、数世代で「大分違う」生き物になる。</div>
         <div class="fill">
           <div id="clusterPlot" class="iframe-wrap">
-            <img id="clusterIframe" src="cluster_images/1.png" class="iframe-inner" style="width: 75%; margin:auto; display: block;"/>
+            <img id="clusterIframe" src="cluster_images/1.png" class="iframe-inner" style="object-fit: contain;"/>
           </div>
-        </div>
-        <div class="vslider">
-          <input id="timeSlider" type="range" min="1" max="16" step="1" value="1"/>
         </div>
         <script>
       (function(){
@@ -106,57 +103,36 @@
     </script>
       </div>
       <div class="box">
-        <h3>Phylogenetic Tree</h3>
-        <div class="caption">系統樹。生物の進化の道筋</div>
+        <h3>系統樹</h3>
+        <div class="caption">生物の進化の道筋。</div>
         <div class="fill phylo-wrap">
           <div id="phyloPlot" class="iframe-wrap">
-            <img id="phyloIframe" src="phylogenetic_tree.png" class="iframe-inner"/>
+            <img id="phyloIframe" src="phylogentic_images/1.png" class="iframe-inner" style="object-fit: contain;"/>
           </div>
         </div>
       </div>
     </div>
     <script>
-(function(){
-  const CHECKPOINTS = [0,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000,21000,22000,23000,24000,25000,26000,27000,28000,29000,30000,31000,32000,33000,34000,35000,36000,37000,38000,39000,40000,41000,42000,43000,44000,45000,46000,47000,48000,49000,50000,51000,52000,53000,54000,55000,56000,57000,58000,59000,60000,61000,62000,63000,64000,65000,66000,67000,68000,69000,70000,71000,72000,73000,74000,75000];
-  const slider       = null;
-  const clusterFrame = null;
-  const phyloFrame   = null;
-
-  function getEls() {
-    // late binding so we also work after load
-    return {
-      slider: document.getElementById('timeSlider'),
-      clusterFrame: document.getElementById('clusterIframe'),
-      phyloFrame: document.getElementById('phyloIframe'),
-    };
-  }
-
-  function syncChildren(){
-    const { slider, clusterFrame, phyloFrame } = getEls();
-    const idx = parseInt(slider.value, 10) - 1;
-    const cp  = CHECKPOINTS[idx];
-
-    // tell clusters iframe to redraw for this checkpoint
-    if (clusterFrame && clusterFrame.contentWindow &&
-        typeof clusterFrame.contentWindow.setCheckpoint === 'function') {
-      clusterFrame.contentWindow.setCheckpoint(cp);
-    }
-
-    // tell phylo iframe to move its red line to this checkpoint
-    if (phyloFrame && phyloFrame.contentWindow &&
-        typeof phyloFrame.contentWindow.setCheckpoint === 'function') {
-      phyloFrame.contentWindow.setCheckpoint(cp);
-    }
-  }
-
-  window.addEventListener('load', () => {
-    const { slider } = getEls();
-    slider.addEventListener('input', syncChildren);
-    // initialise once
-    syncChildren();
-  }, {once:true});
-})();
-</script>
+      (function(){
+        const img = document.getElementById('phyloIframe');
+        const INTERVAL_MS = 15000;
+        const MAX_IDX = 16;
+        let idx = 1;
+    
+        function setImage(){
+          img.src = 'phylogenetic_images/' + idx + '.png';
+        }
+    
+        function advance(){
+          idx++;
+          if (idx > MAX_IDX) idx = 1;
+          setImage();
+        }
+    
+        setImage();
+        setInterval(advance, INTERVAL_MS);
+      })();
+    </script>
   </body>
 </html>
 </html>
