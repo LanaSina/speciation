@@ -116,22 +116,15 @@ dashboard <- tagList(
                 "一つの点が一匹の生き物を表している。時間が経つと、体の大きさ、動きの速さ、寿命、賢さ、子供の数が進化によって変化する。ここでは、体の大きさと寿命を表示している。１つの種(スピーシーズ)から新種が進化したところに、木が枝分かれをしている。"
               )
             ),
-            div(
-              class = "fill",
-              style = "transform: scale(0.93); transform-origin: top center;",
-              div(
-                class = "iframe-wrap",
-                tags$video(
-                  src = "movie.mp4",
-                  type = "video/mp4",
-                  autoplay = NA,
-                  loop = NA,
-                  muted = NA,
-                  playsinline = NA,  # allows autoplay on mobile
-                  width = "100%",
-                  style = "transform: translateY(-120px) scale(0.93); transform-origin: top center;"
+            div(class="fill",
+                style="transform: scale(0.93); transform-origin: top middle;",
+                div(class="iframe-wrap",
+                    tags$iframe(
+                      src = "results/tree3d.html",
+                      class = "iframe-inner",
+                      allowfullscreen = "true"
+                    )
                 )
-              )
             )
           ),
           #species clusters
