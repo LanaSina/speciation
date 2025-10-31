@@ -259,7 +259,13 @@ plot_summary_tree <- function(
         ),
         yaxis = list(title = trait_y),
         zaxis = list(title = trait_z),
-        dragmode = "turntable"
+        dragmode = "turntable",
+        # view
+        camera = list(
+          up=list(x=0, y=0, z=1),
+          center=list(x=0, y=0, z=0),
+          eye=list(x=1.25, y=-0.5, z=0.5)
+        )
       ),
       margin = list(l = 0, r = 0, b = 0, t = 0)
     ) %>%
@@ -304,12 +310,12 @@ plot_summary_tree <- function(
 # Example call (uncomment to run)
  TRAIT_Y <- "pgmDeath"
  TRAIT_Z <- "maxEnergy"
- folder_name <- "2024_12_29_17_15"
- OUT_DIR <- "../../../speciation/RScripts/visualisation/results"
+ folder_name <- "2024_12_29_17_15/"
+ OUT_DIR <- "results/"
 
  time_range <- c(0, 78000L)
  fig <- plot_summary_tree(
-   folder_path   = "/Users/hyoyeon/Desktop/Career/Sony/Lana/2024_12_29_17_15/OEE-data",
+   folder_path   = "../../../Lana/2024_12_29_17_15/OEE-data/",
    folder_name   = folder_name,
    created_range = time_range,
    trait_y       = TRAIT_Y,
