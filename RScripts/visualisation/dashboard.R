@@ -142,12 +142,16 @@ dashboard <- tagList(
                   "突然変異によって、生き物は自分と少し違う子供を産む。その「ちょっと違う」が生存に役立つ変異の場合、子供が生き残って、自分の子供を産んで、数世代で「大分違う」生き物になる。"
               ),
               div(class="fill",
-                  div(id="clusterPlot", class="iframe-wrap",
+                  div(id="clusterPlot",
+                      class="iframe-wrap",
+                      style = "position: relative;",
                       tags$img(
                         id   = "clusterIframe",
                         src  = "cluster_images/1.png",
                         class= "iframe-inner",
-                        style = "width: 75%; margin:auto; display: block;"
+                        style = "  max-width: 100%;
+                        aspect-ratio: 16 / 9;
+                        object-fit: contain;"
                       )
                   )
               ),
