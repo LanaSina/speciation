@@ -11,7 +11,7 @@ library(plotly)
 library(htmlwidgets)
 
 #file path
-folder <- "../../../Lana/2024_12_29_17_15/OEE-data"
+folder <- "../../../Lana/2024_12_29_17_15/OEE-data-clusters"
 
 files <- list.files(
   folder,
@@ -53,9 +53,31 @@ cluster_col_map <- c(
   "17" = "#ff7f00"
 )
 
+
+species_names <- c(
+  "Tolsim-Mammoth",
+  "Tolsim-Velociraptor",
+  "Tolsim-Dugong",
+  "Tolsim-Rabbit",
+  "Tolsim-Mouse",
+  "Tolsim-Baobab",
+  "Tolsim-Crab",
+  "Tolsim-Jellyfish",
+  "Tolsim-Birds",
+  "Tolsim-Centipede",
+  "Tolsim-Dragonfly",
+  "Neo-LUCA",
+  "Tolsim-Bacteria",
+  "Tolsim-Fungi",
+  "Outlier",
+  "Tolsim-Pillbug"
+)
+
+world$species_name <- species_names[world$cluster_id]
+
 noise_col <- "#BDBDBD"
 
-out_dir <- file.path("cluster_html")
+out_dir <- file.path("../cluster_html/")
 dir.create(out_dir, showWarnings = FALSE)
 
 unique_cps <- sort(unique(world$checkpoint))
@@ -72,6 +94,7 @@ for (cp in unique_cps) {
       cluster_hex = cluster_col_map[as.character(cluster_id)],
       cluster_hex = ifelse(is.na(cluster_hex), noise_col, cluster_hex)
     )
+  
 
   # colour assignment
   p <- plot_ly(
@@ -86,7 +109,7 @@ for (cp in unique_cps) {
       color = df_cp$cluster_hex   # <-- fixed per-row colour
     ),
     text = ~paste(
-      "cluster_id:", cluster_id,
+      "Species ", species_name, " has a ",
       "<br>maxEnergy:", round(maxEnergy, 2),
       "<br>pgmDeath:", round(pgmDeath, 2)
     ),
@@ -98,7 +121,8 @@ for (cp in unique_cps) {
     p,
     xaxis = list(title = "maxEnergy"),
     yaxis = list(title = "pgmDeath"),
-    title = paste("Checkpoint", cp)
+    title = list(text = paste("Checkpoint", cp),font = list(size = 13))
+
   )
 
   saveWidget(
