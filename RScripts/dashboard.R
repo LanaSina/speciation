@@ -5,21 +5,19 @@ CHECKPOINTS <- seq(0L, 75000L, by = 1000L)
 parent_js <- HTML(sprintf("
 (function(){
   const CHECKPOINTS = %s;
-  const slider       = null;
   const clusterFrame = null;
   const phyloFrame   = null;
 
   function getEls() {
     // late binding so we also work after load
     return {
-      slider: document.getElementById('timeSlider'),
       clusterFrame: document.getElementById('clusterIframe'),
       phyloFrame: document.getElementById('phyloIframe'),
     };
   }
 
   function syncChildren(){
-    const { slider, clusterFrame, phyloFrame } = getEls();
+    const {clusterFrame, phyloFrame} = getEls();
     const idx = parseInt(slider.value, 10) - 1;
     const cp  = CHECKPOINTS[idx];
 
@@ -81,21 +79,6 @@ dashboard <- tagList(
           border: 0;
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
-        .vslider{
-            margin-top: auto;
-            padding-top: 6px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-        .vslider input[type=range]{
-          -webkit-appearance: none;
-          appearance: none;
-          width:90%;
-          height:6px;
-        }
 
       "))
     ),
@@ -120,7 +103,7 @@ dashboard <- tagList(
                 style="transform: scale(0.93); transform-origin: top middle;",
                 div(class="iframe-wrap",
                     tags$iframe(
-                      src = "results/tree3d.html",
+                      src = "../html/tree3d.html",
                       class = "iframe-inner",
                       allowfullscreen = "true"
                     )
@@ -139,44 +122,33 @@ dashboard <- tagList(
                       class="iframe-wrap",
                       tags$img(
                         id   = "clusterIframe",
-                        src  = "cluster_images/1.png",
+                        src  = "../cluster_images/1.png",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
                   )
               ),
-              div(class="vslider",
-                  tags$input(
-                    id="timeSlider",
-                    type="range",
-                    min="1", max="16", step="1", value="1"
-                  )
-              ),
-              # ← add this part below
               tags$script(HTML("
-      (function(){
-        const slider = document.getElementById('timeSlider');
-        const img    = document.getElementById('clusterIframe');
-        const INTERVAL_MS = 15000;
+              (function(){
+                const img    = document.getElementById('clusterIframe');
+                const INTERVAL_MS = 15000;
+                const MAX_IDX = 16;  
+                let idx = 1;         
+        
+                function setImage(){
+                 img.src = '../cluster_images/' + idx + '.png?v=' + Date.now(); // cache-bust
+                }   
 
-        function setImage(){
-          const idx = parseInt(slider.value, 10);
-          img.src = 'cluster_images/' + idx + '.png';
-        }
+                function advance(){
+                  idx = (idx % MAX_IDX) + 1;
+                  setImage();
+                }
 
-        function advance(){
-          let idx = parseInt(slider.value, 10) + 1;
-          if (idx > parseInt(slider.max, 10)) idx = parseInt(slider.min, 10);
-          slider.value = idx;
-          setImage();
-        }
+                setImage();
+                setInterval(advance, INTERVAL_MS);
 
-        setImage();
-        slider.addEventListener('input', setImage);
-        setInterval(advance, INTERVAL_MS);
-      })();
-    "))
-          ),
+              })();
+            "))),
           
           
           #phylogenetic tree
@@ -188,7 +160,7 @@ dashboard <- tagList(
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "phylogentic_images/1.png",
+                        src  = "../phylogentic_images/1.png",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
@@ -204,7 +176,7 @@ dashboard <- tagList(
         let idx = 1;
     
         function setImage(){
-          img.src = 'phylogenetic_images/' + idx + '.png';
+          img.src = '../phylogenetic_images/' + idx + '.png';
         }
     
         function advance(){
@@ -223,7 +195,7 @@ dashboard <- tagList(
 
 htmltools::save_html(
   dashboard,
-  "dashboard.html",
+  "../html/dashboard.html",
   background = "white",
   libdir = "dashboard_libs"
 )
