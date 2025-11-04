@@ -120,9 +120,9 @@ dashboard <- tagList(
               div(class="fill",
                   div(id="clusterPlot",
                       class="iframe-wrap",
-                      tags$img(
+                      tags$iframe(
                         id   = "clusterIframe",
-                        src  = "../cluster_images/1.png",
+                        src  = "../cluster_html/clusters_cp_0.html",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
@@ -132,11 +132,11 @@ dashboard <- tagList(
               (function(){
                 const img    = document.getElementById('clusterIframe');
                 const INTERVAL_MS = 15000;
-                const MAX_IDX = 16;  
-                let idx = 1;         
+                const MAX_IDX = 15;  
+                let idx = 0;         
         
                 function setImage(){
-                 img.src = '../cluster_images/' + idx + '.png?v=' + Date.now(); // cache-bust
+                 img.src = '../cluster_html/clusters_cp_' + idx * 5000 + '.html?v=' + Date.now(); // cache-bust
                 }   
 
                 function advance(){

@@ -21,7 +21,7 @@ library(RColorBrewer)
 #Load file
 #change your base_path accordingly
 ```{r}
-file_number <- 0L
+file_number <- 10000L
 base_path <- sprintf("../../../Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_%d.csv", file_number)
 
 df = read.csv(base_path)
