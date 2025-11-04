@@ -83,8 +83,14 @@ dashboard <- tagList(
       "))
     ),
     tags$body(
-      div(class="header","Open-Ended Evolution Dashboard"),
-      
+      div(class="header", "Tree of Life Simulation",
+      tags$div(
+        tags$button(
+          "Info",
+          onclick = "window.location.href='../html/details.html';",
+          style = "font-size:12px; margin-top:8px; padding:4px 8px;"
+        )
+      )),
       div(class="container",
           
           # LEFT big panel: 3D Tree of Life iframe

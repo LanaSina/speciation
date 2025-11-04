@@ -122,7 +122,6 @@ for (cp in unique_cps) {
     xaxis = list(title = "maxEnergy"),
     yaxis = list(title = "pgmDeath"),
     title = list(text = paste("Checkpoint", cp),font = list(size = 13))
-
   )
 
   saveWidget(
