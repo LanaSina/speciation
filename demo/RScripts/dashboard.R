@@ -81,21 +81,6 @@ dashboard <- tagList(
           border: 0;
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
-        .vslider{
-            margin-top: auto;
-            padding-top: 6px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
-
-        .vslider input[type=range]{
-          -webkit-appearance: none;
-          appearance: none;
-          width:90%;
-          height:6px;
-        }
 
       "))
     ),
@@ -122,7 +107,7 @@ dashboard <- tagList(
               div(
                 class = "iframe-wrap",
                 tags$video(
-                  src = "movie.mp4",
+                  src = "../movie.mp4",
                   type = "video/mp4",
                   autoplay = NA,
                   loop = NA,
@@ -146,45 +131,34 @@ dashboard <- tagList(
                       class="iframe-wrap",
                       tags$img(
                         id   = "clusterIframe",
-                        src  = "cluster_images/1.png",
+                        src  = "../cluster_images/1.png",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
                   )
               ),
-              div(class="vslider",
-                  tags$input(
-                    id="timeSlider",
-                    type="range",
-                    min="1", max="16", step="1", value="1"
-                  )
-              ),
-              # ← add this part below
-              tags$script(HTML("
-      (function(){
-        const slider = document.getElementById('timeSlider');
-        const img    = document.getElementById('clusterIframe');
-        const INTERVAL_MS = 15000;
-
-        function setImage(){
-          const idx = parseInt(slider.value, 10);
-          img.src = 'cluster_images/' + idx + '.png';
-        }
-
-        function advance(){
-          let idx = parseInt(slider.value, 10) + 1;
-          if (idx > parseInt(slider.max, 10)) idx = parseInt(slider.min, 10);
-          slider.value = idx;
-          setImage();
-        }
-
-        setImage();
-        slider.addEventListener('input', setImage);
-        setInterval(advance, INTERVAL_MS);
-      })();
-    "))
-          ),
-          
+          tags$script(HTML("
+               (function(){
+                 const img    = document.getElementById('clusterIframe');
+                 const INTERVAL_MS = 15000;
+                 const MAX_IDX = 16;  
+                 let idx = 1;         
+                 
+                 function setImage(){
+                   img.src = '../cluster_images/' + idx + '.png'
+                 }   
+                 
+                 function advance(){
+                   idx = (idx % MAX_IDX) + 1;
+                   setImage();
+                 }
+                 
+                 setImage();
+                 setInterval(advance, INTERVAL_MS);
+                 
+               })();
+               "))),
+        
           
           #phylogenetic tree
           div(class="box",
@@ -195,7 +169,7 @@ dashboard <- tagList(
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "phylogentic_images/1.png",
+                        src  = "../phylogentic_images/1.png",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
@@ -211,7 +185,7 @@ dashboard <- tagList(
         let idx = 1;
     
         function setImage(){
-          img.src = 'phylogenetic_images/' + idx + '.png';
+          img.src = '../phylogenetic_images/' + idx + '.png';
         }
     
         function advance(){
@@ -230,7 +204,7 @@ dashboard <- tagList(
 
 htmltools::save_html(
   dashboard,
-  "dashboard.html",
+  "../html/dashboard.html",
   background = "white",
   libdir = "dashboard_libs"
 )
