@@ -19,6 +19,10 @@ files <- list.files(
   full.names = TRUE
 )
 
+out_dir <- file.path("../cluster_html/")
+dir.create(out_dir, showWarnings = FALSE)
+
+
 checkpoints <- as.integer(sub(
   "^SummaryIndividuals_(\\d+)_with_clusters\\.csv$", "\\1",
   basename(files)
@@ -77,8 +81,6 @@ world$species_name <- species_names[world$cluster_id]
 
 noise_col <- "#BDBDBD"
 
-out_dir <- file.path("../cluster_html/")
-dir.create(out_dir, showWarnings = FALSE)
 
 unique_cps <- sort(unique(world$checkpoint))
 
@@ -106,13 +108,10 @@ for (cp in unique_cps) {
     marker = list(
       size = 4,
       opacity = 0.8,
-      color = df_cp$cluster_hex   # <-- fixed per-row colour
+      color = df_cp$cluster_hex   
     ),
     text = ~paste(
-      "Species ", species_name, " has a ",
-      "<br>maxEnergy:", round(maxEnergy, 2),
-      "<br>pgmDeath:", round(pgmDeath, 2)
-    ),
+      "Species: ", species_name),  #adjust the displayed text here
     hoverinfo = "text",
     showlegend = FALSE
   )

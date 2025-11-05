@@ -13,21 +13,20 @@ parent_js <- HTML(sprintf("
     return {
       clusterFrame: document.getElementById('clusterIframe'),
       phyloFrame: document.getElementById('phyloIframe'),
+      slider: document.getElementById('timeSlider')
     };
   }
 
   function syncChildren(){
-    const {clusterFrame, phyloFrame} = getEls();
+    const {slider, clusterFrame, phyloFrame} = getEls();
     const idx = parseInt(slider.value, 10) - 1;
     const cp  = CHECKPOINTS[idx];
 
-    // tell clusters iframe to redraw for this checkpoint
     if (clusterFrame && clusterFrame.contentWindow &&
         typeof clusterFrame.contentWindow.setCheckpoint === 'function') {
       clusterFrame.contentWindow.setCheckpoint(cp);
     }
 
-    // tell phylo iframe to redraw for this checkpoint
     if (phyloFrame && phyloFrame.contentWindow &&
         typeof phyloFrame.contentWindow.setCheckpoint === 'function') {
       phyloFrame.contentWindow.setCheckpoint(cp);
@@ -37,7 +36,6 @@ parent_js <- HTML(sprintf("
   window.addEventListener('load', () => {
     const { slider } = getEls();
     slider.addEventListener('input', syncChildren);
-    // initialise once
     syncChildren();
   }, {once:true});
 })();
@@ -79,6 +77,39 @@ dashboard <- tagList(
           border: 0;
         }
         .phylo-wrap { position: relative; width: 100%; height: 100%; }
+        .vslider{
+          margin-top: 5px;
+          padding-top: 6px;
+          height: 10px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .vslider input[type=range]::-webkit-slider-runnable-track{
+          height: 6px;
+          background: #444;
+          border-radius: 3px;
+        }
+        .vslider input[type=range]::-webkit-slider-thumb{
+          -webkit-appearance: none;
+          border-radius: 50%;
+          background: #fff;
+          border: 1px solid #888;
+          margin-top: -4px;
+        }
+        .vslider input[type=range]::-moz-range-track{
+          height: 6px;
+          background: #444;
+          border-radius: 3px;
+        }
+        .vslider input[type=range]::-moz-range-thumb{
+          width: 14px; height: 14px;
+          border-radius: 50%;
+          background: #fff;
+          border: 1px solid #888;
+        }
+
 
       "))
     ),
@@ -121,7 +152,7 @@ dashboard <- tagList(
           div(class="box",
               h3("Species Clusters"),
               div(class="caption",
-                  "This is a 2D cluster of species of a particular timestamp. Slide the time slider on the right panel of the phylogenetic tree dashboard below to update this plot."
+                  "This is a 2D cluster of species of a particular timestamp. Slide the time slider below to update the plot."
               ),
               div(class="fill",
                   div(id="clusterPlot",
@@ -134,27 +165,43 @@ dashboard <- tagList(
                       )
                   )
               ),
+              div(class="vslider",
+                  tags$input(
+                    type  = "range",
+                    id    = "timeSlider",
+                    min   = "0",
+                    max   = "15",
+                    step  = "1",
+                    value = "0"
+                  )
+              ),
               tags$script(HTML("
               (function(){
+                const slider = document.getElementById('timeSlider');
                 const img    = document.getElementById('clusterIframe');
                 const INTERVAL_MS = 15000;
-                const MAX_IDX = 15;  
-                let idx = 0;         
+                const MAX_IDX = 15;
+                let idx = 0;
         
                 function setImage(){
-                 img.src = '../cluster_html/clusters_cp_' + idx * 5000 + '.html?v=' + Date.now(); // cache-bust
-                }   
-
+                  let idx = parseInt(slider.value, 10);
+                  idx = Math.max(0, Math.min(15, idx));
+                  img.src = '../cluster_html/clusters_cp_' + idx * 5000 + '.html';
+                }
+        
                 function advance(){
-                  idx = (idx % MAX_IDX) + 1;
+                  let idx = parseInt(slider.value, 10) + 1;
+                  if (idx > parseInt(slider.max, 10)) idx = parseInt(slider.min, 10);
+                  slider.value = idx;
                   setImage();
                 }
-
+        
                 setImage();
+                slider.addEventListener('input', setImage);
                 setInterval(advance, INTERVAL_MS);
-
               })();
-            "))),
+            "))
+          ),
           
           
           #phylogenetic tree
