@@ -4,9 +4,9 @@
    - `phylogenetic_images`
    - `cluster_html`
 
-2. **Place both folders** inside the following directory: `speciation/demo`
+2. Place both folders inside the following directory: `speciation/demo`
 
-3. **Run the dashboard** by executing the following command in your terminal:
+3. Run the dashboard by executing the following command in your terminal:
 ```bash
 Rscript dashboard.R
 ```
