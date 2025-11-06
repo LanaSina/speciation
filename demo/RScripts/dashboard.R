@@ -109,9 +109,11 @@ dashboard <- tagList(
           background: #fff;
           border: 1px solid #888;
         }
-
-
-      "))
+      ")),
+      tags$link(rel = "preconnect", href = "https://i.ibb.co"),
+      tags$link(rel = "preload", href = "https://i.ibb.co/hxL/1.png", as = "image"),
+      tags$script(src = "../phylogenetic.js")
+      
     ),
     tags$body(
       div(class="header", "Tree of Life Simulation",
@@ -213,7 +215,7 @@ dashboard <- tagList(
                   div(id="phyloPlot", class="iframe-wrap",
                       tags$img(
                         id   = "phyloIframe",
-                        src  = "../phylogentic_images/1.png",
+                        src  = "https://i.ibb.co/hxL/1.png",
                         class= "iframe-inner",
                         style = "object-fit: contain;"
                       )
@@ -225,11 +227,11 @@ dashboard <- tagList(
       (function(){
         const img = document.getElementById('phyloIframe');
         const INTERVAL_MS = 15000;
-        const MAX_IDX = 16;
-        let idx = 1;
+        const MAX_IDX = 15;
+        let idx = 0;
     
         function setImage(){
-          img.src = '../phylogenetic_images/' + idx + '.png';
+          img.src = PHYLO_IMG[idx];
         }
     
         function advance(){

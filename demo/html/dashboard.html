@@ -69,9 +69,10 @@
           background: #fff;
           border: 1px solid #888;
         }
-
-
       </style>
+  <link rel="preconnect" href="https://i.ibb.co"/>
+  <link rel="preload" href="https://i.ibb.co/hxL/1.png" as="image"/>
+  <script src="../phylogenetic.js"></script>
 </head>
 <html>
   <body>
@@ -136,7 +137,7 @@
         <div class="caption">Branches over evolutionary time. Red line marks selected checkpoint.</div>
         <div class="fill phylo-wrap">
           <div id="phyloPlot" class="iframe-wrap">
-            <img id="phyloIframe" src="../phylogentic_images/1.png" class="iframe-inner" style="object-fit: contain;"/>
+            <img id="phyloIframe" src="https://i.ibb.co/hxL/1.png" class="iframe-inner" style="object-fit: contain;"/>
           </div>
         </div>
       </div>
@@ -145,11 +146,11 @@
       (function(){
         const img = document.getElementById('phyloIframe');
         const INTERVAL_MS = 15000;
-        const MAX_IDX = 16;
-        let idx = 1;
+        const MAX_IDX = 15;
+        let idx = 0;
     
         function setImage(){
-          img.src = '../phylogenetic_images/' + idx + '.png';
+          img.src = PHYLO_IMG[idx];
         }
     
         function advance(){
