@@ -1,0 +1,75 @@
+---
+title: "phylognetic"
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+suppressPackageStartupMessages({
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(purrr) 
+library(readr)
+})
+
+```
+
+```{r}
+folder <- "../../../2024_12_29_17_15/OEE-data"
+
+files <- list.files(folder, pattern = "^SummaryIndividuals_\\d+_with_clusters.csv$", full.names = TRUE)
+nums  <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
+files <- files[order(nums, na.last = TRUE)]
+
+df <- files %>%
+  map_dfr(~ read_csv(.x, show_col_types = FALSE) %>%
+            select(ID, parent_id = parent, cluster_id, created))
+
+names(df)
+head(df)
+```
+
+
+```{r}
+#get the first individual with a new cluster_id.
+
+founders <- df %>% group_by(cluster_id) %>% slice_min(order_by = created, n = 1) %>%
+ungroup()
+
+parent_species_map <- df %>% select(parent_id = ID, parent_cluster_id = cluster_id)
+
+#get their parent.
+founders <- founders %>% left_join(parent_species_map, by = "parent_id") %>%
+arrange(created)
+
+```
+
+
+```{r}
+species_y <- setNames(seq_len(nrow(founders)), founders$cluster_id)
+
+edges <- founders %>%
+filter(!is.na(parent_cluster_id)) %>%
+left_join(founders %>% select(cluster_id, created_parent = created),
+by = c("parent_cluster_id" = "cluster_id")) %>%
+mutate(y_child  = species_y[cluster_id],
+y_parent = species_y[parent_cluster_id])
+
+ggplot() + geom_segment(data = edges,
+aes(x = created_parent, xend = created,
+    y = y_parent, yend = y_child),
+    colour = "gray40") + geom_point(data = founders,
+aes(x = created, y = species_y[cluster_id]),
+    colour = "orange", size = 3) +geom_text(data = founders,
+aes(x = created, y = species_y[cluster_id] + 0.3, label = cluster_id),
+size = 3, hjust = 0) +
+labs(x = "Created", y = "Lineage", title = "Phylogeneetic Tree") +
+theme_minimal()
+
+```
+
+
+
+

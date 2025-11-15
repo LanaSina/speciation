@@ -39,8 +39,8 @@ scatterplot3d(x= world$created, y=world$maxEnergy, z = world$kidEnergy, color = 
 plot(x = world$created, y=world$maxEnergy, col = colors)
 
 browseURL(paste("file://", writeWebGL(dir=file.path("../3Dplots", "real_branches_tree"), width=800), sep=""))
-# 
-# writeWebGL(dir = "..\\3Dplots", filename = file.path(dir, "index.html"), 
+#
+# writeWebGL(dir = "..\\3Dplots", filename = file.path(dir, "index.html"),
 #            template = system.file(file.path("WebGL", "template.html"), package = "rgl"),
 #            prefix = "",
 #            snapshot = TRUE, font = "Arial")
@@ -55,7 +55,7 @@ points(x=me2$ID, y= rep.int(2,length(me2$ID)))
 for(i in 1:length(me1$ID)){
   parX = subset(me2, ID == me1$parent[i])
   if(length(parX$ID)>0){
-    points(x = c(me1$ID[i],parX$ID), y=c(2,1), type="l") 
+    points(x = c(me1$ID[i],parX$ID), y=c(2,1), type="l")
   }
 }
 
@@ -87,7 +87,7 @@ subB = subset(fili, maxEnergy==5)
 for(i in 1:length(subB$ID)){
   parX = subset(subA, ID == subB$parent[i])
   if(length(parX$ID)>0){
-    points(x = c(subB$ID[i],parX$ID), y=c(subB$maxEnergy[i],parX$maxEnergy), type="l", col="red") 
+    points(x = c(subB$ID[i],parX$ID), y=c(subB$maxEnergy[i],parX$maxEnergy), type="l", col="red")
   }
 }
 

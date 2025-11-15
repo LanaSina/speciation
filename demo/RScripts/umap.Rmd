@@ -1,0 +1,147 @@
+---
+title: "UMAP and DBSCAN Clustering"
+author: "Hyoyeon Lee"
+output: html_document
+params:
+  file_path: "output_raw_data/raw_data_2024_12_29_17_15_cp_35000.csv"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(dbscan)
+library(kneedle)
+library(umap)
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer) 
+```
+
+
+#Load file
+#change your base_path accordingly
+```{r}
+file_number <- 10000L
+base_path <- sprintf("../../../Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_%d.csv", file_number)
+
+df = read.csv(base_path)
+
+select_columns = c("maxEnergy")
+df_stripped = df[, select_columns]
+```
+
+#Run UMAP
+```{r}
+set.seed(42) # Set seed for reproducibility
+umap_res <- umap(df_stripped, n_components = 2)
+umap_embedding <- umap_res$layout 
+
+umap_plot_df = data.frame(UMAP1 = umap_embedding[,1], UMAP2 = umap_embedding[,2])
+```
+
+#Plot UMAP
+```{r}
+ggplot(umap_plot_df, aes(x = UMAP1, y = UMAP2)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "UMAP Projection of Agent Attributes")
+```
+
+
+#elbow detection
+```{r}
+db_minPts = 10
+
+select_n = 1000 # Sample size
+set.seed(42)
+sample_indices = sample(1:nrow(umap_embedding), select_n)
+umap_sample = umap_embedding[sample_indices, ]
+
+k_distance_umap <- kNNdist(umap_sample, k = db_minPts)
+d_umap = sort(k_distance_umap)
+
+k_dist_umap_df <- data.frame(Index = 1:length(d_umap), Distance = d_umap)
+
+elbow_sens = 10.0 
+knee_umap <- kneedle(k_dist_umap_df$Index, k_dist_umap_df$Distance, sensitivity = elbow_sens, decreasing = FALSE)
+elbow_umap = knee_umap[2]
+
+cat(paste("New epsilon (elbow) calculated from UMAP sample:", round(elbow_umap, 4), "\n"))
+  
+```
+
+
+# Plot the k-distance graph
+```{r}
+ggplot(k_dist_umap_df, aes(x = Index, y = Distance)) +
+  geom_line() +
+  geom_hline(yintercept = elbow_umap, linetype = "dashed", color = "red") +
+  theme_minimal() +
+  labs(x = "Sorted Index of UMAP Sample Points",
+       y = paste0(db_minPts, "-Nearest Neighbor Distance in UMAP Space"),
+       title = "K-Distance Plot for Epsilon Selection (UMAP Sample)")
+```
+
+
+#Apply DBSCAN to UMAP
+```{r}
+db_umap = dbscan(umap_embedding, eps = elbow_umap, minPts = db_minPts)
+
+umap_plot_df_full <- data.frame(UMAP1 = umap_embedding[,1],
+                                UMAP2 = umap_embedding[,2]) %>%
+  mutate(Cluster = as.factor(db_umap$cluster))
+
+n_clusters_umap = max(db_umap$cluster)
+noise_points_umap = sum(db_umap$cluster == 0)
+
+cat(paste("DBSCAN (on full UMAP) found", n_clusters_umap, "clusters and", noise_points_umap, "noise points (Cluster 0).\n"))
+```
+
+
+#Plot DBSCAN
+```{r}
+
+primary_colors <- c("red", "blue", "green", "orange", "purple", "cyan")
+noise_color <- "lightgrey"
+
+
+if (any(db_umap$cluster == 0)) {
+  cluster_colors_umap <- c(noise_color, primary_colors[1:n_clusters_umap])
+} else {
+  cluster_colors_umap <- primary_colors[1:n_clusters_umap]
+}
+# Apply to plot
+ggplot(umap_plot_df_full, aes(x = UMAP1, y = UMAP2, color = Cluster)) +
+  geom_point(alpha = 0.6, size = 1.5) +
+  scale_color_manual(values = cluster_colors_umap) +
+  theme_minimal() +
+  labs(
+    title = "UMAP Projection (colored by Cluster)",
+    subtitle = paste("eps =", round(elbow_umap, 4), ", MinPts =", db_minPts,
+                     "sensitivity =", elbow_sens)
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 3)))
+
+#p <- plotly::ggplotly(g, tooltip = c("x", "y", "colour"))
+
+```
+
+#Save it
+```{r}
+frame <- list(
+  x = umap_plot_df_full$UMAP1,
+  y = umap_plot_df_full$UMAP2,
+  cluster = as.character(umap_plot_df_full$Cluster)
+)
+
+ cluster_output <- data.frame(
+    id = df$ID,
+    Cluster = db_umap$cluster
+  )
+ 
+out_path <- sprintf("umap_res/umap_res_%d.csv", file_number)
+write.csv(cluster_output, out_path, row.names = FALSE)
+
+
+```
+
