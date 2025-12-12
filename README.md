@@ -17,6 +17,6 @@ Deploying to github pages:
 
 1. Create a copy of `dashboard.html` as `index.html`
 
-To push a subfolder as root of the website:
+To push a subfolder as root of the website: (speciation is the name of the remote, it might be "origin" by default)
 
-2. `git subtree push --prefix demo/ origin gh-pages`
+2. `git subtree push --prefix demo/ speciation gh-pages`
