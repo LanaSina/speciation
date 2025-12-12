@@ -19,4 +19,4 @@ Deploying to github pages:
 
 To push a subfolder as root of the website:
 
-2. `git subtree push --prefix demo origin gh-pages`
+2. `git subtree push --prefix demo/ origin gh-pages`
