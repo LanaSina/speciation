@@ -9,3 +9,14 @@
 Rscript RScripts/dashboard.R
 ```
 This will create `dashboard.html` in `speciation/demo/html`.
+
+
+----
+
+Deploying to github pages:
+
+1. Create a copy of `dashboard.html` as `index.html`
+
+To push a subfolder as root of the website:
+
+2. `git subtree push --prefix RScripts/visualisation origin gh-pages`
