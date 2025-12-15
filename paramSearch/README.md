@@ -14,9 +14,16 @@ This code quantifies the branching behaviour in agent populations across time by
    ```
     sum(r$values & r$lengths >= 2) <-- change the number 2 to @ if you want to count @ or more subsequent empty bins as one gap.
    ```
-   Run the code block after modification.
+   Adjust the bin size per agent characteristics in `count_gaps` function by modifying the following:
 
-3. The fourth block calculates the mean across all simulation, plots it as a graph and saves them as a pdf file. You can adjust
+   ```
+     char_bins <- list(maxEnergy=29, pgmDeath=30, speed=1, kidEnergy=35, nkids=34, matForKids=36)
+   ```
+
+
+   Run the code block after modification.
+   
+4. The fourth block calculates the mean across all simulation, plots it as a graph and saves them as a pdf file. You can adjust
    the length of time windows by modifying:
    ```
      windows <- list(
@@ -26,5 +33,5 @@ This code quantifies the branching behaviour in agent populations across time by
     )
    ```
 
-4. The last code block saves the data into a CSV file; it contains `time window`, `timestamp`, `agent_characteristics`, `number of gaps`,
+5. The last code block saves the data into a CSV file; it contains `time window`, `timestamp`, `agent_characteristics`, `number of gaps`,
    and `exp_var value`. 
