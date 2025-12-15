@@ -32,7 +32,7 @@ count_hist_gaps <- function(p_data, bins = bin) {
   #sum(counts == 0)
   is_zero <- counts == 0
   r <- rle(is_zero)
-  sum(r$values & r$lengths >= 1)
+  sum(r$values & r$lengths >= 2)
 }
 
 
