@@ -4,7 +4,7 @@ This code quantifies the branching behaviour in agent populations across time by
 
 ## How to run it
 1. Open `timestamp_count.Rmd` file and modify the following variables in the second code block:
-     * `base_folder`': It is your path to the directory containing the simulation data. The simulation data should be organised into
+     * `base_folder`: It is your path to the directory containing the simulation data. The simulation data should be organised into
       separate subdirectories according to the experimental parameter (`exp_var`).
      * `exp_var`: The experimental parameter you varied during the simulation. (e.g, `birth_dst`, `mut_factor`)
      * `mut_factor_values`: The range of values taken by `exp_var` in the experiment.
