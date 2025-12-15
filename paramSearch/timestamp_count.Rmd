@@ -1,0 +1,134 @@
+---
+title: "timestamp_count"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+#Data load
+base_folder <- "../../simulation/free_energy"
+sim_dirs <- list.dirs(base_folder, recursive = FALSE, full.names = TRUE)
+
+x_feat <- "created"
+exp_var <- "free_energy"
+agent_chars = c('maxEnergy', 'pgmDeath', 'speed', 'kidEnergy', 'nkids', 'matForKids')
+mut_factor_values <- seq(from=1, to=9, by=1)
+print(mut_factor_values)
+```
+
+
+#Helper functions
+```{r}
+count_hist_gaps <- function(p_data, bins = bin) {
+  bin_counts_df <- p_data$data[[1]]
+  counts <- bin_counts_df$count
+  #sum(counts == 0)
+  is_zero <- counts == 0
+  r <- rle(is_zero)
+  sum(r$values & r$lengths >= 1)
+}
+
+
+count_gaps <- function(ts) {
+  char_bins <- list(maxEnergy=29, pgmDeath=30, speed=1, kidEnergy=35, nkids=34, matForKids=36)
+  gaps <- vector("list", length(agent_chars))
+  for (sim in sim_dirs) {
+    dt <- fread(file.path(sim, paste0("SummaryIndividuals_", ts, ".csv")))
+    for (i in seq_along(agent_chars)) {
+      bin_count <- char_bins[[agent_chars[i]]]
+      #print(paste0("agent characteristic: ", agent_chars[[i]], "  with bin size: ", bin_count))
+      p <- ggplot(dt, aes_string(agent_chars[i])) + geom_histogram(bins = bin_count)
+      gaps[[i]] <- c(gaps[[i]], count_hist_gaps(ggplot_build(p), bins = bin_count))
+    }
+  }
+  gaps
+}
+
+
+mean_for_window <- function(ts_vec) {
+  n_ac <- length(agent_chars)
+  gaps_all_ts <- lapply(ts_vec, count_gaps)
+
+  lapply(seq_len(n_ac), function(ac) {
+    mat <- do.call(rbind, lapply(gaps_all_ts, `[[`, ac))
+    data.frame(
+      mut  = seq_len(ncol(mat)),
+      mean = colMeans(mat),
+      sd   = apply(mat, 2, sd)
+    )
+  })
+}
+
+```
+
+
+#Run
+```{r}
+windows <- list(
+  "w1 (0K-25K)" = seq(0, 25000, 5000),
+  "w2 (25K-50K)" = seq(30000, 50000, 5000),
+  "w3 (50K- 75K)" = seq(55000, 75000, 5000)
+)
+
+stats <- lapply(windows, mean_for_window)
+
+pdf(paste0(exp_var, "_plots.pdf"), width = 8, height = 6)
+
+#plot them all together
+for (i in seq_along(agent_chars)) {
+  df_all <- do.call(rbind, lapply(names(stats), function(w) {
+    df_w <- stats[[w]][[i]] 
+    df_w$window <- w
+    df_w
+  }))
+  
+  p <- ggplot(df_all, aes(x = mut, y = mean, colour = window)) +
+    geom_line() + geom_point() +
+    geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.1) +
+    scale_x_continuous(breaks = seq_along(mut_factor_values), labels = mut_factor_values) + 
+    scale_y_continuous(breaks = 1:15, limits = c(0, 15)) +
+    labs(title = paste("Feature:", agent_chars[[i]]), x = exp_var, y = "Mean Gaps") +
+    theme_minimal()
+  
+  print(p)
+}
+
+
+dev.off()
+
+```
+
+
+#Save it as a CSV
+```{r}
+df_out <- do.call(rbind, lapply(names(windows), function(wname) {
+  ts_vec <- windows[[wname]]
+  
+  do.call(rbind, lapply(ts_vec, function(ts) {
+    gaps_ts <- count_gaps(ts)  
+    
+    do.call(rbind, lapply(seq_along(agent_chars), function(ac) {
+      data.frame(
+        window      = wname,
+        timestamp   = ts,
+        feature     = agent_chars[ac],
+        gaps        = gaps_ts[[ac]],
+        energy_max  = mut_factor_values  
+      )
+    }))
+  }))
+}))
+
+write.csv(df_out, paste0(exp_var, "_results.csv"), row.names = FALSE)
+
+```
+
+
+
