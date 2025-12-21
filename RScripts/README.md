@@ -1,10 +1,18 @@
 # The scripts
 
-## A procedure for testing for Tokyo Type 1 Open-Ended Evolution (Channon 2024)
 
-### Generate the statistics' graphs of one run
 
-The script `oee-stats.R` generates graphs of:
+
+## Plot evolutionary activity statistics of **one** run
+
+To generate plots of statistics related to evolutionary activity, use the `oee-stats.R` script.
+Here is an example command:
+
+```sh
+Rscript oee-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_oee_stats
+```
+
+The previous command will generate plots of:
 - total activity,
 - total normalized activity (original formula),
 - median normalized activity (original formula),
@@ -12,33 +20,63 @@ The script `oee-stats.R` generates graphs of:
 - total normalized activity (alternative formula) and
 - median normalized activity (alternative formula)
 
-of a given run.
+of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_oee_stats/2025_07_07_17_28/`.
 
-If the folder of the run you want to generate the graphs of is `../../new_data/2025_07_07_17_28/` and you want the graphs to be put in `../../tolsim_oee_stats/`, type:
-
+The usage is:
 ```sh
-Rscript oee-stats.R ../../new_data/2025_07_07_17_28/ -o ../../tolsim_oee_stats/
+Rscript oee-stats.R RUN_FOLDER -o OUTPUT_FOLDER
 ```
 
-The graphs will be generated at `../../tolsim_oee_stats/2025_07_07_17_28/`.
-
-If the option `-o OUTPUT` is omitted, the default output folder (`./tolsim_oee_stats/`) will be used.
-
-Type `Rscript oee-stats.R --help` to see the usage.
 
 
-### Generate the statistics' graphs of several runs
 
-The script `oee-stats-for-several-runs.sh` generates the graphs for several runs.
+## Plot non-evolutionary activity statistics of **one** run
 
-If your runs' folders are in `../../new_data/` and you want the graphs to be put in `../../tolsim_oee_stats/`, type:
+To generate plots of statistics **not** related to evolutionary activity, use the `normal-stats.R`.
+Here is an example command:
 
 ```sh
-./oee-stats-for-several-runs.sh ../../new_data/ ../../tolsim_oee_stats/
+Rscript normal-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_normal_stats
 ```
 
-The graphs for each run folder `../../new_data/RUN_FOLDER` will be generated at `../../tolsim_oee_stats/RUN_FOLDER/`.
+The previous command will generate plots of:
+- population or demography,
+- speed,
+- maxEnergy,
+- nkids,
+- pgmDeath
 
-**Warning: all folders in `../../new_data/`:**
+of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_normal_stats/2025_07_07_17_28/`.
+
+The usage is:
+```sh
+Rscript normal-stats.R RUN_FOLDER -o OUTPUT_FOLDER
+```
+
+
+
+
+## Generate plots of **several** runs
+
+Use `run_script_on_several_runs.sh`.
+
+Here are example commands:
+```sh
+# generate plots of evolutionary activity statistics
+./run_script_on_several_runs.sh oee-stats.R ../../new_data ../../tolsim_oee_stats
+# generate plots of NON evolutionary activity statistics
+./run_script_on_several_runs.sh normal-stats.R ../../new_data ../../tolsim_normal_stats
+```
+
+The previous commands will generate plots for every run whose folder is in `../../new_data`, and will put them in `../../tolsim_oee_stats` or `../../tolsim_normal_stats`.
+More precisely, the plots of each run folder `../../new_data/RUN_FOLDER` will be generated in `../../tolsim_{oee,normal}_stats/RUN_FOLDER`.
+
+Usage:
+
+```sh
+./run_script_on_several_runs.sh R_SCRIPT RUNS_FOLDER OUTPUT_FOLDER
+```
+
+**Warning: all folders in `RUNS_FOLDER`:**
 - **must be runs' folders**;
-- **must contain the data of the deltas**.
+- **must contain the data of the deltas (for plotting evolutionary activity statistics) and/or of the dead individuals (`SummaryIndividuals_*.csv`, for the **non** evolutionary activity statistics)**.

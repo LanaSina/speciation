@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 
 # This script generates graphs of:
 # - total activity,
@@ -106,14 +106,15 @@ shadowMapDeltasFile <- file.path(run_folder,"ShadowMapDeltas.csv")
 
 # ========================== MAIN FUNCTIONS ====================================
 
-#' Plot a statistic with optional running average
+#' Plots a temporal statistic, i.e. a statistic whose x-axis is time
+#' (represented by the column `t`), with optional running average.
 #'
 #' @param data dataframe with one column "t" (time) and another arbitrary column
 #' @param ycol string, the name of the column to plot on Y axis
 #' @param color string, the color of the raw data curve
 #' @param ylab string, label of the y-axis
 #' @param window_size integer, window size for running average (default = NULL, no average)
-plot_statistic <- function(data, ycol, ylab, color, window_size = average_window_size, deltas_save_frequency = deltas_saved_every) {
+plot_linear_data <- function(data, ycol, ylab, color, window_size = average_window_size) {
   plot(
     data$t,
     data[[ycol]],
@@ -212,7 +213,7 @@ cat("\r\n")
 dir.create(output_folder, showWarnings = FALSE)
 dir.create(output_subfolder, showWarnings = FALSE)
 
-save_plot("total_activity", function() plot_statistic(totalActivities, "totalActivity", "Total activity", RAW_DATA_COLOR_ORIGINAL))
+save_plot("total_activity", function() plot_linear_data(totalActivities, "totalActivity", "Total activity", RAW_DATA_COLOR_ORIGINAL))
 
 # ==============================================================================
 
@@ -345,19 +346,19 @@ cat("\r\n")
 # --- PLOT TOTAL NORMALIZED ACTIVITY, MEDIAN NORMALIZED ACTIVITY & NEW ACTIVITY ---
 
 # total normalized activity (original formula)
-save_plot("total_normalized_activity", function() plot_statistic(normTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ORIGINAL))
+save_plot("total_normalized_activity", function() plot_linear_data(normTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ORIGINAL))
 
 # median normalized activity (original formula)
-save_plot("median_normalized_activity", function() plot_statistic(normMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ORIGINAL))
+save_plot("median_normalized_activity", function() plot_linear_data(normMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ORIGINAL))
 
 # new activity (original formula)
-save_plot("new_activity", function() plot_statistic(normNewActivities, "normNewActivity", "New activity", RAW_DATA_COLOR_ORIGINAL))
+save_plot("new_activity", function() plot_linear_data(normNewActivities, "normNewActivity", "New activity", RAW_DATA_COLOR_ORIGINAL))
 
 # total normalized activity (alternative formula)
-save_plot("total_normalized_activity_alt", function() plot_statistic(altNormTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
+save_plot("total_normalized_activity_alt", function() plot_linear_data(altNormTotalActivities, "normTotalActivity", "Total normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
 
 # median normalized activity (alternative formula)
-save_plot("median_normalized_activity_alt", function() plot_statistic(altNormMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
+save_plot("median_normalized_activity_alt", function() plot_linear_data(altNormMedianActivities, "normMedianActivity", "Median normalized activity", RAW_DATA_COLOR_ALTERNATIVE))
 
 # new activity (alternative formula)
 # TODO
