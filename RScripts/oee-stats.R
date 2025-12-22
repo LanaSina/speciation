@@ -36,6 +36,8 @@ RUNNING_AVERAGE_COLOR <- "black"
 RAW_DATA_LWD <- 1
 # width of running average curves
 RUNNING_AVERAGE_LWD <- 2
+# progress bar length in characters
+PROGRESS_BAR_LENGTH <- 50
 # default output folder
 DEFAULT_OUTPUT_FOLDER <- "./tolsim_oee_stats"
 
@@ -106,6 +108,24 @@ shadowMapDeltasFile <- file.path(run_folder,"ShadowMapDeltas.csv")
 
 # ========================== MAIN FUNCTIONS ====================================
 
+#' Prints a progress bar at a given state.
+#' 
+#' @param bar_length numeric, the length of the bar
+#' @param proportion numeric, the proportion to fill
+print_progress_bar <- function(bar_length, proportion) {
+  cat("\r[")
+  i <- 0
+  while (i < bar_length * proportion) {
+    cat("#")
+    i <- i + 1
+  }
+  while (i < bar_length) {
+    cat(".")
+    i <- i + 1
+  }
+  cat("]")
+}
+
 #' Plots a temporal statistic, i.e. a statistic whose x-axis is time
 #' (represented by the column `t`), with optional running average.
 #'
@@ -172,6 +192,8 @@ deltas <- fread(realMapDeltasFile, dec = ".")
 # ------------------------------
 # number of lines
 nbLines <- nrow(deltas)
+# the last time step
+lastTimeStep <- deltas$t[nbLines]
 # the components' names
 components <- setdiff(names(deltas), "t")
 # the number of components
@@ -193,11 +215,10 @@ totalActivities <- data.table(t = integer(nbLines), totalActivity = numeric(nbLi
 start_time <- proc.time() # to measure the time that the computation takes
 for (line in 1:nbLines) {
   # read the time
-  t <- deltas[line, t]
+  t <- deltas$t[line]
   # print the elapsed computation time since the start of this loop
-  if (t %% 100000 == 0) {
-    elapsed <- (proc.time() - start_time)[["elapsed"]]
-    cat(sprintf("\rt = %d ; elapsed time = %.1f seconds", t, elapsed))
+  if (t %% 10000 == 0) {
+    print_progress_bar(PROGRESS_BAR_LENGTH, t / lastTimeStep)
   }
   # compute and store the results
   currDeltas <- as.numeric(deltas[line, ..components])
@@ -243,6 +264,8 @@ shadowDeltas <- fread(shadowMapDeltasFile, dec = ".")
 # ------------------------------
 # the number of lines in each file
 nbLines <- nrow(realDeltas)
+# the last time step
+lastTimeStep <- realDeltas$t[nbLines]
 # the real model's components' names
 realComponents <- setdiff(names(realDeltas), "t")
 # the shadow model's components' names
@@ -281,8 +304,7 @@ for (line in 1:nbLines) {
 
   # print the elapsed computation time
   if (t %% 10000 == 0) {
-    elapsed <- (proc.time() - start_time)[["elapsed"]]
-    cat(sprintf("\rt = %d ; elapsed time = %.1f seconds", t, elapsed))
+    print_progress_bar(PROGRESS_BAR_LENGTH, t / lastTimeStep)
   }
 
   # names of components that currently exist in the real model
