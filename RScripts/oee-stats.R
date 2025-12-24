@@ -111,19 +111,23 @@ shadowMapDeltasFile <- file.path(run_folder,"ShadowMapDeltas.csv")
 #' Prints a progress bar at a given state.
 #' 
 #' @param bar_length numeric, the length of the bar
-#' @param proportion numeric, the proportion to fill
-print_progress_bar <- function(bar_length, proportion) {
-  cat("\r[")
+#' @param numerator the number of items treated
+#' @param denominator the number of items to treat
+print_progress_bar <- function(bar_length, numerator, denominator) {
+  proportion <- numerator / denominator
+  prog_bar <- "\r["
   i <- 0
   while (i < bar_length * proportion) {
-    cat("#")
+    prog_bar <- paste0(prog_bar, "#")
     i <- i + 1
   }
   while (i < bar_length) {
-    cat(".")
+    prog_bar <- paste0(prog_bar, ".")
     i <- i + 1
   }
-  cat("]")
+  prog_bar <- paste0(prog_bar, "]")
+  numbers <- paste0(numerator, "/", denominator, " (", as.integer(proportion * 100), "%)")
+  cat(prog_bar, numbers)
 }
 
 #' Plots a temporal statistic, i.e. a statistic whose x-axis is time
@@ -164,7 +168,7 @@ save_plot <- function(filename, plot_function) {
   plot_function()
   grid()
   invisible(dev.off())
-  cat("Saved", filepath, "\r\n")
+  cat("  ↳ saved", filepath, "\r\n")
 }
 
 # ==============================================================================
@@ -218,7 +222,7 @@ for (line in 1:nbLines) {
   t <- deltas$t[line]
   # print the elapsed computation time since the start of this loop
   if (t %% 10000 == 0) {
-    print_progress_bar(PROGRESS_BAR_LENGTH, t / lastTimeStep)
+    print_progress_bar(PROGRESS_BAR_LENGTH, t, lastTimeStep)
   }
   # compute and store the results
   currDeltas <- as.numeric(deltas[line, ..components])
@@ -304,7 +308,7 @@ for (line in 1:nbLines) {
 
   # print the elapsed computation time
   if (t %% 10000 == 0) {
-    print_progress_bar(PROGRESS_BAR_LENGTH, t / lastTimeStep)
+    print_progress_bar(PROGRESS_BAR_LENGTH, t, lastTimeStep)
   }
 
   # names of components that currently exist in the real model

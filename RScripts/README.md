@@ -9,7 +9,7 @@ To generate plots of statistics related to evolutionary activity, use the `oee-s
 Here is an example command:
 
 ```sh
-Rscript oee-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_oee_stats
+Rscript oee-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_stats
 ```
 
 The previous command will generate plots of:
@@ -20,7 +20,7 @@ The previous command will generate plots of:
 - total normalized activity (alternative formula) and
 - median normalized activity (alternative formula)
 
-of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_oee_stats/2025_07_07_17_28/`.
+of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_stats/2025_07_07_17_28/`.
 
 The usage is:
 ```sh
@@ -36,7 +36,7 @@ To generate plots of statistics **not** related to evolutionary activity, use th
 Here is an example command:
 
 ```sh
-Rscript normal-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_normal_stats
+Rscript normal-stats.R ../../new_data/2025_07_07_17_28 -o ../../tolsim_stats
 ```
 
 The previous command will generate plots of:
@@ -46,7 +46,7 @@ The previous command will generate plots of:
 - nkids,
 - pgmDeath
 
-of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_normal_stats/2025_07_07_17_28/`.
+of the run whose folder is `../../new_data/2025_07_07_17_28` in `../../tolsim_stats/2025_07_07_17_28/`.
 
 The usage is:
 ```sh
@@ -63,13 +63,13 @@ Use `run_script_on_several_runs.sh`.
 Here are example commands:
 ```sh
 # generate plots of evolutionary activity statistics
-./run_script_on_several_runs.sh oee-stats.R ../../new_data ../../tolsim_oee_stats
+./run_script_on_several_runs.sh oee-stats.R ../../new_data ../../tolsim_stats
 # generate plots of NON evolutionary activity statistics
-./run_script_on_several_runs.sh normal-stats.R ../../new_data ../../tolsim_normal_stats
+./run_script_on_several_runs.sh normal-stats.R ../../new_data ../../tolsim_stats
 ```
 
-The previous commands will generate plots for every run whose folder is in `../../new_data`, and will put them in `../../tolsim_oee_stats` or `../../tolsim_normal_stats`.
-More precisely, the plots of each run folder `../../new_data/RUN_FOLDER` will be generated in `../../tolsim_{oee,normal}_stats/RUN_FOLDER`.
+The previous commands will generate plots for every run whose folder is in `../../new_data`, and will put them in `../../tolsim_stats`.
+More precisely, the plots of each run folder `../../new_data/RUN_FOLDER` will be generated in `../../tolsim_stats/RUN_FOLDER`.
 
 Usage:
 
