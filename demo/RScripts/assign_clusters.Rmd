@@ -1,0 +1,105 @@
+```{r}
+library(scatterplot3d)
+options(rgl.useNULL = TRUE)
+library(rgl)
+library(dbscan)
+library(kneedle)
+library(umap)
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer) 
+```
+
+
+```{r}
+# read file and assign clusters as we can, as well as species name
+set.seed(42) # Set seed for reproducibility
+
+file_number <- 0L
+base_path <- sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d.csv", file_number)
+df = read.csv(base_path)
+
+# decimate file for easy analysis
+decimate_p = 0.001
+n = round(length(df$ID)*decimate_p)
+
+# random subset
+sample_vector=c(1:nrow(df))
+# sample elements from the vector (in this example 30 elements sampled without replacement)
+the_sample = sample(sample_vector, n, replace=FALSE)
+# the vector of randomly selected elements is then used to select rows from the dataframe
+world = df[the_sample,]
+
+```
+
+
+```{r}
+
+close3d()
+plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
+       col = "black")
+points3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
+       col = "red", main = "folder", xlim = c(0, max(world$created)))
+
+rglwidget()
+
+```
+
+
+UMAP 
+
+```{r}
+select_columns = c("maxEnergy", "pgmDeath")
+df_stripped = world[, select_columns]
+
+umap_res <- umap(df_stripped, n_components = 2)
+umap_embedding <- umap_res$layout 
+umap_plot_df = data.frame(UMAP1 = umap_embedding[,1], UMAP2 = umap_embedding[,2])
+```
+
+Plot 
+
+```{r}
+ggplot(umap_plot_df, aes(x = UMAP1, y = UMAP2)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "UMAP Projection of Agent Attributes")
+```
+
+PCA
+
+
+```{r}
+# Apply PCA display clusters
+#"sensors", , "speed", "kidEnergy", "nkids", "sensors", "matForKids")
+pc <- prcomp(world[c("pgmDeath","maxEnergy")],
+             center = TRUE,
+            scale. = TRUE)
+
+library(ggfortify)
+summary(pc)
+autoplot(pc)
+```
+
+```{r}
+# Plot principal components
+plot(pc$x[,1])
+plot(pc$x[,2])
+# plot(pc$x[,3])
+```
+
+ Assign clusters
+ 
+```{r}
+# all before 5K are LUCA
+df$Cluster = 0
+df$species = "neo-LUCA"
+
+```
+
+```{r}
+out_path = sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d_with_clusters.csv", file_number)
+write.csv(df, out_path, row.names = FALSE)
+print(out_path)
+```
+
