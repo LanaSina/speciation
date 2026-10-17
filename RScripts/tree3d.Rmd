@@ -148,28 +148,17 @@ plot_summary_tree <- function(
                   ifelse(frac < 0.7,  "medium sized",
                          "big")))
   } else factor(rep("unknown size", nrow(world)))
-
-  if ("lifeExpectancy" %in% names(world)) {
-    # say 80% of max is actually the norm
-    exp_life <- world$lifeExpectancy*0.8
-  } else if ("lifeSpan" %in% names(world)) {
-    grp <- if (!is.null(species_col)) world[[species_col]] else factor(1)
-    exp_life <- ave(
-      world$lifeSpan, grp,
-      FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE))
-    )
-  } else {
-    exp_life <- rep(NA_real_, nrow(world))
-  }
   
   if ("lifeSpan" %in% names(world)) {
-    frac <- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
+    max_life = max(world$lifeSpan)*0.8
+    frac = world$lifeSpan/max_life
+    
     pct  <- ifelse(is.na(frac), NA_integer_, round(frac * 100))
     died_phrase <- ifelse(is.na(frac), "lifespan unknown",
                           ifelse(frac < 0.1,  "died prematurely",
                                  ifelse(frac < 0.6,  "died early",
                                         ifelse(frac < 0.8, "died middle aged",
-                                          ifelse(frac < 101, "lived a full life",
+                                          ifelse(frac < 101, "died after a full life",
                                                "outlived expectations")))))
     died_phrase <- ifelse(is.na(pct), died_phrase,
                           paste0(died_phrase, " at ~", pct, "% of expected lifespan"))
@@ -187,7 +176,7 @@ plot_summary_tree <- function(
 
   hover_text <- paste0(
     "Individual ", world$ID, " (species ", species_lbl, ") ",
-    "was ", as.character(speed_adj), " and ", as.character(size_adj),
+    "was ", as.character(size_adj), " and ",  as.character(speed_adj), ". ",
     "It ", kids_phrase, ", and <br>", died_phrase, ".", " It was born ", born_line, "."
   )
 
