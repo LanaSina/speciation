@@ -15,12 +15,12 @@ library(RColorBrewer)
 # read file and assign clusters as we can, as well as species name
 set.seed(42) # Set seed for reproducibility
 
-file_number <- 0L
+file_number <- 15000L
 base_path <- sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d.csv", file_number)
 df = read.csv(base_path)
 
 # decimate file for easy analysis
-decimate_p = 0.001
+decimate_p = 0.01
 n = round(length(df$ID)*decimate_p)
 
 # random subset
@@ -46,56 +46,85 @@ rglwidget()
 ```
 
 
-UMAP 
-
-```{r}
-select_columns = c("maxEnergy", "pgmDeath")
-df_stripped = world[, select_columns]
-
-umap_res <- umap(df_stripped, n_components = 2)
-umap_embedding <- umap_res$layout 
-umap_plot_df = data.frame(UMAP1 = umap_embedding[,1], UMAP2 = umap_embedding[,2])
-```
-
-Plot 
-
-```{r}
-ggplot(umap_plot_df, aes(x = UMAP1, y = UMAP2)) +
-  geom_point(alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "UMAP Projection of Agent Attributes")
-```
-
 PCA
 
 
 ```{r}
 # Apply PCA display clusters
 #"sensors", , "speed", "kidEnergy", "nkids", "sensors", "matForKids")
-pc <- prcomp(world[c("pgmDeath","maxEnergy")],
+pc <- prcomp(df[c("pgmDeath","maxEnergy")],
              center = TRUE,
             scale. = TRUE)
 
 library(ggfortify)
-summary(pc)
 autoplot(pc)
 ```
 
+
 ```{r}
-# Plot principal components
-plot(pc$x[,1])
-plot(pc$x[,2])
-# plot(pc$x[,3])
+a = 5
+b = 0.9
+
+plot(pc$x[,1], pc$x[,2])
+abline(a, b)
 ```
 
- Assign clusters
+
+```{r}
+df$Cluster = 0
+```
+
+
+Assign clusters
  
 ```{r}
 # all before 5K are LUCA
-df$Cluster = 0
-df$species = "neo-LUCA"
+# df$Cluster = 0
+# df$species = "neo-LUCA"
+
+# # at 5000 we have luca, bacteria, fungi
+# # 0, <
+# a = 1.1
+# b = 0.9
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# # 1, <
+# a = 5
+# b = 0.9
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+# # 3rd is default
+
+# at 10K
+a = 5
+b = 0.9
+df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+
+sub = subset(pc$x, pc$x[,2] < (b*pc$x[,1]+a))
+
+
+
+# 
+# df$species = "neo-LUCA"
+# Tolsim-Bacteria
 
 ```
+
+
+
+```{r}
+plot(pc$x[,1], pc$x[,2])
+points(sub[,1], sub[,2], col="red")
+```
+
+```{r}
+plot(pc$x[,1], pc$x[,2], col = c("red", "blue", "green")[df$Cluster+1])
+
+```
+```{r}
+df$species = c("Tolsim-Fungi","neo-LUCA")[df$Cluster+1]
+
+# "Tolsim-Bacteria",
+```
+
 
 ```{r}
 out_path = sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d_with_clusters.csv", file_number)
