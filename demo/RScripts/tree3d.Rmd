@@ -12,7 +12,7 @@ options(plotly.cdn = FALSE)
 suppressWarnings({
   Rtsne_available <- requireNamespace("Rtsne", quietly = TRUE)
 })
-
+library(beepr)
 ```
 
 ```{r}
@@ -317,72 +317,10 @@ plot_summary_tree <- function(
    sample_frac   = 0.003,
    out_file      = file.path(OUT_DIR, paste0(folder_name, "tree3d-new.html"))
  )
+ 
+ beep()
 ```
-```{r}
-## debug
-
-folder_path = "../../../new_data/2024_12_29_17_15_load_long"
-
- files <- list.files(
-      folder_path,
-      # pattern = "^SummaryIndividuals_\\d+\\.csv$",
-      pattern = "^SummaryIndividuals_\\d+\\_with_clusters.csv$",
-      full.names = TRUE
-    )
-    nums <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
-    ord  <- order(nums, na.last = TRUE)
-    files <- files[ord]
-
-    cat("Found", length(files), "summary-individual files (numeric order):\n")
 
 
-files <- list.files(
-      folder_path,
-      pattern = "^SummaryIndividuals_\\d+\\_with_clusters.csv$",
-      full.names = TRUE
-    )
-    nums <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
-    ord  <- order(nums, na.last = TRUE)
-    files <- files[ord]
-
-    cat("Found", length(files), "summary-individual files (numeric order):\n")
-
-    data_list <- lapply(files, function(f) {
-      df <- read.csv(f, stringsAsFactors = FALSE)
-      if ("isLight" %in% names(df)) {
-        df <- df %>% dplyr::select(-isLight, -parentIsLight)  # drop non-numeric lamp flags
-      }
-      df
-    })
-    out <- dplyr::bind_rows(data_list, .id = "snapshot_id")
-    out$snapshot_index <- as.integer(out$snapshot_id)
-    # out
-
-```
-```{r}
-# debug
-
-  trait_y <- "pgmDeath"
- trait_z <- "maxEnergy"
-  
-  needed <- unique(c("ID", "parent", "ancestor", "created", "species", trait_y, trait_z))
-  missing <- setdiff(needed, names(out))
-  
-
-all_data <- out %>%
-    dplyr::select(
-      dplyr::any_of(needed),
-      dplyr::any_of(c("lifeSpan","lifeExpectancy","size","maxEnergy","sensors","energy","speed","nkids"))
-    ) %>%
-    dplyr::mutate(
-      dplyr::across(
-        tidyselect::any_of(unique(c(
-          "created", trait_y, trait_z,
-          c("speed","nkids","lifeSpan","lifeExpectancy","size","maxEnergy","sensors","energy")
-        ))),
-        ~ suppressWarnings(as.numeric(.x))
-      )
-    )
-```
 
 
