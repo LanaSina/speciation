@@ -8,6 +8,7 @@ library(umap)
 library(ggplot2)
 library(dplyr)
 library(RColorBrewer) 
+library(beepr)
 ```
 
 
@@ -15,7 +16,7 @@ library(RColorBrewer)
 # read file and assign clusters as we can, as well as species name
 set.seed(42) # Set seed for reproducibility
 
-file_number <- 15000L
+file_number <- 75000L
 base_path <- sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d.csv", file_number)
 df = read.csv(base_path)
 
@@ -43,8 +44,8 @@ rglwidget()
 ```
 
 
-PCA
 
+PCA
 
 ```{r}
 # Apply PCA display clusters
@@ -59,17 +60,19 @@ autoplot(pc)
 
 
 ```{r}
-a = 1
-b = 0
+df$Cluster = 0
+```
+
+
+
+```{r}
+a = 3
+b = 1
 
 plot(pc$x[,1], pc$x[,2])
 abline(a, b)
 ```
 
-
-```{r}
-df$Cluster = 0
-```
 
 
 Assign clusters
@@ -100,29 +103,156 @@ Assign clusters
 # b = 0.9
 # df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
 
-a = 1
-b = 0
+# a = 1
+# b = 0
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+
+
+# 20K
+# a = 0.2
+# b = 0
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = -2
+# b = -2
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+# 
+# a = -2.8
+# b = 2
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 3
+# 
+# a = -6
+# b = 2
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 4
+
+# 25K
+# a = -5
+# b = -1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = -1
+# b = -1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+# 
+# a = 0.5
+# b = -1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 3
+
+#30K
+# a = -2.5
+# b = -1.1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = -0.2
+# b = 1.5
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+# 
+# a = 5
+# b = -1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 3
+
+
+# 40
+# a = -0.2
+# b = 1.5
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# 
+# a = 4
+# b = 1.5
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+
+# 45
+# a = 4
+# b = -1
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# 
+# a = 1.7
+# b = -0.9
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+# 
+# a = 0.5
+# b = -0.9
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 3
+
+
+# 50K
+# a = 6
+# b = -3
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# 
+# a = -9.5
+# b = -3
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+# 
+# a = -20
+# b = -3
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 3
+
+# 55
+# a = 0.3
+# b = -1.5
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# 
+# a = 5
+# b = -1.5
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+
+# 60
+# a = -10
+# b = -1.5
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = 1.2
+# b = 0.8
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+
+# 65
+# a = 0
+# b = -1
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = 6
+# b = -1
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+
+# 70
+# a = 6
+# b = -1
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+# 
+# a = 0.5
+# b = -1
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 2
+
+# 75
+a = 0.5
+b = 1
+df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+
+a = 3
+b = 1
 df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
-
-sub = subset(pc$x, pc$x[,2] > (b*pc$x[,1]+a))
-
-
 
 # 
 # df$species = "neo-LUCA"
 # Tolsim-Bacteria
+sub = subset(pc$x, pc$x[,2] < (b*pc$x[,1]+a))
 
 ```
-
 
 
 ```{r}
 plot(pc$x[,1], pc$x[,2])
-points(sub[,1], sub[,2], col="red")
+points(sub[,1], sub[,2], col = "red")
 ```
 
+
 ```{r}
-plot(pc$x[,1], pc$x[,2], col = c("red", "blue", "green")[df$Cluster+1])
+plot(pc$x[,1], pc$x[,2], col = c("red", "blue", "green", "pink", "grey")[df$Cluster+1])
 
 ```
 
@@ -130,30 +260,23 @@ plot(pc$x[,1], pc$x[,2], col = c("red", "blue", "green")[df$Cluster+1])
 
 close3d()
 plot3d(x= df$created, y=df$pgmDeath, z = df$maxEnergy,
-       col = c("red", "blue", "green")[df$Cluster+1])
+       col = c("red", "blue", "green", "pink", "grey")[df$Cluster+1])
 
 rglwidget()
 ```
-# More pca without luca
 
-```{r}
-sub_df = subset(df, Cluster == 0)
-
-pc <- prcomp(sub_df[c("pgmDeath","maxEnergy")],
-             center = TRUE,
-            scale. = TRUE)
-
-library(ggfortify)
-autoplot(pc)
-```
 
 
 
 ```{r}
-df$species = c("Tolsim-Jellyfish","neo-LUCA","Tolsim-Baobab")[df$Cluster+1]
+
+df$species = c( "Tolsim-Mouse", "Tolsim-Mammoth", "neo-LUCA")[df$Cluster+1]
 
 # "Tolsim-Bacteria",
-# "Tolsim-Fungi","neo-LUCA"
+# "Tolsim-Fungi","neo-LUCA", "Tolsim-Dragonfly", "Tolsim-Pillbug", "neo-LUCA"
+# ,  "Tolsim-Baobab", "Tolsim-Crab", "neo-LUCA"
+# "Tolsim-Bird", "Tolsim-Velociraptor", "Tolsim-Mammoth
+
 ```
 
 
@@ -161,5 +284,15 @@ df$species = c("Tolsim-Jellyfish","neo-LUCA","Tolsim-Baobab")[df$Cluster+1]
 out_path = sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d_with_clusters.csv", file_number)
 write.csv(df, out_path, row.names = FALSE)
 print(out_path)
+```
+
+
+
+
+
+```{r}
+file_number <- 40000L
+base_path <- sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d_with_clusters.csv", file_number)
+df = read.csv(base_path)
 ```
 
