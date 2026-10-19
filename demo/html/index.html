@@ -137,7 +137,7 @@
         <div class="caption">Branches over evolutionary time. Red line marks selected checkpoint.</div>
         <div class="fill phylo-wrap">
           <div id="phyloPlot" class="iframe-wrap">
-            <img id="phyloIframe" src="https://i.ibb.co/hxL/1.png" class="iframe-inner" style="object-fit: contain;"/>
+            <img id="phyloIframe" src="img/global.png" class="iframe-inner" style="object-fit: contain;"/>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@
         const MAX_IDX = 15;
         let idx = 0;
     
-        function setImage(){
+        /*function setImage(){
           img.src = PHYLO_IMG[idx];
         }
     
@@ -157,7 +157,7 @@
           idx++;
           if (idx > MAX_IDX) idx = 1;
           setImage();
-        }
+        }*/
     
         setImage();
         setInterval(advance, INTERVAL_MS);

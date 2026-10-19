@@ -3,6 +3,7 @@ title: "tree3d"
 output: html_document
 ---
 
+Imports
 ```{r}
 library(dplyr)
 library(plotly)
@@ -11,8 +12,10 @@ options(plotly.cdn = FALSE)
 suppressWarnings({
   Rtsne_available <- requireNamespace("Rtsne", quietly = TRUE)
 })
+library(beepr)
+```
 
-
+```{r}
 plot_summary_tree <- function(
   folder_path,
   folder_name,
@@ -30,7 +33,7 @@ plot_summary_tree <- function(
   read_summary_individuals <- function(folder_path) {
     files <- list.files(
       folder_path,
-      pattern = "^SummaryIndividuals_\\d+\\.csv$",
+      pattern = "^SummaryIndividuals_\\d+\\_with_clusters.csv$",
       full.names = TRUE
     )
     nums <- as.integer(sub(".*_(\\d+)\\.csv$", "\\1", basename(files)))
@@ -89,7 +92,7 @@ plot_summary_tree <- function(
   }
 
   #id check
-  needed <- unique(c("ID", "parent", "ancestor", "created", trait_y, trait_z))
+  needed <- unique(c("ID", "parent", "ancestor", "created", trait_y, trait_z, "species"))
   missing <- setdiff(needed, names(all_data))
   if (length(missing)) stop("Missing required columns: ", paste(missing, collapse = ", "))
 
@@ -130,62 +133,51 @@ plot_summary_tree <- function(
   speed_col   <- pick_col(world, "speed")
 
   speed_adj <- if (!is.null(speed_col)) {
-    spd <- world[[speed_col]]
-    qs  <- quantile(spd, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
-    qs  <- unique(qs)
-    if (length(qs) < 4) {
-      factor(rep("average", nrow(world)), levels = c("slow","average","fast"))
-    } else {
-      speed_bins <- cut(
-        spd, breaks = qs,
-        labels = c("slow","average","fast"),
-        include.lowest = TRUE
-      )
-      factor(speed_bins, levels = c("slow","average","fast"))
-    }
+    max_speed = max(world$speed)
+    frac = world$speed/max_speed
+    ifelse(is.na(frac), "speed unknown",
+           ifelse(frac < 0.5,  "slow", "fast"))
   } else factor(rep("unknown speed", nrow(world)))
 
   size_adj <- if (!is.null(size_col)) {
-    factor(qlabel(world[[size_col]], "small", "medium", "large"),
-           levels = c("small","medium","large"))
+    max_size = max(world$maxEnergy)
+    frac = world$maxEnergy/max_size
+    
+    ifelse(is.na(frac), "size unknown",
+           ifelse(frac < 0.4,  "small",
+                  ifelse(frac < 0.7,  "medium sized",
+                         "big")))
   } else factor(rep("unknown size", nrow(world)))
-
-  if ("lifeExpectancy" %in% names(world)) {
-    exp_life <- world$lifeExpectancy
-  } else if ("lifeSpan" %in% names(world)) {
-    grp <- if (!is.null(species_col)) world[[species_col]] else factor(1)
-    exp_life <- ave(
-      world$lifeSpan, grp,
-      FUN = function(x) suppressWarnings(stats::quantile(x, 0.90, na.rm = TRUE))
-    )
-  } else {
-    exp_life <- rep(NA_real_, nrow(world))
-  }
-
+  
   if ("lifeSpan" %in% names(world)) {
-    frac <- suppressWarnings(pmax(0, pmin(1, world$lifeSpan / exp_life)))
+    max_life = max(world$lifeSpan)*0.8
+    frac = world$lifeSpan/max_life
+    
     pct  <- ifelse(is.na(frac), NA_integer_, round(frac * 100))
     died_phrase <- ifelse(is.na(frac), "lifespan unknown",
-                          ifelse(frac < 0.5,  "died very early",
-                                 ifelse(frac < 0.9,  "died early",
-                                        ifelse(frac < 0.98, "lived a full life",
-                                               "outlived expectations"))))
+                          ifelse(frac < 0.1,  "died prematurely",
+                                 ifelse(frac < 0.6,  "died early",
+                                        ifelse(frac < 0.8, "died middle aged",
+                                          ifelse(frac < 101, "died after a full life",
+                                               "outlived expectations")))))
     died_phrase <- ifelse(is.na(pct), died_phrase,
                           paste0(died_phrase, " at ~", pct, "% of expected lifespan"))
   } else {
     died_phrase <- rep("lifespan unknown", nrow(world))
   }
 
-  species_lbl <- if (!is.null(species_col)) paste0(world[[species_col]]) else rep("unknown", nrow(world))
+  #species_lbl <- if (!is.null(species_col)) paste0(world[[species_col]]) else rep("unknown", nrow(world))
+  species_lbl <- world$species
+
   nkids_txt   <- if ("nkids" %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
   kids_phrase <- ifelse(is.na(nkids_txt), "kids: n/a",
-                        paste0("had ", nkids_txt, ifelse(nkids_txt==1," kid"," kids")))
-  born_line <- if ("created" %in% names(world)) paste0("Born at: ", world$created) else ""
+                        paste0("had ", nkids_txt, ifelse(nkids_txt==1," kid"," kids"), " per litter"))
+  born_line <- if ("created" %in% names(world)) paste0("at t = ", world$created) else ""
 
   hover_text <- paste0(
     "Individual ", world$ID, " (species ", species_lbl, ") ",
-    "was ", as.character(speed_adj), " and ", as.character(size_adj), "-sized; ",
-    "It ", kids_phrase, ", and <br>", died_phrase, ".", " It was born in ", born_line, "."
+    "was ", as.character(size_adj), " and ",  as.character(speed_adj), ". ",
+    "It ", kids_phrase, ", and <br>", died_phrase, ".", " It was born ", born_line, "."
   )
 
   #colour
@@ -314,7 +306,8 @@ plot_summary_tree <- function(
 
  time_range <- c(0, 78000L)
  fig <- plot_summary_tree(
-   folder_path   = "../../Lana/2024_12_29_17_15/OEE-data",  #replace this with your folder path
+   # folder_path   = "../../Lana/2024_12_29_17_15/OEE-data",  #replace this with your folder path
+   folder_path   = "../../../new_data/2024_12_29_17_15_load_long",  #replace this with your folder path
    folder_name   = folder_name,
    created_range = time_range,
    trait_y       = TRAIT_Y,
@@ -322,8 +315,12 @@ plot_summary_tree <- function(
    color_by      = c("speed", "maxEnergy", "pgmDeath"),
    keep_parents  = FALSE,
    sample_frac   = 0.003,
-   out_file      = file.path(OUT_DIR, paste0(folder_name, "tree3d.html"))
+   out_file      = file.path(OUT_DIR, paste0(folder_name, "tree3d-new.html"))
  )
+ 
+ beep()
 ```
+
+
 
 

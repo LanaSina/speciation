@@ -22,11 +22,12 @@ library(RColorBrewer)
 #change your base_path accordingly
 ```{r}
 file_number <- 10000L
-base_path <- sprintf("../../../Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_%d.csv", file_number)
+# base_path <- sprintf("../../../Lana/2024_12_29_17_15/OEE-data/SummaryIndividuals_%d.csv", file_number)
+base_path <- sprintf("../../../new_data/2024_12_29_17_15_load_long/SummaryIndividuals_%d.csv", file_number)
 
 df = read.csv(base_path)
 
-select_columns = c("maxEnergy")
+select_columns = c("maxEnergy", "nkids")
 df_stripped = df[, select_columns]
 ```
 
