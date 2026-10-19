@@ -38,9 +38,6 @@ world = df[the_sample,]
 close3d()
 plot3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
        col = "black")
-points3d(x= world$created, y=world$pgmDeath, z = world$maxEnergy,
-       col = "red", main = "folder", xlim = c(0, max(world$created)))
-
 rglwidget()
 
 ```
@@ -62,8 +59,8 @@ autoplot(pc)
 
 
 ```{r}
-a = 5
-b = 0.9
+a = 1
+b = 0
 
 plot(pc$x[,1], pc$x[,2])
 abline(a, b)
@@ -94,11 +91,20 @@ Assign clusters
 # # 3rd is default
 
 # at 10K
-a = 5
-b = 0.9
-df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
+# a = 5
+# b = 0.9
+# df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 1
 
-sub = subset(pc$x, pc$x[,2] < (b*pc$x[,1]+a))
+# 15K
+# a = -5
+# b = 0.9
+# df[pc$x[,2] < (b*pc$x[,1]+a), "Cluster"] = 1
+
+a = 1
+b = 0
+df[pc$x[,2] > (b*pc$x[,1]+a), "Cluster"] = 2
+
+sub = subset(pc$x, pc$x[,2] > (b*pc$x[,1]+a))
 
 
 
@@ -119,10 +125,35 @@ points(sub[,1], sub[,2], col="red")
 plot(pc$x[,1], pc$x[,2], col = c("red", "blue", "green")[df$Cluster+1])
 
 ```
+
 ```{r}
-df$species = c("Tolsim-Fungi","neo-LUCA")[df$Cluster+1]
+
+close3d()
+plot3d(x= df$created, y=df$pgmDeath, z = df$maxEnergy,
+       col = c("red", "blue", "green")[df$Cluster+1])
+
+rglwidget()
+```
+# More pca without luca
+
+```{r}
+sub_df = subset(df, Cluster == 0)
+
+pc <- prcomp(sub_df[c("pgmDeath","maxEnergy")],
+             center = TRUE,
+            scale. = TRUE)
+
+library(ggfortify)
+autoplot(pc)
+```
+
+
+
+```{r}
+df$species = c("Tolsim-Jellyfish","neo-LUCA","Tolsim-Baobab")[df$Cluster+1]
 
 # "Tolsim-Bacteria",
+# "Tolsim-Fungi","neo-LUCA"
 ```
 
 
