@@ -132,6 +132,7 @@ plot_summary_tree <- function(
   size_col    <- pick_col(world, "size", "maxEnergy", trait_z)
   speed_col   <- pick_col(world, "speed")
 
+
   speed_adj <- if (!is.null(speed_col)) {
     max_speed = max(world$speed)
     frac = world$speed/max_speed
@@ -168,6 +169,7 @@ plot_summary_tree <- function(
 
   #species_lbl <- if (!is.null(species_col)) paste0(world[[species_col]]) else rep("unknown", nrow(world))
   species_lbl <- world$species
+  print(names(world))
 
   nkids_txt   <- if ("nkids" %in% names(world)) world$nkids else rep(NA_integer_, nrow(world))
   kids_phrase <- ifelse(is.na(nkids_txt), "kids: n/a",
@@ -181,7 +183,7 @@ plot_summary_tree <- function(
   )
 
   #colour
-  feat_cols <- intersect(color_by, names(world))
+  feat_cols <- intersect(color_by, names(world)[])
   if (length(feat_cols) == 0) {
     warning("No color_by columns found in data; using grey.")
     world$feat_color <- "#9E9E9E"
